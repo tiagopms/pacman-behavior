@@ -11,15 +11,21 @@
  */
 class Agent
 {
-    protected:
-        ros::NodeHandle n_;
-        ros::Publisher action_publisher_;
-        geometry_msgs::Pose pose_;
+  protected:
+    ros::NodeHandle n_;
+    geometry_msgs::Pose pose_;
 
-    public:
-        Agent();
-        virtual void updatePosition();
-        virtual void sendAction();
+    static geometry_msgs::Pose north_movement_;
+    static geometry_msgs::Pose south_movement_;
+    static geometry_msgs::Pose west_movement_;
+    static geometry_msgs::Pose east_movement_;
+    static geometry_msgs::Pose stop_movement_;
+    static std::map<int, geometry_msgs::Pose> action_to_movement_;
+
+  public:
+    Agent();
+    virtual void updatePosition();
+    virtual std::string getAgentName();
 };
 
 #endif // AGENT_H

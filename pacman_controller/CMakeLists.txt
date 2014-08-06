@@ -34,7 +34,12 @@ include_directories(
 
 ## Declare a cpp executable
 add_executable(keyboard_cpp_controller src/keyboardCppAgent.cpp)
-add_executable(new_keyboard_cpp_controller src/newKeyboardAgent.cpp src/agent.cpp)
+#add_executable(new_keyboard_cpp_controller src/new_keyboard_agent.cpp src/agent.cpp src/pacman_agent.cpp)
+
+add_library(util_functions src/util_functions.cpp)
+
+add_executable(moduled_keyboard_cpp_controller src/pacman_controller.cpp
+      src/agent.cpp src/pacman_agent.cpp src/keyboard_agent.cpp src/ghost_agent.cpp src/visible_ghost_agent.cpp)
 
 # add_dependencies(keyboard_cpp_controller pacman_controller_generate_messages_cpp)
 
@@ -43,8 +48,12 @@ target_link_libraries(keyboard_cpp_controller
   ${catkin_LIBRARIES}
 )
 
-target_link_libraries(new_keyboard_cpp_controller
-  ${catkin_LIBRARIES}
+#target_link_libraries(new_keyboard_cpp_controller
+#  ${catkin_LIBRARIES}
+#)
+
+target_link_libraries(moduled_keyboard_cpp_controller
+  ${catkin_LIBRARIES} util_functions
 )
 
 #############
