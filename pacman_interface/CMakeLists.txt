@@ -19,12 +19,14 @@ add_message_files(
   FILES
   PacmanAction.msg
   AgentAction.msg
+  MapLayout.msg
 )
 
 add_service_files(
   FILES
   PacmanGetAction.srv
   PacmanInitializationInfo.srv
+  PacmanMapInfo.srv
 )
 
 ## Generate added messages and services with any dependencies listed here

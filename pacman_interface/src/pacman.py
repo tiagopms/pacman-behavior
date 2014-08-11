@@ -44,6 +44,8 @@ import sys, types, time, random, os
 import rospy
 import rospkg
 from pacman_interface.srv import PacmanInitializationInfo
+from pacman_interface.msg import MapLayout
+from pacman_interface.srv import PacmanMapInfo
 
 ###################################################
 # YOUR INTERFACE TO THE PACMAN WORLD: A GameState #
@@ -570,6 +572,40 @@ def readCommand( argv ):
         info = [options.layout, options.numGhosts]
         return info
     rospy.Service('pacman_inialize_game_state', PacmanInitializationInfo, getInitializationInfo)
+
+    def getLayoutInfo(req):
+        thisLayout = layout.getLayout(options.layout);
+
+        mapLayout = MapLayout();
+        mapLayout.height = thisLayout.height
+        mapLayout.width = thisLayout.width
+
+        mapLayout.map = [mapLayout.EMPTY] * (mapLayout.width * mapLayout.height)
+        for i, j in thisLayout.walls.asList():
+            x = mapLayout.width - i -1;
+            y = mapLayout.height - j - 1;
+            mapLayout.map[y * mapLayout.width + x] = mapLayout.WALL
+        for i, j in thisLayout.food.asList():
+            x = mapLayout.width - i -1;
+            y = mapLayout.height - j - 1;
+            mapLayout.map[y * mapLayout.width + x] = mapLayout.FOOD
+        for i, j in thisLayout.agentPositions:
+            x = mapLayout.width - j[0] -1;
+            y = mapLayout.height - j[1] - 1;
+            if (i == False):
+                mapLayout.map[y * mapLayout.width + x] = mapLayout.GHOST
+            else:
+                mapLayout.map[y * mapLayout.width + x] = mapLayout.PACMAN
+        for i, j in thisLayout.capsules:
+            x = mapLayout.width - i -1;
+            y = mapLayout.height - j - 1;
+            mapLayout.map[y * mapLayout.width + x] = mapLayout.BIG_FOOD
+
+        print mapLayout.map
+
+        info = [mapLayout, options.numGhosts]
+        return info
+    rospy.Service('pacman_initialize_map_layout', PacmanMapInfo, getLayoutInfo)
 
     # Special case: recorded games don't use the runGames method or args structure
     if options.gameToReplay != None:

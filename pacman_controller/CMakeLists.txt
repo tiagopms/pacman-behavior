@@ -37,6 +37,7 @@ add_executable(keyboard_cpp_controller src/keyboardCppAgent.cpp)
 #add_executable(new_keyboard_cpp_controller src/new_keyboard_agent.cpp src/agent.cpp src/pacman_agent.cpp)
 
 add_library(util_functions src/util_functions.cpp)
+add_library(game_info src/game_info.cpp)
 
 add_executable(moduled_keyboard_cpp_controller src/pacman_controller.cpp
       src/agent.cpp src/pacman_agent.cpp src/keyboard_agent.cpp src/ghost_agent.cpp src/visible_ghost_agent.cpp)
@@ -53,7 +54,7 @@ target_link_libraries(keyboard_cpp_controller
 #)
 
 target_link_libraries(moduled_keyboard_cpp_controller
-  ${catkin_LIBRARIES} util_functions
+  ${catkin_LIBRARIES} util_functions game_info
 )
 
 #############
