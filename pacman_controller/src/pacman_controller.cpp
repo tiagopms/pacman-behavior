@@ -6,7 +6,7 @@
 #include <boost/algorithm/string.hpp>
 #include <string.h>
 
-#include "game_info.h"
+#include "pacman_controller/game_info.h"
 #include "keyboard_agent.h"
 #include "visible_ghost_agent.h"
 

@@ -12,7 +12,7 @@ VisibleGhostAgent::VisibleGhostAgent()
 
 void VisibleGhostAgent::movementCallback(const pacman_interface::AgentAction::ConstPtr& action)
 {
-    if(action->agentIndex == getGhostNumber())
+    if(action->agent == getGhostNumber())
     {
         geometry_msgs::Pose movement = action_to_movement_[action->action];
 

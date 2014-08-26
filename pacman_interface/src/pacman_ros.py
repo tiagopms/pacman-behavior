@@ -7,7 +7,7 @@ import pacman
 def runPacman():
     rospy.init_node('pacman_interface', anonymous=True)
 
-    a=["-p", "RosAgent", "-l", "smallClassic", "-k", "3"]
+    a=["-p", "RosAgent", "-l", "originalClassic", "-k", "2"]
     args = pacman.readCommand(a)
     pacman.runGames(**args)
 

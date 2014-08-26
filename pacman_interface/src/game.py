@@ -12,6 +12,8 @@ import traceback
 
 import rospy
 from pacman_interface.msg import AgentAction
+from pacman_interface.msg import AgentPose
+from geometry_msgs.msg import Pose
 
 #######################
 # Parts worth reading #
@@ -518,6 +520,8 @@ class Game:
 
         # declare this as a publisher of String messages to /pacman_interface/keypress topic
         self.agentActionPublisher = rospy.Publisher('/pacman_interface/agent_action', AgentAction, queue_size=10)
+        self.ghostDistancePublisher = rospy.Publisher('/pacman_interface/ghost_distance', AgentPose, queue_size=10)
+        self.pacmanPosePublisher = rospy.Publisher('/pacman_interface/pacman_pose', Pose, queue_size=10)
         
 
     def getProgress(self):
@@ -689,9 +693,31 @@ class Game:
 
             #publish agent action to /pacman/agent_action
             agentAction = AgentAction()
-            agentAction.agentIndex = agentIndex
+            agentAction.agent = agentIndex
             agentAction.action = self.moveToAction[action]
             self.agentActionPublisher.publish(agentAction)
+
+            if agentIndex == 0:
+                pacmanPosition = self.state.getPacmanPosition()
+
+                pacman_pose = Pose()
+                pacman_pose.position.x = pacmanPosition[0]
+                pacman_pose.position.y = pacmanPosition[1]
+
+                self.pacmanPosePublisher.publish(pacman_pose)
+            else:
+                ghostPosition = self.state.getGhostPositions()[agentIndex - 1]
+                pacmanPosition = self.state.getPacmanPosition()
+
+                ghost_distance = AgentPose()
+                ghost_distance.agent = agentIndex
+                ghost_distance.pose.position.x = ( ghostPosition[0] - pacmanPosition[0] )
+                ghost_distance.pose.position.y = ( ghostPosition[1] - pacmanPosition[1] )
+
+                self.ghostDistancePublisher.publish(ghost_distance)
+
+
+          #  import ipdb; ipdb.set_trace()
 
             # Change the display
             self.display.update( self.state.data )

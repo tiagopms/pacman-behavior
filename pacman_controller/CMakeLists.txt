@@ -9,7 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED COMPONENTS system)
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -19,7 +19,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## catkin specific configuration ##
 ###################################
 catkin_package(
-#  INCLUDE_DIRS include
+  INCLUDE_DIRS include
+  LIBRARIES game_info
   CATKIN_DEPENDS rospy roscpp std_msgs pacman_interface
 )
 
@@ -36,11 +37,18 @@ include_directories(
 add_executable(keyboard_cpp_controller src/keyboardCppAgent.cpp)
 #add_executable(new_keyboard_cpp_controller src/new_keyboard_agent.cpp src/agent.cpp src/pacman_agent.cpp)
 
+# pacman world usefull functions
 add_library(util_functions src/util_functions.cpp)
 add_library(game_info src/game_info.cpp)
 
+# pacman agents
+add_library(behavior_keyboard_agent src/behavior_keyboard_agent.cpp src/pacman_agent.cpp src/agent.cpp)
+
 add_executable(moduled_keyboard_cpp_controller src/pacman_controller.cpp
       src/agent.cpp src/pacman_agent.cpp src/keyboard_agent.cpp src/ghost_agent.cpp src/visible_ghost_agent.cpp)
+
+add_executable(behavior_keyboard_controller src/behavior_pacman_controller.cpp
+      src/agent.cpp src/pacman_agent.cpp src/ghost_agent.cpp src/visible_ghost_agent.cpp)
 
 # add_dependencies(keyboard_cpp_controller pacman_controller_generate_messages_cpp)
 
@@ -52,9 +60,16 @@ target_link_libraries(keyboard_cpp_controller
 #target_link_libraries(new_keyboard_cpp_controller
 #  ${catkin_LIBRARIES}
 #)
+target_link_libraries(game_info
+  ${catkin_LIBRARIES} util_functions
+)
 
 target_link_libraries(moduled_keyboard_cpp_controller
   ${catkin_LIBRARIES} util_functions game_info
+)
+
+target_link_libraries(behavior_keyboard_controller
+  ${catkin_LIBRARIES} util_functions game_info behavior_keyboard_agent
 )
 
 #############

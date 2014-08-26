@@ -4,6 +4,7 @@ project(pacman_interface)
 find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
+  geometry_msgs
   message_generation
 )
 
@@ -19,6 +20,7 @@ add_message_files(
   FILES
   PacmanAction.msg
   AgentAction.msg
+  AgentPose.msg
   MapLayout.msg
 )
 
@@ -33,6 +35,7 @@ add_service_files(
 generate_messages(
   DEPENDENCIES
   std_msgs
+  geometry_msgs
 )
 
 ###################################

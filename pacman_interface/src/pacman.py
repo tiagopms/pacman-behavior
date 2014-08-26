@@ -582,23 +582,24 @@ def readCommand( argv ):
 
         mapLayout.map = [mapLayout.EMPTY] * (mapLayout.width * mapLayout.height)
         for i, j in thisLayout.walls.asList():
-            x = mapLayout.width - i -1;
-            y = mapLayout.height - j - 1;
+            x = i;
+            y = j;
             mapLayout.map[y * mapLayout.width + x] = mapLayout.WALL
         for i, j in thisLayout.food.asList():
-            x = mapLayout.width - i -1;
-            y = mapLayout.height - j - 1;
+            x = i;
+            y = j;
             mapLayout.map[y * mapLayout.width + x] = mapLayout.FOOD
         for i, j in thisLayout.agentPositions:
-            x = mapLayout.width - j[0] -1;
-            y = mapLayout.height - j[1] - 1;
+            x = j[0];
+            y = j[1];
             if (i == False):
                 mapLayout.map[y * mapLayout.width + x] = mapLayout.GHOST
             else:
+                print "Pacman: ", x, ", ", y
                 mapLayout.map[y * mapLayout.width + x] = mapLayout.PACMAN
         for i, j in thisLayout.capsules:
-            x = mapLayout.width - i -1;
-            y = mapLayout.height - j - 1;
+            x = i;
+            y = j;
             mapLayout.map[y * mapLayout.width + x] = mapLayout.BIG_FOOD
 
         print mapLayout.map
@@ -606,6 +607,8 @@ def readCommand( argv ):
         info = [mapLayout, options.numGhosts]
         return info
     rospy.Service('pacman_initialize_map_layout', PacmanMapInfo, getLayoutInfo)
+
+    time.sleep(5)
 
     # Special case: recorded games don't use the runGames method or args structure
     if options.gameToReplay != None:
