@@ -28,6 +28,11 @@ bool compareProbabilities(std::pair< double, GameParticle > i, std::pair< double
     return ( i.first < j.first );
 }
 
+bool compareProbabilities2(std::pair< double, GameParticle > i, double j)
+{
+    return ( i.first < j );
+}
+
 void ParticleFilter::observePacman(const geometry_msgs::Pose::ConstPtr& msg)
 {
     int measurement_x = msg->position.x;
@@ -51,10 +56,10 @@ const clock_t begin_time = clock();
     {
         geometry_msgs::Pose pose = it->getPacmanPose();
         double probability = util::getProbOfMeasurementGivenPosition(pose.position.x, pose.position.y, measurement_x, measurement_y, 5);
-        probabilities.push_back(probability);
+       // probabilities.push_back(probability);
         sum_prob_all_particles += probability;
 
-        particles_pair.push_back(std::make_pair(sum_prob_all_particles, *it));
+        particles_pair.push_back(std::pair<double,GameParticle>(sum_prob_all_particles, *it));
     }
 
     ROS_ERROR_STREAM_COND(sum_prob_all_particles == 0, "Error, all particles have a zero probability of being correct");
@@ -68,14 +73,13 @@ const clock_t begin_time = clock();
     double sum_probs = 0;
     double random_multiplier = sum_prob_all_particles / (double) RAND_MAX;
 
-    int counter = util::NUMBER_OF_PARTICLES - 1;
-
     while (particlesCounter > 0)
     {
-        double random_variable = std::rand() * random_multiplier;
+        double random_number = std::rand() * random_multiplier;
+
 
         std::vector< std::pair< double, GameParticle > >::iterator low;
-        low=std::lower_bound (particles_pair.begin(), particles_pair.end(), std::make_pair(random_variable, game_particles_[0]), compareProbabilities);
+        low=std::lower_bound (particles_pair.begin(), particles_pair.end(), random_number, compareProbabilities2);
 
         particlesCounter--;
         new_particles.push_back(low->second);
