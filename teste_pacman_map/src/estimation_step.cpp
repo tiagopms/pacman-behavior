@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <math.h> 
+#include <math.h>
 
 #include "ros/ros.h"
 #include "teste_pacman_map/new_game_info.h"
@@ -10,6 +10,8 @@
 
 static float SD_PACMAN_MEASUREMENT = 5.0;
 static float SD_GHOST_DIST_MEASUREMENT = 1.0;
+
+// TODO: Add food probabilities to observe and predict pacman movement
 
 float getProbOfMeasurementGivenPosition(int pos_x, int pos_y, int measurement_x, int measurement_y, double standard_deviation)
 {
