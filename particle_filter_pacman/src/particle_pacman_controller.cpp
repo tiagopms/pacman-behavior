@@ -8,7 +8,7 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "particle_filter");
     ros::NodeHandle n;
-    ros::Rate loop_rate(50);
+    ros::Rate loop_rate(10);
 
     ParticleFilter particle_filter;
 

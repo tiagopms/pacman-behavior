@@ -2,4 +2,4 @@
 
 const int util::NUMBER_OF_PARTICLES = 10000;
 
-const float util::CHANCE_OF_ACTION_SUCCESS = 0.9;
+const float util::CHANCE_OF_ACTION_SUCCESS = 0.7;
