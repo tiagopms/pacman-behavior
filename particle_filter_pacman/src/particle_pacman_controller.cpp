@@ -8,19 +8,12 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "particle_filter");
     ros::NodeHandle n;
-    ros::Rate loop_rate(10);
+    ros::Rate loop_rate(60);
 
     ParticleFilter particle_filter;
 
     while (ros::ok())
     {
-        pacman_interface::PacmanAction action;
-        action.action = action.WEST;
-        particle_filter.estimateMovement(action);
-        particle_filter.printPacmanParticles();
-
-     //   ROS_INFO_STREAM("Loop");
-
         ros::spinOnce();
         loop_rate.sleep();
     }

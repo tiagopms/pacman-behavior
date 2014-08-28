@@ -72,7 +72,7 @@ class RosAgent(Agent):
         return move
 
 
-class RosWaitAgent(Agent):
+class RosWaitServiceAgent(Agent):
     """
     An agent controlled by ROS messages.
     """
@@ -114,5 +114,66 @@ class RosWaitAgent(Agent):
 
     def fromActionToMove(self, action):
         move = None
+
+        return move
+
+
+class RosWaitAgent(Agent):
+    """
+    An agent controlled by ROS messages.
+    """
+    directions = [Directions.WEST,
+                  Directions.EAST,
+                  Directions.NORTH,
+                  Directions.SOUTH,
+                  Directions.STOP]
+
+    def __init__( self, index = 0 ):
+
+        self.nextMove = None
+        self.index = index
+        self.keys = []
+        self.r = rospy.Rate(10)
+        rospy.Subscriber("/pacman_interface/pacman_action", PacmanAction, self.actionCallback)
+
+    def actionCallback(self, data):
+        self.nextMove = None
+
+        if data.action >= 0 and data.action <= 5:
+            self.nextMove = self.directions[data.action]
+        else:
+            rospy.logerr("Inexistent action received!")
+
+    def getAction(self, state):
+       # from graphicsUtils import keys_waiting
+       # from graphicsUtils import keys_pressed
+       # keys = keys_waiting() + keys_pressed()
+       # if keys != []:
+       #     self.keys = keys
+
+        legal = state.getLegalActions(self.index)
+        move = self.getMove(legal)
+
+        while move == None:
+            move = self.getMove(legal)
+            if rospy.is_shutdown():
+                exit()
+
+        if move not in legal:
+            rospy.logerr("Illegal move received, executing random action!")
+            move = random.choice(legal)
+            self.r.sleep()
+
+        return move
+
+    def getMove(self, legal):
+        move = None
+
+        if self.nextMove in legal:
+            move = self.nextMove
+        else:
+            if self.nextMove != None:
+                rospy.logerr("Illegal action received!")
+        self.nextMove = None
 
         return move

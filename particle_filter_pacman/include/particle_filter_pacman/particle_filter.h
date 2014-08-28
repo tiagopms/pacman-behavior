@@ -30,6 +30,7 @@ class ParticleFilter
     ros::Subscriber pacman_pose_subscriber_;
     std::vector< GameParticle > game_particles_;
 
+    void sampleParticles(std::map< double, GameParticle > particles_map, double sum_prob_all_particles);
     void observePacman(const geometry_msgs::Pose::ConstPtr& msg);
     void observeGhost(const pacman_interface::AgentPose::ConstPtr& msg);
 

@@ -33,10 +33,9 @@ class GameParticle
     void move(pacman_interface::PacmanAction action);
 
     geometry_msgs::Pose getPacmanPose();
+    geometry_msgs::Pose getGhostPose(int ghost_index);
     std::vector< geometry_msgs::Pose > getGhostsPoses();
     int getNumberOfGhosts();
-
-    static int MAX_DISTANCE;
 
   protected:
     ros::NodeHandle n_;
