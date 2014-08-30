@@ -218,6 +218,11 @@ int GameParticle::getNumberOfGhosts()
     return num_ghosts_;
 }
 
+std::vector< std::vector<GameParticle::MapElements> > GameParticle::getMap()
+{
+    return map_;
+}
+
 std::vector< std::pair< float, std::pair<int, int> > > GameParticle::getNextPositionsWithProbabilities(int x, int y, pacman_interface::PacmanAction action)
 {
     std::vector< std::pair< float, std::pair<int, int> > > legal_next_positions_with_probabilities;

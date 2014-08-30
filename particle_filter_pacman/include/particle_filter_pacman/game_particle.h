@@ -32,6 +32,8 @@ class GameParticle
 	std::vector< std::pair<int, int> > getLegalNextPositions(int x, int y);
     void move(pacman_interface::PacmanAction action);
 
+    std::vector< std::vector<MapElements> > getMap();
+
     geometry_msgs::Pose getPacmanPose();
     geometry_msgs::Pose getGhostPose(int ghost_index);
     std::vector< geometry_msgs::Pose > getGhostsPoses();

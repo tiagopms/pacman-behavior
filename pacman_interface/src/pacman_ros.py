@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 import rospy
-import sys
 import pacman
 
 def runPacman():

@@ -16,9 +16,10 @@ int main(int argc, char **argv)
 
     while (ros::ok())
     {
-//        particle_filter.printGhostParticles(1);
         loop_rate.sleep();
         ros::spinOnce();
+        //particle_filter.printGhostParticles(1);
+        //particle_filter.printPacmanParticles();
         /*while( !particle_filter.hasNewObservation() && ros::ok())
         {
             ROS_INFO_STREAM_THROTTLE(1, "Waiting");
@@ -26,6 +27,9 @@ int main(int argc, char **argv)
             loop_rate.sleep();
         }*/
 
+        particle_filter.estimateMap();
+        particle_filter.printMostProbableMap();
+        
         pacman_interface::PacmanAction action;
         action = pacman_agent.sendAction(&particle_filter);
 

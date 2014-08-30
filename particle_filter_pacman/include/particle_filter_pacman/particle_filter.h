@@ -23,6 +23,9 @@ class ParticleFilter
 
     void printPacmanParticles();
     void printGhostParticles(int ghost_index);
+    void printMostProbableMap();
+
+    void estimateMap();
 
     bool hasNewObservation();
     void resetNewObservation();
@@ -33,6 +36,15 @@ class ParticleFilter
     ros::Subscriber pacman_pose_subscriber_;
     std::vector< GameParticle > game_particles_;
     bool is_observed_;
+
+    int map_height_;
+    int map_width_;
+    int num_ghosts_;
+    std::vector< std::vector<bool> > walls_;
+    
+    std::vector< std::vector<GameParticle::MapElements> > estimated_map_;
+    geometry_msgs::Pose estimated_pacman_pose_;
+    std::vector< geometry_msgs::Pose > estimated_ghosts_poses_;
 
     void sampleParticles(std::map< double, GameParticle > particles_map, double sum_prob_all_particles);
     void observePacman(const geometry_msgs::Pose::ConstPtr& msg);

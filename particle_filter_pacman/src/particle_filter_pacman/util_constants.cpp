@@ -1,5 +1,8 @@
 #include "particle_filter_pacman/util_constants.h"
 
+const double util::INFINITE = 10000000;
+const float util::PRINT_FOOD_MINIMUM = 0.5;
+
 const int util::NUMBER_OF_PARTICLES = 1000;
 
 const float util::CHANCE_OF_ACTION_SUCCESS = 0.7;
