@@ -166,8 +166,10 @@ void ParticleFilter::estimateMap()
         }
 
         std::vector< std::vector<GameParticle::MapElements> > particle_map = it->getMap();
-        for (int i = map_height_ -1 ; i > -1  ; i--) {
-            for (int j = 1 ; j < map_width_ - 1 ; j++) {
+        for (int i = map_height_ -1 ; i > -1  ; i--)
+        {
+            for (int j = 1 ; j < map_width_ - 1 ; j++)
+            {
                 if( particle_map[i][j] == GameParticle::FOOD )
                     food_probability_map[i][j] += increase_amount;
                 else if( particle_map[i][j] == GameParticle::BIG_FOOD )
@@ -202,6 +204,8 @@ void ParticleFilter::estimateMap()
                 estimated_map_[i][j] = GameParticle::FOOD;
             else if(big_food_probability_map[i][j] > util::PRINT_FOOD_MINIMUM)
                 estimated_map_[i][j] = GameParticle::BIG_FOOD;
+            else
+                estimated_map_[i][j] = GameParticle::EMPTY;
         }
     }
 
@@ -276,86 +280,20 @@ void ParticleFilter::printPacmanOrGhostParticles(bool is_pacman, int ghost_index
 
 void ParticleFilter::printMostProbableMap()
 {
-    GameParticle map = game_particles_[0];
-    int height = map.getHeight();
-    int width = map.getWidth();
-    int num_ghosts = map.getNumberOfGhosts();
-
-    std::vector<float> probability_line(height, 0);
-    std::vector< std::vector<float> > pacman_probability_map(width, probability_line);
-    std::vector< std::vector< std::vector<float> > > ghosts_probability_map(num_ghosts, pacman_probability_map);
-    std::vector< std::vector<float> > food_probability_map(width, probability_line);
-    std::vector< std::vector<float> > big_food_probability_map(width, probability_line);
-
-    double increase_amount = 1 / (double) game_particles_.size();
-
-    ROS_INFO_STREAM("increase_amount " << increase_amount);
-
-    for(std::vector< GameParticle >::reverse_iterator it = game_particles_.rbegin(); it != game_particles_.rend(); ++it) {
-        geometry_msgs::Pose pose;
-        
-        pose = it->getPacmanPose();
-        pacman_probability_map[pose.position.y][pose.position.x] += increase_amount;
-
-        for(int i = 0 ; i < num_ghosts ; ++i)
-        {
-            pose = it->getGhostPose(i);
-            ghosts_probability_map[i][pose.position.y][pose.position.x] += increase_amount;
-        }
-
-        std::vector< std::vector<GameParticle::MapElements> > particle_map = it->getMap();
-        for (int i = height -1 ; i > -1  ; i--) {
-            for (int j = 1 ; j < width - 1 ; j++) {
-                if( particle_map[i][j] == GameParticle::FOOD )
-                    food_probability_map[i][j] += increase_amount;
-                else if( particle_map[i][j] == GameParticle::BIG_FOOD )
-                    big_food_probability_map[i][j] += increase_amount;
-            }
-        }
-    }
-
-    double pacman_max = 0;
-    std::vector< double > ghosts_max(num_ghosts, 0);
-    geometry_msgs::Pose pacman_pose;
-    std::vector< geometry_msgs::Pose > ghosts_poses(num_ghosts, pacman_pose);
-
-    for (int i = height -1 ; i > -1  ; i--) {
-        for (int j = 1 ; j < width - 1 ; j++) {
-            if(pacman_max < pacman_probability_map[i][j])
-            {
-                pacman_pose.position.x = j;
-                pacman_pose.position.y = i;
-                pacman_max = pacman_probability_map[i][j];
-            }
-            for(int ghost_counter = 0; ghost_counter < num_ghosts ; ++ghost_counter)
-            {
-                if(ghosts_max[ghost_counter] < ghosts_probability_map[ghost_counter][i][j])
-                {
-                    ghosts_poses[ghost_counter].position.x = j;
-                    ghosts_poses[ghost_counter].position.y = i;
-                    ghosts_max[ghost_counter] = ghosts_probability_map[ghost_counter][i][j];
-                }
-            }
-        }
-    }
-
-    ROS_INFO_STREAM("Pacman " << pacman_pose.position.x << " " << pacman_pose.position.y);
-
-    for (int i = height -1 ; i > -1  ; i--) {
+    for (int i = map_height_ -1 ; i > -1  ; i--) {
         std::ostringstream foo;
-
-        for (int j = 1 ; j < width - 1 ; j++) {
-            if( map.getMapElement(j, i) == GameParticle::WALL)
+        for (int j = 1 ; j < map_width_ - 1 ; j++) {
+            if( walls_[i][j])
                 foo << "#" << ' ';
             else
             {
-                if(pacman_pose.position.x == j && pacman_pose.position.y == i)
+                if(estimated_pacman_pose_.position.x == j && estimated_pacman_pose_.position.y == i)
                 {
                     foo << "\033[48;5;90mP\033[0m" << ' ';
                     continue;
                 }
                 bool is_ghost = false;
-                for(std::vector< geometry_msgs::Pose >::reverse_iterator it = ghosts_poses.rbegin(); it != ghosts_poses.rend(); ++it)
+                for(std::vector< geometry_msgs::Pose >::reverse_iterator it = estimated_ghosts_poses_.rbegin(); it != estimated_ghosts_poses_.rend(); ++it)
                     if(it->position.x == j && it->position.y == i)
                     {
                         foo << "\033[48;5;196mG\033[0m" << ' ';
@@ -364,12 +302,14 @@ void ParticleFilter::printMostProbableMap()
                     }
 
                 if(!is_ghost)
-                    if(food_probability_map[i][j] >= util::PRINT_FOOD_MINIMUM)
+                    if(estimated_map_[i][j] == GameParticle::FOOD)
                         foo << "\033[48;5;40m.\033[0m" << ' ';
-                    else if(big_food_probability_map[i][j] >= util::PRINT_FOOD_MINIMUM)
+                    else if(estimated_map_[i][j] == GameParticle::BIG_FOOD)
                         foo << "\033[48;5;201mo\033[0m" << ' ';
-                    else
+                    else if(estimated_map_[i][j] == GameParticle::EMPTY)
                         foo << "\033[48;5;12m \033[0m" << ' ';
+                    else
+                        foo << "\033[48;5;0mE\033[0m" << ' ';
             }
         }
         ROS_INFO_STREAM(foo.str());
