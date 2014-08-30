@@ -51,6 +51,7 @@ class GameParticle
     std::vector< std::pair< float, std::pair<int, int> > > getNextPositionsWithProbabilities(int x, int y, pacman_interface::PacmanAction action);
 
     void movePacman(pacman_interface::PacmanAction action);
+    void moveGhost(std::vector< geometry_msgs::Pose >::reverse_iterator it);
     void moveGhosts();
 
     static bool particle_initialized;

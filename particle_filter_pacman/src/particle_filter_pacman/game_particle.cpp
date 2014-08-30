@@ -279,18 +279,33 @@ void GameParticle::movePacman(pacman_interface::PacmanAction action)
     }
 }
 
+void GameParticle::moveGhost(std::vector< geometry_msgs::Pose >::reverse_iterator it)
+{
+    int x = it->position.x;
+    int y = it->position.y;
+
+    std::vector< std::pair<int, int> > next_positions = getLegalNextPositions(x, y);
+    int random_variable = std::rand() % next_positions.size();
+
+    it->position.x = next_positions[random_variable].first;
+    it->position.y = next_positions[random_variable].second;
+}
+
 void GameParticle::moveGhosts()
 {
     for(std::vector< geometry_msgs::Pose >::reverse_iterator it = ghosts_poses_.rbegin(); it != ghosts_poses_.rend(); ++it)
     {
-        int x = it->position.x;
-        int y = it->position.y;
+        double random_number_of_moves = std::rand() / (double) RAND_MAX;
 
-        std::vector< std::pair<int, int> > next_positions = getLegalNextPositions(x, y);
-        int random_variable = std::rand() % next_positions.size();
-
-        it->position.x = next_positions[random_variable].first;
-        it->position.y = next_positions[random_variable].second;
+        if(random_number_of_moves > util::CHANCE_OF_GHOST_STOP)
+        {
+            random_number_of_moves -= util::CHANCE_OF_GHOST_STOP;
+            moveGhost(it);
+            if(random_number_of_moves > util::CHANCE_OF_GHOST_ONE_MOVE)
+            {   
+                moveGhost(it);
+            }
+        }
     }
 }
 

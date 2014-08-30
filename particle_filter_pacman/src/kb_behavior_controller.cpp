@@ -7,7 +7,7 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "particle_filter");
     ros::NodeHandle n;
-    ros::Rate loop_rate(5);
+    ros::Rate loop_rate(10);
 
     BehaviorKeyboardAgent pacman_agent;
     ParticleFilter particle_filter;
@@ -16,6 +16,7 @@ int main(int argc, char **argv)
 
     while (ros::ok())
     {
+//        particle_filter.printGhostParticles(1);
         loop_rate.sleep();
         ros::spinOnce();
         /*while( !particle_filter.hasNewObservation() && ros::ok())
@@ -30,7 +31,6 @@ int main(int argc, char **argv)
 
         particle_filter.estimateMovement(action);
         ROS_INFO_STREAM("Loop " << loop_count);
-        //particle_filter.printPacmanParticles();
 
         loop_count++;
     }
