@@ -24,11 +24,15 @@ class ParticleFilter
     void printPacmanParticles();
     void printGhostParticles(int ghost_index);
 
+    bool hasNewObservation();
+    void resetNewObservation();
+
   protected:
     ros::NodeHandle n_;
     ros::Subscriber ghost_distance_subscriber_;
     ros::Subscriber pacman_pose_subscriber_;
     std::vector< GameParticle > game_particles_;
+    bool is_observed_;
 
     void sampleParticles(std::map< double, GameParticle > particles_map, double sum_prob_all_particles);
     void observePacman(const geometry_msgs::Pose::ConstPtr& msg);

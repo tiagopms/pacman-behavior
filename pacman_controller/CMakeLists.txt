@@ -6,6 +6,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
   pacman_interface
+  pacman_abstract_classes
 )
 
 ## System dependencies are found with CMake's conventions
@@ -38,7 +39,7 @@ add_executable(keyboard_cpp_controller src/keyboardCppAgent.cpp)
 #add_executable(new_keyboard_cpp_controller src/new_keyboard_agent.cpp src/agent.cpp src/pacman_agent.cpp)
 
 # pacman world usefull functions
-add_library(util_functions src/util_functions.cpp)
+#add_library(util_functions src/util_functions.cpp)
 add_library(game_info src/game_info.cpp)
 
 # pacman agents

@@ -608,7 +608,8 @@ def readCommand( argv ):
         return info
     rospy.Service('pacman_initialize_map_layout', PacmanMapInfo, getLayoutInfo)
 
-    time.sleep(5)
+    # wait for start
+    # time.sleep(5)
 
     # Special case: recorded games don't use the runGames method or args structure
     if options.gameToReplay != None:

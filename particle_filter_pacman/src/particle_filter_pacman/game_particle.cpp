@@ -244,11 +244,11 @@ std::vector< std::pair< float, std::pair<int, int> > > GameParticle::getNextPosi
         legal_next_positions_with_probabilities.push_back(std::make_pair(south_probability, std::make_pair(x, y-1)));
     else
         stop_probability += south_probability;
-    if(map_[y][x + 1] != WALL)
+    if(map_[y][x - 1] != WALL)
         legal_next_positions_with_probabilities.push_back(std::make_pair(west_probability, std::make_pair(x-1, y)));
     else
         stop_probability += west_probability;
-    if(map_[y][x - 1] != WALL)
+    if(map_[y][x + 1] != WALL)
         legal_next_positions_with_probabilities.push_back(std::make_pair(east_probability, std::make_pair(x+1, y)));
     else
         stop_probability += east_probability;

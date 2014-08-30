@@ -11,8 +11,10 @@ ParticleFilter::ParticleFilter()
     game_particle.printMap();
     game_particles_ = std::vector< GameParticle > (util::NUMBER_OF_PARTICLES, game_particle);
 
-    ghost_distance_subscriber_ = n_.subscribe<pacman_interface::AgentPose>("/pacman_interface/ghost_distance", 10, boost::bind(&ParticleFilter::observeGhost, this, _1));
+    ghost_distance_subscriber_ = n_.subscribe<pacman_interface::AgentPose>("/pacman_interface/ghost_distance", 20, boost::bind(&ParticleFilter::observeGhost, this, _1));
     pacman_pose_subscriber_ = n_.subscribe<geometry_msgs::Pose>("/pacman_interface/pacman_pose", 10, boost::bind(&ParticleFilter::observePacman, this, _1));
+
+    is_observed_ = true;
 }
 
 void ParticleFilter::estimateMovement(pacman_interface::PacmanAction action)
@@ -21,16 +23,6 @@ void ParticleFilter::estimateMovement(pacman_interface::PacmanAction action)
     {
         it->move(action);
     }
-}
-
-bool compareProbabilities(std::pair< double, GameParticle > i, std::pair< double, GameParticle > j)
-{
-    return ( i.first < j.first );
-}
-
-bool compareProbabilities2(std::pair< double, GameParticle > i, double j)
-{
-    return ( i.first < j );
 }
 
 void ParticleFilter::sampleParticles(std::map< double, GameParticle > particles_map, double sum_prob_all_particles)
@@ -59,11 +51,6 @@ void ParticleFilter::sampleParticles(std::map< double, GameParticle > particles_
 
 void ParticleFilter::observePacman(const geometry_msgs::Pose::ConstPtr& msg)
 {
-    // TODO: remove this
-    pacman_interface::PacmanAction action;
-    action.action = action.WEST;
-    estimateMovement(action);
-
     int measurement_x = msg->position.x;
     int measurement_y = msg->position.y;
 
@@ -89,8 +76,7 @@ void ParticleFilter::observePacman(const geometry_msgs::Pose::ConstPtr& msg)
     else
         sampleParticles(particles_map, sum_prob_all_particles);
 
-ROS_INFO_STREAM("Pacman");
-printPacmanParticles();
+    is_observed_ = true;
 }
 
 // TODO: merge all ghost position measurements to gain speed
@@ -114,7 +100,7 @@ void ParticleFilter::observeGhost(const pacman_interface::AgentPose::ConstPtr& m
         distance.position.x = ghost_pose.position.x - pacman_pose.position.x;
         distance.position.y = ghost_pose.position.y - pacman_pose.position.y;
 
-        double probability = util::getProbOfMeasurementGivenPosition(distance.position.x, distance.position.y, measurement_x, measurement_y, 1);
+        double probability = util::getProbOfMeasurementGivenPosition(distance.position.x, distance.position.y, measurement_x, measurement_y, 0.5);
         sum_prob_all_particles += probability;
         particles_map.insert(std::pair<double,GameParticle>(sum_prob_all_particles, *it));
     }
@@ -126,8 +112,13 @@ void ParticleFilter::observeGhost(const pacman_interface::AgentPose::ConstPtr& m
     else
         sampleParticles(particles_map, sum_prob_all_particles);
 
-ROS_INFO_STREAM("Ghost " << ghost_index);
-printGhostParticles(ghost_index);
+//    is_observed_ = true;
+    if(ghost_index==1)
+    {
+        //ROS_INFO_STREAM("Observed ghost");
+        ROS_INFO_STREAM("x " << measurement_x << " y " << measurement_y);
+        printGhostParticles(ghost_index);
+    }
 }
 
 void ParticleFilter::printPacmanParticles()
@@ -150,6 +141,8 @@ void ParticleFilter::printPacmanOrGhostParticles(bool is_pacman, int ghost_index
     std::vector< std::vector<float> > probability_map(width, probability_line);
 
     double increase_amount = 1 / (double) game_particles_.size();
+
+    ROS_INFO_STREAM("increase_amount " << increase_amount);
 
     for(std::vector< GameParticle >::reverse_iterator it = game_particles_.rbegin(); it != game_particles_.rend(); ++it) {
         geometry_msgs::Pose pose;
@@ -189,4 +182,13 @@ void ParticleFilter::printPacmanOrGhostParticles(bool is_pacman, int ghost_index
         }
         ROS_INFO_STREAM(foo.str());
     }
+}
+
+bool ParticleFilter::hasNewObservation()
+{
+    return is_observed_;
+}
+void ParticleFilter::resetNewObservation()
+{
+    is_observed_ = false;
 }

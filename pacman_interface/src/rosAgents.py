@@ -152,17 +152,18 @@ class RosWaitAgent(Agent):
        #     self.keys = keys
 
         legal = state.getLegalActions(self.index)
+
         move = self.getMove(legal)
 
         while move == None:
             move = self.getMove(legal)
+            self.r.sleep()
             if rospy.is_shutdown():
                 exit()
 
         if move not in legal:
             rospy.logerr("Illegal move received, executing random action!")
             move = random.choice(legal)
-            self.r.sleep()
 
         return move
 
@@ -173,7 +174,7 @@ class RosWaitAgent(Agent):
             move = self.nextMove
         else:
             if self.nextMove != None:
-                rospy.logerr("Illegal action received!")
+                rospy.logerr("Illegal action " + str(self.nextMove) + " received! Legal: " + str(legal))
         self.nextMove = None
 
         return move
