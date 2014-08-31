@@ -1,6 +1,8 @@
 #include "particle_filter_pacman/behavior_keyboard_agent.h"
 
 #include "ros/ros.h"
+#include "particle_filter_pacman/util_constants.h"
+
 #include "pacman_interface/PacmanAction.h"
 #include "std_msgs/String.h"
 
@@ -101,6 +103,37 @@ pacman_interface::PacmanAction BehaviorKeyboardAgent::getEatBigFoodAction(Partic
 
 pacman_interface::PacmanAction BehaviorKeyboardAgent::getEatAction(ParticleFilter *particle_filter) {
     pacman_interface::PacmanAction action;
+
+    geometry_msgs::Pose pacman_pose = particle_filter->getEstimatedPacmanPose();
+    std::map< std::pair<int, int>, int > distances = particle_filter->getDistances(pacman_pose.position.x, pacman_pose.position.y);
+
+    int width = particle_filter->getMapWidth();
+    int height = particle_filter->getMapHeight();
+    std::vector< std::vector<GameParticle::MapElements> > map = particle_filter->getEstimatedMap();
+
+    int min_distance = util::INFINITE;
+    int food_x = -1;
+    int food_y = -1;
+    for (int i = 0 ; i < width ; i++)
+    {
+        for (int j = 0 ; j < height ; j++)
+        {
+            if( map[j][i] == GameParticle::FOOD)
+            {
+                int distance = distances[std::make_pair(i, j)];
+                if(distance < min_distance)
+                {
+                    food_x = i;
+                    food_y = j;
+                    min_distance = distance;
+                }
+            }
+        }
+    }
+
+    distances = particle_filter->getDistances(food_x, food_y);
+    // TODO: add last part
+
     action.action = action.STOP;
 
     return action;

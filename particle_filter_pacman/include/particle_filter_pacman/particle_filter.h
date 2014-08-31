@@ -30,6 +30,12 @@ class ParticleFilter
     bool hasNewObservation();
     void resetNewObservation();
 
+    int getMapWidth();
+    int getMapHeight();
+    std::vector< std::vector<GameParticle::MapElements> > getEstimatedMap();
+    geometry_msgs::Pose getEstimatedPacmanPose();
+    std::map< std::pair<int, int>, int > getDistances(int x, int y);
+
   protected:
     ros::NodeHandle n_;
     ros::Subscriber ghost_distance_subscriber_;
@@ -41,7 +47,7 @@ class ParticleFilter
     int map_width_;
     int num_ghosts_;
     std::vector< std::vector<bool> > walls_;
-    
+
     std::vector< std::vector<GameParticle::MapElements> > estimated_map_;
     geometry_msgs::Pose estimated_pacman_pose_;
     std::vector< geometry_msgs::Pose > estimated_ghosts_poses_;
@@ -51,6 +57,10 @@ class ParticleFilter
     void observeGhost(const pacman_interface::AgentPose::ConstPtr& msg);
 
     void printPacmanOrGhostParticles(bool is_pacman, int ghost_index);
+
+    std::map< std::pair<int, int>, std::map< std::pair<int, int>, int > > precalculated_distances_;
+    std::map< std::pair<int, int>, int > calculateDistances(int x, int y);
+    void precalculateAllDistances();
 };
 
 #endif // PARTICLE_FILTER_H

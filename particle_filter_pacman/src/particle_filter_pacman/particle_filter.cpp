@@ -31,6 +31,8 @@ ParticleFilter::ParticleFilter()
         }
     }
 
+    precalculateAllDistances();
+
     ghost_distance_subscriber_ = n_.subscribe<pacman_interface::AgentPose>("/pacman_interface/ghost_distance", 20, boost::bind(&ParticleFilter::observeGhost, this, _1));
     pacman_pose_subscriber_ = n_.subscribe<geometry_msgs::Pose>("/pacman_interface/pacman_pose", 10, boost::bind(&ParticleFilter::observePacman, this, _1));
 
@@ -133,9 +135,9 @@ void ParticleFilter::observeGhost(const pacman_interface::AgentPose::ConstPtr& m
         sampleParticles(particles_map, sum_prob_all_particles);
 
 //    is_observed_ = true;
-    if(ghost_index==1)
+    if(ghost_index==0)
     {
-        //ROS_INFO_STREAM("Observed ghost");
+        ROS_INFO_STREAM("Observed ghost");
         //ROS_INFO_STREAM("x " << measurement_x << " y " << measurement_y);
         //printGhostParticles(ghost_index);
     }
@@ -323,4 +325,85 @@ bool ParticleFilter::hasNewObservation()
 void ParticleFilter::resetNewObservation()
 {
     is_observed_ = false;
+}
+
+std::map< std::pair<int, int>, int > ParticleFilter::calculateDistances(int x, int y)
+{
+    std::map< std::pair<int, int>, int > distances;
+
+    distances[std::make_pair(x, y)] = 0;
+
+    int current_distance = 0;
+    bool done = false;
+
+    GameParticle map = game_particles_[0];
+    std::vector< std::pair<int, int> > legal_positions = map.getLegalNextPositions(x, y);
+
+    while(!done)
+    {
+        done = true;
+        current_distance++;
+        std::vector< std::pair<int, int> > next_legal_positions;
+
+        for(std::vector< std::pair<int, int> >::reverse_iterator it = legal_positions.rbegin(); it != legal_positions.rend(); ++it)
+        {
+            if ( distances.find(*it) == distances.end() )
+            {
+                distances[*it] = current_distance;
+                done = false;
+
+                std::vector< std::pair<int, int> > temp_legal_positions = map.getLegalNextPositions(it->first, it->second);
+                next_legal_positions.reserve(next_legal_positions.size() + temp_legal_positions.size());
+                next_legal_positions.insert(next_legal_positions.end(), temp_legal_positions.begin(), temp_legal_positions.end());
+            }
+        }
+
+        legal_positions = next_legal_positions;
+    }
+    
+    return distances;
+}
+
+void ParticleFilter::precalculateAllDistances() {
+    ROS_INFO_STREAM("Calculating all distances");
+
+    for (int i = 0 ; i < map_width_ ; i++)
+    {
+        for (int j = 0 ; j < map_height_ ; j++)
+        {
+            if( !walls_[j][i] )
+            {
+                precalculated_distances_[std::make_pair(i, j)] = calculateDistances(i, j);
+            }
+        }
+    }
+
+    ROS_INFO_STREAM("Pre calculated all distances");
+}
+
+std::map< std::pair<int, int>, int > ParticleFilter::getDistances(int x, int y)
+{
+    std::map< std::pair<int, int>, int > distances = precalculated_distances_[std::make_pair(x, y)];
+    
+    return distances;
+}
+
+geometry_msgs::Pose ParticleFilter::getEstimatedPacmanPose()
+{
+    return estimated_pacman_pose_;
+}
+
+int ParticleFilter::getMapWidth()
+{
+    return map_width_;
+}
+
+int ParticleFilter::getMapHeight()
+{
+    return map_height_;
+}
+
+std::vector< std::vector<GameParticle::MapElements> > ParticleFilter::getEstimatedMap()
+{
+    return estimated_map_;
 }

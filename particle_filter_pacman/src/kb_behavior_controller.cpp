@@ -7,7 +7,7 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "particle_filter");
     ros::NodeHandle n;
-    ros::Rate loop_rate(10);
+    ros::Rate loop_rate(1);
 
     BehaviorKeyboardAgent pacman_agent;
     ParticleFilter particle_filter;
@@ -29,7 +29,8 @@ int main(int argc, char **argv)
 
         particle_filter.estimateMap();
         particle_filter.printMostProbableMap();
-        
+        //particle_filter.printGhostParticles(0);
+
         pacman_interface::PacmanAction action;
         action = pacman_agent.sendAction(&particle_filter);
 
