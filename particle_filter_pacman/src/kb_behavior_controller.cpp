@@ -42,5 +42,3 @@ int main(int argc, char **argv)
 }
 
 // TODO: Move pacman twice sometimes
-
-// TODO: Kill ghost in particles
