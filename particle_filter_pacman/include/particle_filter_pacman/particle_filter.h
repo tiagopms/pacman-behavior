@@ -34,7 +34,11 @@ class ParticleFilter
     int getMapHeight();
     std::vector< std::vector<GameParticle::MapElements> > getEstimatedMap();
     geometry_msgs::Pose getEstimatedPacmanPose();
+    std::vector< geometry_msgs::Pose > getEstimatedGhostsPoses();
     std::map< std::pair<int, int>, int > getDistances(int x, int y);
+    
+    std::vector< pacman_interface::PacmanAction > getLegalActions(int x, int y);
+    std::vector< std::pair<int, int> > getLegalNextPositions(int x, int y);
 
   protected:
     ros::NodeHandle n_;

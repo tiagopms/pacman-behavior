@@ -39,6 +39,9 @@ class GameParticle
     std::vector< geometry_msgs::Pose > getGhostsPoses();
     int getNumberOfGhosts();
 
+    std::vector<int> getWhiteGhostsTime();
+    void checkIfDeadGhosts();
+
   protected:
     ros::NodeHandle n_;
 
@@ -46,9 +49,12 @@ class GameParticle
     int width_;
     std::vector< std::vector<MapElements> > map_;
 
+    std::vector< int > white_ghosts_time_;
+
     int num_ghosts_;
     geometry_msgs::Pose pacman_pose_;
     std::vector< geometry_msgs::Pose > ghosts_poses_;
+    std::vector< geometry_msgs::Pose > spawn_ghosts_poses_;
 
     std::vector< std::pair< float, std::pair<int, int> > > getNextPositionsWithProbabilities(int x, int y, pacman_interface::PacmanAction action);
 

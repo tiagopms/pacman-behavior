@@ -150,12 +150,14 @@ void ParticleFilter::estimateMap()
     std::vector< std::vector< std::vector<float> > > ghosts_probability_map(num_ghosts_, pacman_probability_map);
     std::vector< std::vector<float> > food_probability_map(map_width_, probability_line);
     std::vector< std::vector<float> > big_food_probability_map(map_width_, probability_line);
+    std::vector<double> white_ghosts_time(num_ghosts_, 0);
 
     double increase_amount = 1 / (double) game_particles_.size();
 
     ROS_INFO_STREAM("increase_amount " << increase_amount);
 
-    for(std::vector< GameParticle >::reverse_iterator it = game_particles_.rbegin(); it != game_particles_.rend(); ++it) {
+    for(std::vector< GameParticle >::reverse_iterator it = game_particles_.rbegin(); it != game_particles_.rend(); ++it)
+    {
         geometry_msgs::Pose pose;
         
         pose = it->getPacmanPose();
@@ -165,6 +167,12 @@ void ParticleFilter::estimateMap()
         {
             pose = it->getGhostPose(i);
             ghosts_probability_map[i][pose.position.y][pose.position.x] += increase_amount;
+        }
+
+        std::vector<int> white_ghosts_time_particle = it->getWhiteGhostsTime();
+        for(int i = white_ghosts_time.size() - 1 ; i > -1 ; i--)
+        {
+            white_ghosts_time[i] += white_ghosts_time_particle[i];
         }
 
         std::vector< std::vector<GameParticle::MapElements> > particle_map = it->getMap();
@@ -179,6 +187,14 @@ void ParticleFilter::estimateMap()
             }
         }
     }
+
+    // round whith_ghosts_time number
+    for(std::vector<double>::reverse_iterator it = white_ghosts_time.rbegin(); it != white_ghosts_time.rend(); ++it)
+    {
+        std::floor((*it * increase_amount ) + 0.5);
+    ROS_INFO_STREAM("white_ghosts_time "  << *it);
+    }
+
 
     double pacman_max = 0;
     std::vector< double > ghosts_max(num_ghosts_, 0);
@@ -393,6 +409,11 @@ geometry_msgs::Pose ParticleFilter::getEstimatedPacmanPose()
     return estimated_pacman_pose_;
 }
 
+std::vector< geometry_msgs::Pose > ParticleFilter::getEstimatedGhostsPoses()
+{
+    return estimated_ghosts_poses_;
+}
+
 int ParticleFilter::getMapWidth()
 {
     return map_width_;
@@ -406,4 +427,14 @@ int ParticleFilter::getMapHeight()
 std::vector< std::vector<GameParticle::MapElements> > ParticleFilter::getEstimatedMap()
 {
     return estimated_map_;
+}
+
+std::vector< pacman_interface::PacmanAction > ParticleFilter::getLegalActions(int x, int y)
+{
+    return game_particles_[0].getLegalActions(x, y);
+}
+
+std::vector< std::pair<int, int> > ParticleFilter::getLegalNextPositions(int x, int y)
+{
+    return game_particles_[0].getLegalNextPositions(x, y);
 }

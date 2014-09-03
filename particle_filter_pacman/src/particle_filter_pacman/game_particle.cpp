@@ -33,6 +33,8 @@ GameParticle::GameParticle()
 
         num_ghosts_ = (int) initInfo.response.numGhosts;
 
+        white_ghosts_time_ = std::vector<int> (num_ghosts_, 0);
+
         pacman_interface::MapLayout map_layout;
 
         for (int i = 0 ; i < height_ ; i++) {
@@ -54,6 +56,7 @@ GameParticle::GameParticle()
                             ghost_pose.position.x = j;
                             ghost_pose.position.y = i;
                             ghosts_poses_.push_back(ghost_pose);
+                            spawn_ghosts_poses_.push_back(ghost_pose);
 
                             num_initialized_ghost++;
                         }
@@ -218,6 +221,11 @@ int GameParticle::getNumberOfGhosts()
     return num_ghosts_;
 }
 
+std::vector<int> GameParticle::getWhiteGhostsTime()
+{
+    return white_ghosts_time_;
+}
+
 std::vector< std::vector<GameParticle::MapElements> > GameParticle::getMap()
 {
     return map_;
@@ -278,6 +286,15 @@ void GameParticle::movePacman(pacman_interface::PacmanAction action)
         {
             pacman_pose_.position.x = it->second.first;
             pacman_pose_.position.y = it->second.second;
+
+            // if big food, start white ghosts time
+            if(map_[it->second.second][it->second.first] == BIG_FOOD)
+            {
+                for(std::vector<int>::reverse_iterator it = white_ghosts_time_.rbegin(); it != white_ghosts_time_.rend(); ++it)
+                {
+                    *it = 38;
+                }
+            }
             map_[it->second.second][it->second.first] = EMPTY;
             break;
         }
@@ -298,24 +315,83 @@ void GameParticle::moveGhost(std::vector< geometry_msgs::Pose >::reverse_iterato
 
 void GameParticle::moveGhosts()
 {
-    for(std::vector< geometry_msgs::Pose >::reverse_iterator it = ghosts_poses_.rbegin(); it != ghosts_poses_.rend(); ++it)
+    std::vector< int >::reverse_iterator white_it = white_ghosts_time_.rbegin();
+    std::vector< geometry_msgs::Pose >::reverse_iterator spawn_pose_it = spawn_ghosts_poses_.rbegin();
+
+    for(std::vector< geometry_msgs::Pose >::reverse_iterator it = ghosts_poses_.rbegin(); it != ghosts_poses_.rend(); ++it, ++white_it, ++spawn_pose_it)
     {
         double random_number_of_moves = std::rand() / (double) RAND_MAX;
 
-        if(random_number_of_moves > util::CHANCE_OF_GHOST_STOP)
+        if(*white_it) // if white, change probabilities of moves
         {
-            random_number_of_moves -= util::CHANCE_OF_GHOST_STOP;
-            moveGhost(it);
-            if(random_number_of_moves > util::CHANCE_OF_GHOST_ONE_MOVE)
-            {   
+            if( random_number_of_moves > util::CHANCE_OF_WHITE_GHOST_STOP )
+            {
+                random_number_of_moves -= util::CHANCE_OF_WHITE_GHOST_STOP;
                 moveGhost(it);
+
+                // if eaten, go to initial position
+                if( ( it->position.x == pacman_pose_.position.x ) && ( it->position.y == pacman_pose_.position.y ) )
+                {
+                    *it = *spawn_pose_it;
+                    *white_it = 0;
+                }
+
+                if(random_number_of_moves > util::CHANCE_OF_WHITE_GHOST_ONE_MOVE)
+                {   
+                    moveGhost(it);
+
+                    // if eaten, go to initial position
+                    if( ( it->position.x == pacman_pose_.position.x ) && ( it->position.y == pacman_pose_.position.y ) )
+                    {
+                        *it = *spawn_pose_it;
+                        *white_it = 0;
+                    }
+                }
             }
+        }
+        else // if not white, move normally
+        {
+            if( random_number_of_moves > util::CHANCE_OF_GHOST_STOP )
+            {
+                random_number_of_moves -= util::CHANCE_OF_GHOST_STOP;
+                moveGhost(it);
+                if(random_number_of_moves > util::CHANCE_OF_GHOST_ONE_MOVE)
+                {   
+                    moveGhost(it);
+                }
+            }
+        }
+    }
+}
+
+void GameParticle::checkIfDeadGhosts()
+{
+    std::vector< geometry_msgs::Pose >::reverse_iterator pose_it = ghosts_poses_.rbegin();
+    std::vector< int >::reverse_iterator white_it = white_ghosts_time_.rbegin();
+    std::vector< geometry_msgs::Pose >::reverse_iterator spawn_pose_it = spawn_ghosts_poses_.rbegin();
+    for(; pose_it != ghosts_poses_.rend(); ++pose_it, ++white_it, ++spawn_pose_it)
+    {
+        if(*white_it && ( pose_it->position.x == pacman_pose_.position.x ) && ( pose_it->position.y == pacman_pose_.position.y ) )
+        {
+            *pose_it = *spawn_pose_it;
+            *white_it = 0;
         }
     }
 }
 
 void GameParticle::move(pacman_interface::PacmanAction action)
 {
+    // count a step to white ghosts
+    for(std::vector<int>::reverse_iterator it = white_ghosts_time_.rbegin(); it != white_ghosts_time_.rend(); ++it)
+    {
+        if(*it)
+        {
+            (*it)--;
+        }
+    }
+
     moveGhosts();
     movePacman(action);
+
+    checkIfDeadGhosts();
 }

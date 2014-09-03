@@ -18,7 +18,7 @@ int main(int argc, char **argv)
     {
         loop_rate.sleep();
         ros::spinOnce();
-        //particle_filter.printGhostParticles(1);
+        particle_filter.printGhostParticles(1);
         //particle_filter.printPacmanParticles();
         /*while( !particle_filter.hasNewObservation() && ros::ok())
         {
@@ -28,7 +28,7 @@ int main(int argc, char **argv)
         }*/
 
         particle_filter.estimateMap();
-        particle_filter.printMostProbableMap();
+        //particle_filter.printMostProbableMap();
         //particle_filter.printGhostParticles(0);
 
         pacman_interface::PacmanAction action;
@@ -40,3 +40,7 @@ int main(int argc, char **argv)
         loop_count++;
     }
 }
+
+// TODO: Move pacman twice sometimes
+
+// TODO: Kill ghost in particles

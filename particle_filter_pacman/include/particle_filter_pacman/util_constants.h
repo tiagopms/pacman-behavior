@@ -10,4 +10,7 @@ namespace util
     extern const float CHANCE_OF_GHOST_STOP;
     extern const float CHANCE_OF_GHOST_ONE_MOVE;
     extern const float CHANCE_OF_GHOST_TWO_MOVES;
+    extern const float CHANCE_OF_WHITE_GHOST_STOP;
+    extern const float CHANCE_OF_WHITE_GHOST_ONE_MOVE;
+    extern const float CHANCE_OF_WHITE_GHOST_TWO_MOVES;
 }
