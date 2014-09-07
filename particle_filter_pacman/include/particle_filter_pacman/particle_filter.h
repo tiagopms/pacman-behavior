@@ -35,6 +35,8 @@ class ParticleFilter
     std::vector< std::vector<GameParticle::MapElements> > getEstimatedMap();
     geometry_msgs::Pose getEstimatedPacmanPose();
     std::vector< geometry_msgs::Pose > getEstimatedGhostsPoses();
+    double getEstimatedScore();
+    double getEstimatedReward();
     std::map< std::pair<int, int>, int > getDistances(int x, int y);
     
     std::vector< pacman_interface::PacmanAction > getLegalActions(int x, int y);
@@ -51,6 +53,8 @@ class ParticleFilter
     int map_width_;
     int num_ghosts_;
     std::vector< std::vector<bool> > walls_;
+    double score_;
+    double last_reward_;
 
     std::vector< std::vector<GameParticle::MapElements> > estimated_map_;
     geometry_msgs::Pose estimated_pacman_pose_;

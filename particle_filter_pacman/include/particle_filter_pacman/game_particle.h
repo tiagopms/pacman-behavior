@@ -27,6 +27,7 @@ class GameParticle
     int getHeight();
     int getWidth();
     MapElements getMapElement(int x, int y);
+    int getScore();
 
 	std::vector< pacman_interface::PacmanAction > getLegalActions(int x, int y);
 	std::vector< std::pair<int, int> > getLegalNextPositions(int x, int y);
@@ -48,6 +49,7 @@ class GameParticle
     int height_;
     int width_;
     std::vector< std::vector<MapElements> > map_;
+    int score_;
 
     std::vector< int > white_ghosts_time_;
 

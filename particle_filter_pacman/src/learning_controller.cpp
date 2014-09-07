@@ -2,6 +2,7 @@
 
 #include "particle_filter_pacman/particle_filter.h"
 #include "particle_filter_pacman/learning_agent.h"
+#include "particle_filter_pacman/q_learning_simple.h"
 
 int main(int argc, char **argv)
 {
@@ -11,6 +12,7 @@ int main(int argc, char **argv)
 
     LearningAgent pacman_agent;
     ParticleFilter particle_filter;
+    QLearningSimple q_learning;
 
     int loop_count = 0;
 
@@ -20,9 +22,13 @@ int main(int argc, char **argv)
         ros::spinOnce();
 
         particle_filter.estimateMap();
+        q_learning.updateFeatures(&particle_filter);
+        double reward = particle_filter.getEstimatedReward();
+        q_learning.updateWeights(reward);
+       // q_learning.getBehavior();
         //particle_filter.printMostProbableMap();
         //particle_filter.printGhostParticles(0);
-        particle_filter.printGhostParticles(1);
+        //particle_filter.printGhostParticles(1);
         //particle_filter.printPacmanParticles();
 
         pacman_interface::PacmanAction action;

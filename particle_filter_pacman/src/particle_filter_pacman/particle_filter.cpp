@@ -14,6 +14,7 @@ ParticleFilter::ParticleFilter()
     map_height_ = game_particle.getHeight();
     map_width_ = game_particle.getWidth();
     num_ghosts_ = game_particle.getNumberOfGhosts();
+    score_ = 0;
 
     std::vector<bool> walls_line(map_height_, false);
     walls_ = std::vector< std::vector<bool> > (map_width_, walls_line);
@@ -151,6 +152,7 @@ void ParticleFilter::estimateMap()
     std::vector< std::vector<float> > food_probability_map(map_width_, probability_line);
     std::vector< std::vector<float> > big_food_probability_map(map_width_, probability_line);
     std::vector<double> white_ghosts_time(num_ghosts_, 0);
+    double score = 0;
 
     double increase_amount = 1 / (double) game_particles_.size();
 
@@ -159,6 +161,8 @@ void ParticleFilter::estimateMap()
     for(std::vector< GameParticle >::reverse_iterator it = game_particles_.rbegin(); it != game_particles_.rend(); ++it)
     {
         geometry_msgs::Pose pose;
+
+        score += it->getScore();
         
         pose = it->getPacmanPose();
         pacman_probability_map[pose.position.y][pose.position.x] += increase_amount;
@@ -187,6 +191,12 @@ void ParticleFilter::estimateMap()
             }
         }
     }
+
+    score = score * increase_amount;
+    last_reward_ = score - score_;
+    score_ = score;
+    ROS_INFO_STREAM("score " << score_);
+    ROS_INFO_STREAM("reward " << last_reward_);
 
     // round whith_ghosts_time number
     for(std::vector<double>::reverse_iterator it = white_ghosts_time.rbegin(); it != white_ghosts_time.rend(); ++it)
@@ -412,6 +422,16 @@ geometry_msgs::Pose ParticleFilter::getEstimatedPacmanPose()
 std::vector< geometry_msgs::Pose > ParticleFilter::getEstimatedGhostsPoses()
 {
     return estimated_ghosts_poses_;
+}
+
+double ParticleFilter::getEstimatedScore()
+{
+    return score_;
+}
+
+double ParticleFilter::getEstimatedReward()
+{
+    return last_reward_;
 }
 
 int ParticleFilter::getMapWidth()

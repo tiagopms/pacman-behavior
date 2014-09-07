@@ -21,6 +21,8 @@ GameParticle::GameParticle()
     ros::ServiceClient initInfoClient = n_.serviceClient<pacman_interface::PacmanMapInfo>("pacman_initialize_map_layout");
     pacman_interface::PacmanMapInfo initInfo;
 
+    score_ = 0;
+
     ros::service::waitForService("pacman_initialize_map_layout", -1);
 
     if (initInfoClient.call(initInfo))
@@ -231,6 +233,11 @@ std::vector< std::vector<GameParticle::MapElements> > GameParticle::getMap()
     return map_;
 }
 
+int GameParticle::getScore()
+{
+    return score_;
+}
+
 std::vector< std::pair< float, std::pair<int, int> > > GameParticle::getNextPositionsWithProbabilities(int x, int y, pacman_interface::PacmanAction action)
 {
     std::vector< std::pair< float, std::pair<int, int> > > legal_next_positions_with_probabilities;
@@ -287,6 +294,11 @@ void GameParticle::movePacman(pacman_interface::PacmanAction action)
             pacman_pose_.position.x = it->second.first;
             pacman_pose_.position.y = it->second.second;
 
+            // if food, increase score
+            if(map_[it->second.second][it->second.first] == FOOD)
+            {
+                score_ += 10;
+            }
             // if big food, start white ghosts time
             if(map_[it->second.second][it->second.first] == BIG_FOOD)
             {
@@ -334,6 +346,7 @@ void GameParticle::moveGhosts()
                 {
                     *it = *spawn_pose_it;
                     *white_it = 0;
+                    score_ += 500;
                 }
 
                 if(random_number_of_moves > util::CHANCE_OF_WHITE_GHOST_ONE_MOVE)
@@ -345,6 +358,7 @@ void GameParticle::moveGhosts()
                     {
                         *it = *spawn_pose_it;
                         *white_it = 0;
+                        score_ += 500;
                     }
                 }
             }
@@ -355,9 +369,20 @@ void GameParticle::moveGhosts()
             {
                 random_number_of_moves -= util::CHANCE_OF_GHOST_STOP;
                 moveGhost(it);
+                // if kileed, drop score
+                if( ( it->position.x == pacman_pose_.position.x ) && ( it->position.y == pacman_pose_.position.y ) )
+                {
+                    score_ -= 1000;
+                }
+
                 if(random_number_of_moves > util::CHANCE_OF_GHOST_ONE_MOVE)
                 {   
                     moveGhost(it);
+                    // if kileed, drop score
+                    if( ( it->position.x == pacman_pose_.position.x ) && ( it->position.y == pacman_pose_.position.y ) )
+                    {
+                        score_ -= 1000;
+                    }
                 }
             }
         }
@@ -389,6 +414,8 @@ void GameParticle::move(pacman_interface::PacmanAction action)
             (*it)--;
         }
     }
+
+    score_--;
 
     moveGhosts();
     movePacman(action);
