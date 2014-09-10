@@ -15,9 +15,11 @@ class QLearning
 
     std::vector<double> weights_;
     std::vector<double> features_;
+    std::vector<double> old_features_;
 
     double old_q_value_;
     double new_q_value_;
+    double old_behavior_;
     double behavior_;
     std::vector<double> q_values_;
 

@@ -25,14 +25,14 @@ int main(int argc, char **argv)
         q_learning.updateFeatures(&particle_filter);
         double reward = particle_filter.getEstimatedReward();
         q_learning.updateWeights(reward);
-       // q_learning.getBehavior();
+        int behavior = q_learning.getBehavior();
         //particle_filter.printMostProbableMap();
         //particle_filter.printGhostParticles(0);
         //particle_filter.printGhostParticles(1);
         //particle_filter.printPacmanParticles();
 
         pacman_interface::PacmanAction action;
-        action = pacman_agent.sendAction(&particle_filter);
+        action = pacman_agent.sendAction(&particle_filter, behavior);
 
         particle_filter.estimateMovement(action);
         ROS_INFO_STREAM("Loop " << loop_count);

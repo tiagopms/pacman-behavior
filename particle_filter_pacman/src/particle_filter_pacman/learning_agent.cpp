@@ -17,30 +17,35 @@ LearningAgent::LearningAgent()
     ROS_DEBUG("Learning Agent initialized");
 }
 
-pacman_interface::PacmanAction LearningAgent::sendAction(ParticleFilter *particle_filter)
+pacman_interface::PacmanAction LearningAgent::sendAction(ParticleFilter *particle_filter, int behavior)
 {
     pacman_interface::PacmanAction action;
-    int behavior = RUN;
 
     switch (behavior)
     {
         case STOP:
             action = getStopAction();
+            ROS_INFO_STREAM("Stop behavior");
             break;
         case EAT:
             action = getEatAction(particle_filter);
+            ROS_INFO_STREAM("Eat behavior");
             break;
         case EAT_BIG_FOOD:
             action = getEatBigFoodAction(particle_filter);
+            ROS_INFO_STREAM("Eat big food behavior");
             break;
         case RUN:
             action = getRunAction(particle_filter);
+            ROS_INFO_STREAM("Run behavior");
             break;
         case HUNT:
             action = getHuntAction(particle_filter);
+            ROS_INFO_STREAM("Hunt behavior");
             break;
         default:
             action.action = action.STOP;
+            ROS_ERROR_STREAM("Unknown default behavior");
             break;
     }
 

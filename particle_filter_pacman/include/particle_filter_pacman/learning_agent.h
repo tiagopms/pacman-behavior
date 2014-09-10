@@ -18,6 +18,6 @@ class LearningAgent : public PacmanAgent
 
   public:
     LearningAgent();
-    pacman_interface::PacmanAction sendAction(ParticleFilter *particle_filter);
+    pacman_interface::PacmanAction sendAction(ParticleFilter *particle_filter, int behavior);
     std::string getAgentName();
 };
