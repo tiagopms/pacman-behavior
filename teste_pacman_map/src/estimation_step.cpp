@@ -8,7 +8,7 @@
 #include "pacman_interface/AgentPose.h"
 #include "geometry_msgs/Pose.h"
 
-static float SD_PACMAN_MEASUREMENT = 5.0;
+static float SD_PACMAN_MEASUREMENT = 1.0;
 static float SD_GHOST_DIST_MEASUREMENT = 1.0;
 
 // TODO: Add food probabilities to observe and predict pacman movement
@@ -83,6 +83,7 @@ void observeGhost(NewGameInfo *game_info, int measurement_x_dist, int measuremen
 
 void observePacman(NewGameInfo *game_info, int measurement_x, int measurement_y)
 {
+    ROS_INFO_STREAM("Observe");
     int width = game_info->getWidth();
     int height = game_info->getHeight();
 
@@ -127,6 +128,8 @@ void observePacman(NewGameInfo *game_info, int measurement_x, int measurement_y)
     }
 
     game_info->setPacmanPoseMap(pacman_new_pose_map);
+    
+    game_info->printPacmanOrGhostPose(true, 0);
 }
 
 void predictGhostMove(NewGameInfo *game_info, int ghost_index)
@@ -167,6 +170,7 @@ void predictGhostMove(NewGameInfo *game_info, int ghost_index)
 
 void predictPacmanMove(NewGameInfo *game_info, pacman_interface::PacmanAction action)
 {
+    ROS_INFO_STREAM("Predict " << (int) action.action);
     int width = game_info->getWidth();
     int height = game_info->getHeight();
 
@@ -199,6 +203,8 @@ void predictPacmanMove(NewGameInfo *game_info, pacman_interface::PacmanAction ac
         }
     }
     game_info->setPacmanPoseMap(pacman_new_pose_map);
+
+    game_info->printPacmanOrGhostPose(true, 0);
 }
 
 void updateGhosts(const pacman_interface::AgentPose::ConstPtr& msg, NewGameInfo *game_info)
@@ -248,12 +254,16 @@ int main(int argc, char **argv)
     game_info.printPacmanOrGhostPose( true, 0);
 //    game_info.printPacmanOrGhostPose( false, 0);
 
-    ros::Subscriber estimate_action_subscriber = n.subscribe<pacman_interface::AgentAction>("/pacman_interface/agent_action", 1000, boost::bind(&updateAgents, _1, &game_info));
-    ros::Subscriber ghost_distance_subscriber = n.subscribe<pacman_interface::AgentPose>("/pacman_interface/ghost_distance", 1000, boost::bind(updateGhosts, _1, &game_info));
-    ros::Subscriber pacman_pose_subscriber = n.subscribe<geometry_msgs::Pose>("/pacman_interface/pacman_pose", 1000, boost::bind(updatePacman, _1, &game_info));
+    ros::Subscriber estimate_action_subscriber = n.subscribe<pacman_interface::AgentAction>
+                        ("/pacman_interface/agent_action", 1000, boost::bind(&updateAgents, _1, &game_info));
+    ros::Subscriber ghost_distance_subscriber = n.subscribe<pacman_interface::AgentPose>
+                        ("/pacman_interface/ghost_distance", 1000, boost::bind(updateGhosts, _1, &game_info));
+    ros::Subscriber pacman_pose_subscriber = n.subscribe<geometry_msgs::Pose>
+                        ("/pacman_interface/pacman_pose", 1000, boost::bind(updatePacman, _1, &game_info));
 
     while (ros::ok())
     {
+    //game_info.printPacmanOrGhostPose(true, 0);
         ros::spinOnce();
         loop_rate.sleep();
     }

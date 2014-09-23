@@ -20,6 +20,8 @@ namespace util
     extern int MAX_DISTANCE;
 
     geometry_msgs::Pose actionToMovement(int action);
+
+    double getProbOfMeasurementGivenPosition(int pos_x, int pos_y, int measurement_x, int measurement_y, double standard_deviation);
 }
 
 #endif // UTIL_FUNCTIONS_H
