@@ -1,6 +1,6 @@
 namespace util
 {
-    extern const double INFINITE;
+    extern const double DOUBLE_INFINITE;
     extern const float PRINT_FOOD_MINIMUM;
 
     extern const int NUMBER_OF_PARTICLES;

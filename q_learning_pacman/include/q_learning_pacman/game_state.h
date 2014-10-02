@@ -32,6 +32,8 @@ class GameState
 
     std::vector< std::vector<float> > getPacmanPoseMap();
     std::vector< std::vector<float> > getGhostPoseMap(int ghost_index);
+    std::vector< std::vector< std::vector<float> > > getGhostsPoseMaps();
+    std::vector< std::vector<float> > getFoodMap();
     void setPacmanPoseMap(std::vector< std::vector<float> > pacman_pose_map);
     void setGhostPoseMap(std::vector< std::vector<float> > ghost_pose_map, int ghost_index);
 

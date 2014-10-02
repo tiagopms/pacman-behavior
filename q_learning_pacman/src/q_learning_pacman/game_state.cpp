@@ -357,6 +357,16 @@ std::vector< std::vector<float> > GameState::getGhostPoseMap(int ghost_index)
     return ghosts_poses_map_[ghost_index];
 }
 
+std::vector< std::vector< std::vector<float> > > GameState::getGhostsPoseMaps()
+{
+    return ghosts_poses_map_;
+}
+
+std::vector< std::vector<float> > GameState::getFoodMap()
+{
+    return foods_map_;
+}
+
 void GameState::setGhostPoseMap(std::vector< std::vector<float> > ghost_pose_map, int ghost_index)
 {
     ghosts_poses_map_[ghost_index] = ghost_pose_map;

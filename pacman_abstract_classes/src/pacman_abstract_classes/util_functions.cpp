@@ -31,6 +31,7 @@ geometry_msgs::Pose util::sumPoses(geometry_msgs::Pose pose, geometry_msgs::Pose
 }
 
 int util::MAX_DISTANCE = 10000000;
+int util::INFINITE = 10000000;
 
 geometry_msgs::Pose util::actionToMovement(int action)
 {

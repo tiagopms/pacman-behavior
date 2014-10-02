@@ -1,6 +1,7 @@
 #include "particle_filter_pacman/q_learning_simple.h"
 
 #include "particle_filter_pacman/util_constants.h"
+#include "pacman_abstract_classes/util_functions.h"
 
 int QLearning::NUM_FEATURES = 2;
 

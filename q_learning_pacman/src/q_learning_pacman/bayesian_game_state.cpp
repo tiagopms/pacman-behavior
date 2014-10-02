@@ -4,23 +4,20 @@
 
 BayesianGameState::BayesianGameState()
 {
-    ROS_INFO_STREAM("Initialize bayesian game state");
     pacman_pose_subscriber_ = n_.subscribe<geometry_msgs::Pose>
                     ("/pacman/pacman_pose", 1000, boost::bind(&BayesianGameState::updatePacman, this, _1));
     ghost_distance_subscriber_ = n_.subscribe<pacman_msgs::AgentPose>
                     ("/pacman/ghost_distance", 1000, boost::bind(&BayesianGameState::updateGhosts, this, _1));
 
-    ROS_INFO_STREAM("Bayesian init " << ghosts_poses_map_.size());
+    ROS_DEBUG_STREAM("Bayesian game state initialized");
 }
 
 BayesianGameState::~BayesianGameState()
 {
-        ROS_ERROR_STREAM("Bayesian game state being destroyed");
-
         pacman_pose_subscriber_.shutdown();
         ghost_distance_subscriber_.shutdown();
 
-        ROS_ERROR_STREAM("Bayesian game state destroyed");
+        ROS_DEBUG_STREAM("Bayesian game state destroyed");
 }
 
 void BayesianGameState::updateGhosts(const pacman_msgs::AgentPose::ConstPtr& msg)
@@ -95,10 +92,10 @@ void BayesianGameState::observePacman(int measurement_x, int measurement_y)
 void BayesianGameState::observeGhost(int measurement_x_dist, int measurement_y_dist, int ghost_index)
 {
     ROS_INFO_STREAM("Observe ghost " << ghost_index);
-    if(ghost_index == 1) {
+    /*if(ghost_index == 1) {
         ROS_INFO_STREAM("pos x " << measurement_x_dist << " y " << measurement_y_dist);
         printPacmanOrGhostPose(false, ghost_index);
-    }
+    }*/
     double SD_GHOST_DIST_MEASUREMENT = 1.0;
 
     std::vector< std::vector<float> > ghost_pose_map = ghosts_poses_map_[ghost_index];
@@ -150,8 +147,8 @@ void BayesianGameState::observeGhost(int measurement_x_dist, int measurement_y_d
     ghosts_poses_map_[ghost_index].clear();
     ghosts_poses_map_[ghost_index] = ghost_new_pose_map;
 
-    if(ghost_index == 1)
-        printPacmanOrGhostPose(false, ghost_index);
+    //if(ghost_index == 1)
+    //    printPacmanOrGhostPose(false, ghost_index);
 }
 
 void BayesianGameState::predictPacmanMove(pacman_msgs::PacmanAction action)
@@ -229,4 +226,18 @@ void BayesianGameState::predictGhostMove(int ghost_index)
 
     ghosts_poses_map_[ghost_index].clear();
     ghosts_poses_map_[ghost_index] = ghost_new_pose_map;
+}
+
+void BayesianGameState::predictGhostsMoves()
+{
+    for(int i = 0 ; i < num_ghosts_ ; ++i)
+    {
+        predictGhostMove(i);
+    }
+}
+
+void BayesianGameState::predictAgentsMoves(pacman_msgs::PacmanAction action)
+{
+    predictPacmanMove(action);
+    predictGhostsMoves();
 }

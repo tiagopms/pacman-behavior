@@ -20,7 +20,7 @@ class PacmanGame():
         self.r = rospy.Rate(10) # 10hz
 
         # game attributes
-        a=["-p", "RosWaitAgent", "-l", "smallClassic", "-k", "4"]
+        a=["-p", "RosWaitServiceAgent", "-l", "smallClassic", "-k", "4"]
         self.args = pacman.readCommand(a)
 
         # service and variables to start new game and end it
@@ -65,6 +65,7 @@ class PacmanGame():
                     self.args['numTraining'] = 1
 
                 # run game and get if win or lose
+                self.args['pacman'].startEpisode()
                 games = pacman.runGames(**self.args)
                 single_game = games.pop()
                 is_win = single_game.state.isWin()

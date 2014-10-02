@@ -28,6 +28,8 @@ class BayesianGameState : public GameState
     
     void predictPacmanMove(pacman_msgs::PacmanAction action);
     void predictGhostMove(int ghost_index);
+    void predictGhostsMoves();
+    void predictAgentsMoves(pacman_msgs::PacmanAction action);
 };
 
 #endif // BAYESIAN_GAME_STATE_H

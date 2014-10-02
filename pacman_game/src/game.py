@@ -19,7 +19,7 @@ from geometry_msgs.msg import Pose
 # Parts worth reading #
 #######################
 
-class Agent:
+class Agent(object):
     """
     An agent must define a getAction method, but may also define the
     following methods which will be called if they exist:

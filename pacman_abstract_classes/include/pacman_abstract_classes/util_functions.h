@@ -18,6 +18,7 @@ namespace util
     geometry_msgs::Pose sumPoses(geometry_msgs::Pose pose, geometry_msgs::Pose pose_diff);
 
     extern int MAX_DISTANCE;
+    extern int INFINITE;
 
     geometry_msgs::Pose actionToMovement(int action);
 
