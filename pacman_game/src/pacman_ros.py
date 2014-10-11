@@ -63,6 +63,8 @@ class PacmanGame():
                 #if not show gui, set game as in training mode
                 if not self.show_gui:
                     self.args['numTraining'] = 1
+                else:
+                    self.args['numTraining'] = 0
 
                 # run game and get if win or lose
                 self.args['pacman'].startEpisode()

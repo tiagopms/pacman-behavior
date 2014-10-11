@@ -52,6 +52,29 @@ geometry_msgs::Pose util::actionToMovement(int action)
     return actionToMovement[action];
 }
 
+geometry_msgs::Pose util::move(geometry_msgs::Pose agent_pose, int action)
+{
+    static std::map< int, geometry_msgs::Pose > actionToMovement;
+    static bool initialized = false;
+
+    if(!initialized)
+    {
+        actionToMovement[pacman_interface::PacmanAction::NORTH] = createPose( 0, 1);
+        actionToMovement[pacman_interface::PacmanAction::SOUTH] = createPose( 0,-1);
+        actionToMovement[pacman_interface::PacmanAction::EAST] = createPose( 1, 0);
+        actionToMovement[pacman_interface::PacmanAction::WEST] = createPose(-1, 0);
+        actionToMovement[pacman_interface::PacmanAction::STOP] = createPose( 0, 0);
+
+        initialized = true;
+    }
+
+    geometry_msgs::Pose new_pose;
+    new_pose.position.x = agent_pose.position.x + actionToMovement[action].position.x;
+    new_pose.position.y = agent_pose.position.y + actionToMovement[action].position.y;
+
+    return new_pose;
+}
+
 double util::getProbOfMeasurementGivenPosition(int pos_x, int pos_y, int measurement_x, int measurement_y, double standard_deviation)
 {
     // e^( (-1/2) * ( ( x - mean ) / std_deviation ) ^ 2 )

@@ -3,7 +3,7 @@
 
 #include "q_learning_pacman/game_state.h"
 
-#include "pacman_msgs/AgentPose.h"
+#include "geometry_msgs/Pose.h"
 #include "pacman_msgs/AgentPoseService.h"
 
 /**
@@ -11,24 +11,19 @@
  * 
  * @author Tiago Pimentel Martins da Silva
  */
-class BayesianGameState : public GameState
+class DeterministicGameState : public GameState
 {
   protected:
     void observeGhost(int measurement_x_dist, int measurement_y_dist, int ghost_index);
     void observePacman(int measurement_x, int measurement_y);
     bool observeAgent(pacman_msgs::AgentPoseService::Request &req, pacman_msgs::AgentPoseService::Response &res);
 
-    ros::Subscriber pacman_pose_subscriber_;
-    ros::Subscriber ghost_distance_subscriber_;
     ros::ServiceServer pacman_observer_service_;
     ros::ServiceServer ghost_distance_observer_service_;
 
-    void updatePacman(const geometry_msgs::Pose::ConstPtr& msg);
-    void updateGhosts(const pacman_msgs::AgentPose::ConstPtr& msg);
-
   public:
-    BayesianGameState();
-    ~BayesianGameState();
+    DeterministicGameState();
+    ~DeterministicGameState();
     
     void predictPacmanMove(pacman_msgs::PacmanAction action);
     void predictGhostMove(int ghost_index);

@@ -13,6 +13,7 @@ import traceback
 import rospy
 from pacman_msgs.msg import AgentAction
 from pacman_msgs.msg import AgentPose
+from pacman_msgs.srv import AgentPoseService
 from geometry_msgs.msg import Pose
 
 #######################
@@ -522,6 +523,10 @@ class Game:
         self.agentActionPublisher = rospy.Publisher('/pacman/agent_action', AgentAction, queue_size=10)
         self.ghostDistancePublisher = rospy.Publisher('/pacman/ghost_distance', AgentPose, queue_size=10)
         self.pacmanPosePublisher = rospy.Publisher('/pacman/pacman_pose', Pose, queue_size=10)
+
+        # declare this as a client of services in /pacman/ topics
+        self.pacman_pose_client = rospy.ServiceProxy('/pacman/pacman_pose', AgentPoseService)
+        self.ghost_distance_client = rospy.ServiceProxy('/pacman/ghost_distance', AgentPoseService)
         
 
     def getProgress(self):
@@ -705,6 +710,12 @@ class Game:
                 pacman_pose.position.y = pacmanPosition[1]
 
                 self.pacmanPosePublisher.publish(pacman_pose)
+
+                rospy.wait_for_service('/pacman/pacman_pose')
+                try:
+                    self.pacman_pose_client(agent=0, pose=pacman_pose)
+                except rospy.ServiceException, e:
+                    print "Service call failed: %s"%e
             else:
                 ghostPosition = self.state.getGhostPositions()[agentIndex - 1]
                 pacmanPosition = self.state.getPacmanPosition()
@@ -716,8 +727,11 @@ class Game:
 
                 self.ghostDistancePublisher.publish(ghost_distance)
 
-
-          #  import ipdb; ipdb.set_trace()
+                rospy.wait_for_service('/pacman/ghost_distance')
+                try:
+                    self.ghost_distance_client(agent=agentIndex, pose=ghost_distance.pose)
+                except rospy.ServiceException, e:
+                    print "Service call failed: %s"%e
 
             # Change the display
             self.display.update( self.state.data )

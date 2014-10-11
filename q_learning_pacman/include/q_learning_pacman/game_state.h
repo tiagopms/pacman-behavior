@@ -4,6 +4,7 @@
 #include "ros/ros.h"
 #include <vector>
 
+#include "geometry_msgs/Pose.h"
 #include "pacman_msgs/PacmanAction.h"
 
 /**
@@ -19,6 +20,7 @@ class GameState
     typedef enum {EMPTY, FOOD, BIG_FOOD, WALL, ERROR} MapElements;
     
     void printMap();
+    void printDeterministicMap();
 
     int getHeight();
     int getWidth();
@@ -30,6 +32,9 @@ class GameState
 
     int getNumberOfGhosts();
 
+    geometry_msgs::Pose getPacmanPose();
+    geometry_msgs::Pose getGhostPose(int ghost_index);
+    std::vector< geometry_msgs::Pose > getGhostsPoses();
     std::vector< std::vector<float> > getPacmanPoseMap();
     std::vector< std::vector<float> > getGhostPoseMap(int ghost_index);
     std::vector< std::vector< std::vector<float> > > getGhostsPoseMaps();
@@ -49,9 +54,14 @@ class GameState
     std::vector< std::vector<MapElements> > map_;
 
     int num_ghosts_;
+    // probabilistic variables
     std::vector< std::vector<float> > pacman_pose_map_;
     std::vector< std::vector< std::vector<float> > > ghosts_poses_map_;
     std::vector< std::vector<float> > foods_map_;
+
+    // deterministic variables
+    geometry_msgs::Pose pacman_pose_;
+    std::vector< geometry_msgs::Pose > ghosts_poses_;
 };
 
 #endif // GAME_STATE_H

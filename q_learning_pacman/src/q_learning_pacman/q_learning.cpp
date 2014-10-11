@@ -81,7 +81,7 @@ std::vector<double> QLearning::getFeatures(BayesianGameState *game_state)
         }
     }
 
-    ROS_INFO_STREAM("closest distance is " << closest_distance);
+    //ROS_INFO_STREAM("closest distance is " << closest_distance);
 
     if(closest_distance == 0)
     {
@@ -114,7 +114,7 @@ double QLearning::getQValue(BayesianGameState *game_state, int behavior)
         }
         //ROS_INFO_STREAM(" - - - q value " << q_value << " features_ " << *features_it << " weight " << *weights_it);
     }
-    ROS_INFO_STREAM(" - - q value " << q_value << " for behavior " << behavior);
+    //ROS_INFO_STREAM(" - - q value " << q_value << " for behavior " << behavior);
 
     return q_value;
 }
@@ -128,7 +128,7 @@ std::pair<int, double> QLearning::getMaxQValue(BayesianGameState *game_state)
     for(int i = 0; i < NUM_BEHAVIORS ; ++i)
     {
         q_value = getQValue(game_state, i);
-        ROS_INFO_STREAM(" - - q value " << q_value);
+    //    ROS_INFO_STREAM(" - - q value " << q_value);
         if(q_value > max_q_value)
         {
             max_q_value = q_value;
@@ -154,7 +154,7 @@ void QLearning::updateWeights(BayesianGameState *new_game_state, int reward)
 
     // error = reward + discount_factor * q_value(new_state) - q_value(old_state)
     double error = reward + discount_factor_ * new_q_value_ - old_q_value_;
-    ROS_INFO_STREAM(" - error " << error);
+    //ROS_INFO_STREAM(" - error " << error);
 
     std::vector<double>::iterator weights_it = weights_.begin();
     std::vector<double>::iterator features_it = old_features_.begin();
@@ -162,8 +162,8 @@ void QLearning::updateWeights(BayesianGameState *new_game_state, int reward)
     for(int i = 0; features_it != old_features_.end() ; ++i, ++features_it, ++weights_it)
     {
         *weights_it = *weights_it + learning_rate_ * error * *features_it;
-        ROS_INFO_STREAM(" - feature " << *features_it);
-        ROS_INFO_STREAM(" - weight " << *weights_it);
+    //    ROS_INFO_STREAM(" - feature " << *features_it);
+    //    ROS_INFO_STREAM(" - weight " << *weights_it);
     }
 }
 

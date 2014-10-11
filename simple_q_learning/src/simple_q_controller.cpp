@@ -6,28 +6,24 @@
 #include "pacman_msgs/PacmanGetAction.h"
 #include "pacman_msgs/RewardService.h"
 
-#include "q_learning_pacman/bayesian_game_state.h"
-#include "q_learning_pacman/behavior_agent.h"
-#include "q_learning_pacman/q_learning.h"
+#include "simple_q_learning/simple_game_state.h"
+#include "simple_q_learning/simple_behavior_agent.h"
+#include "simple_q_learning/simple_q_learning.h"
 
-int NUMBER_OF_GAMES = 7;
+int NUMBER_OF_GAMES = 60;
 int NUMBER_OF_TRAININGS = 0;
 
 bool endGame(pacman_msgs::EndGame::Request &req, pacman_msgs::EndGame::Response &res, 
-        ros::ServiceClient *start_game_client, BayesianGameState **game_state)
+        ros::ServiceClient *start_game_client, DeterministicGameState **game_state)
 {
     // count number of games
     static int game_count = 0;
     game_count++;
 
     if (req.win)
-    {
         ROS_INFO_STREAM("Won game " << game_count);
-    }
     else
-    {
         ROS_WARN_STREAM("Lost game " << game_count);
-    }
 
     if (game_count < NUMBER_OF_GAMES)
     {
@@ -43,7 +39,7 @@ bool endGame(pacman_msgs::EndGame::Request &req, pacman_msgs::EndGame::Response 
             {
                 // new game started
                 delete *game_state;
-                *game_state = new BayesianGameState();
+                *game_state = new DeterministicGameState();
                 res.game_restarted = true;
 
                 ROS_INFO("New game started");
@@ -54,6 +50,8 @@ bool endGame(pacman_msgs::EndGame::Request &req, pacman_msgs::EndGame::Response 
         else // if problem => print error
             ROS_ERROR("Failed to call service StartGame");
     }
+    else
+        ROS_INFO_STREAM("Game finished, type ctrl+c to exit");
 
     // game not restarted
     res.game_restarted = false;
@@ -61,16 +59,13 @@ bool endGame(pacman_msgs::EndGame::Request &req, pacman_msgs::EndGame::Response 
 }
 
 bool getAction(pacman_msgs::PacmanGetAction::Request &req, pacman_msgs::PacmanGetAction::Response &res, 
-                    BayesianGameState **game_state, BehaviorAgent pacman, QLearning *q_learning)
+                    DeterministicGameState **game_state, SimplePacmanAgent pacman, SimpleQLearning *q_learning)
 {
-    ROS_INFO_STREAM("Sending action");
+    ROS_DEBUG_STREAM("Sending action");
 
     // predict next game state
     int behavior = q_learning->getBehavior(*game_state);
-    //(*game_state)->printPacmanOrGhostPose(false, 0);
-    //(*game_state)->printPacmanOrGhostPose(false, 1);
-    //(*game_state)->printPacmanOrGhostPose(true, 0);
-    pacman_msgs::PacmanAction action = pacman.getAction(*game_state, 1);
+    pacman_msgs::PacmanAction action = pacman.getAction(*game_state, behavior);
     (*game_state)->predictAgentsMoves(action);
 
     // game not restarted
@@ -79,10 +74,10 @@ bool getAction(pacman_msgs::PacmanGetAction::Request &req, pacman_msgs::PacmanGe
 }
 
 bool receiveReward(pacman_msgs::RewardService::Request &req, pacman_msgs::RewardService::Response &res, 
-                    BayesianGameState **game_state, QLearning *q_learning)
+                    DeterministicGameState **game_state, SimpleQLearning *q_learning)
 {
     int reward = (int) req.reward;
-    ROS_INFO_STREAM("Received reward " << reward);
+    ROS_DEBUG_STREAM("Received reward " << reward);
     q_learning->updateWeights(*game_state, reward);
 
     return true;
@@ -95,9 +90,9 @@ int main(int argc, char **argv)
     ros::NodeHandle n;
     ros::Rate loop_rate(1);
 
-    BayesianGameState *game_state = new BayesianGameState();
-    BehaviorAgent pacman;
-    QLearning *q_learning = new QLearning;
+    DeterministicGameState *game_state = new DeterministicGameState();
+    SimplePacmanAgent pacman;
+    SimpleQLearning *q_learning = new SimpleQLearning;
 
     ros::Publisher chatter_pub = n.advertise<pacman_msgs::PacmanAction>("/pacman/pacman_action", 1000);
     ros::ServiceServer get_action_service = n.advertiseService<pacman_msgs::PacmanGetAction::Request, pacman_msgs::PacmanGetAction::Response>
@@ -140,7 +135,3 @@ int main(int argc, char **argv)
     // shutdown ros node
     ros::shutdown();
 }
-
-// TODO: adicionar dois passos ou 0 para fantasmas
-// TODO: adicionar dois passos e aumentar 0 para pacman
-// TODO: update food probabilty

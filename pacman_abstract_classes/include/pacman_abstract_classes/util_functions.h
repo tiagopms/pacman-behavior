@@ -21,6 +21,7 @@ namespace util
     extern int INFINITE;
 
     geometry_msgs::Pose actionToMovement(int action);
+    geometry_msgs::Pose move(geometry_msgs::Pose agent_pose, int action);
 
     double getProbOfMeasurementGivenPosition(int pos_x, int pos_y, int measurement_x, int measurement_y, double standard_deviation);
 }

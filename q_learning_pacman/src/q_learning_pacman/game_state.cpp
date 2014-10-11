@@ -2,10 +2,11 @@
 
 #include <sstream>
 
-#include "geometry_msgs/Pose.h"
 #include "pacman_msgs/PacmanMapInfo.h"
 
 int GameState::MAX_DISTANCE = 1000000;
+
+// TODO: check if set map_ to food instead of option is ok
 
 GameState::GameState()
 {
@@ -45,7 +46,7 @@ GameState::GameState()
                         map_line.push_back(EMPTY);
                     else if (map_msg[i * width_ + j] == map_layout.FOOD)
                     {
-                        map_line.push_back(EMPTY);
+                        map_line.push_back(FOOD);
                         has_food = 1.0;
                     }
                     else if (map_msg[i * width_ + j] == map_layout.BIG_FOOD)
@@ -54,9 +55,15 @@ GameState::GameState()
                         map_line.push_back(WALL);
                     else if (map_msg[i * width_ + j] == map_layout.GHOST)
                     {
-                        ROS_INFO_STREAM("Ghsot in " << i << " and " << j);
+                        ROS_DEBUG_STREAM("Ghsot in " << i << " and " << j);
                         if (num_initialized_ghost < num_ghosts_)
                         {
+                            // deterministic variable
+                            geometry_msgs::Pose new_pose;
+                            new_pose.position.x = j;
+                            new_pose.position.y = i;
+                            ghosts_poses_.push_back(new_pose);
+                            // probabilistic variable
                             ghosts_poses_map_[num_initialized_ghost][i][j] = 1.0;
 
                             num_initialized_ghost++;
@@ -65,6 +72,11 @@ GameState::GameState()
                     }
                     else if (map_msg[i * width_ + j] == map_layout.PACMAN)
                     {
+                        // deterministic variable
+                        pacman_pose_.position.x = j;
+                        pacman_pose_.position.y = i;
+
+                        // probabilistic variable
                         pacman_pose_map_[i][j] = 1.0;
 
                         map_line.push_back(EMPTY);
@@ -86,19 +98,19 @@ GameState::GameState()
             num_ghosts_ = num_initialized_ghost;
         }
 
-        ROS_INFO_STREAM("width " << width_ << " height " << height_ << " num ghosts " << num_ghosts_);
+        ROS_DEBUG_STREAM("Map width " << width_ << " height " << height_ << " num ghosts " << num_ghosts_);
     }
     else
     {
         ROS_ERROR_STREAM("Failed to call service /pacman/initialize_map_layout");
     }
 
-    ROS_INFO_STREAM("Initialize ghost size " << ghosts_poses_map_.size());
+    ROS_DEBUG_STREAM("Initialize ghost size " << ghosts_poses_map_.size());
 }
 
 GameState::~GameState()
 {
-        ROS_ERROR_STREAM("Game state being destroyed");
+        ROS_DEBUG_STREAM("Game state being destroyed");
 
         for(std::vector< std::vector<MapElements> >::reverse_iterator it = map_.rbegin(); it != map_.rend(); ++it) {
             /* std::cout << *it; ... */
@@ -130,13 +142,54 @@ GameState::~GameState()
         }
         foods_map_.clear();
 
-        ROS_ERROR_STREAM("Game state destroyed");
+        ROS_DEBUG_STREAM("Game state destroyed");
+}
+
+void GameState::printDeterministicMap()
+{
+    geometry_msgs::Pose pacman_pose = pacman_pose_;
+    std::vector< geometry_msgs::Pose > ghosts_poses = ghosts_poses_;
+
+    for (int i = height_ -1 ; i > -1  ; i--) {
+        std::ostringstream foo;
+        for (int j = 0 ; j < width_ ; j++) {
+                bool is_ghost = false;
+                for(int ghost_counter = 0; ghost_counter < num_ghosts_ ; ghost_counter++)
+                {
+                    if (ghosts_poses[ghost_counter].position.x == j && ghosts_poses[ghost_counter].position.y == i)
+                    {
+                        foo << 'G';
+                        is_ghost = true;
+                        break;
+                    }
+                }
+                if (is_ghost)
+                    continue;
+                else if (pacman_pose.position.x == j && pacman_pose.position.y == i)
+                    foo << 'P';
+                else if (map_[i][j] == FOOD)
+                {
+                    //foo << "\033[48;2;0;0;0m" << '.' << "\033[0m";
+                    foo << "\033[48;5;46m" << '.' << "\033[0m";
+                }
+                else if (map_[i][j] == BIG_FOOD)
+                    foo << 'B';
+                else if (map_[i][j] == WALL)
+                    foo << '#';
+                else if(map_[i][j] == EMPTY)
+                    foo << ' ';
+                else
+                    foo << 'E';
+        }
+        ROS_INFO_STREAM(foo.str());
+    }
+    ROS_INFO_STREAM("Sum: " << num_ghosts_ << std::endl);
 }
 
 void GameState::printMap()
 {
-    geometry_msgs::Pose pacman_pose;
-    std::vector< geometry_msgs::Pose > ghosts_poses(num_ghosts_, pacman_pose);
+    geometry_msgs::Pose pacman_pose = pacman_pose_;
+    std::vector< geometry_msgs::Pose > ghosts_poses = ghosts_poses_;
 
     for (int i = height_ -1 ; i > -1  ; i--) {
         std::ostringstream foo;
@@ -370,4 +423,19 @@ std::vector< std::vector<float> > GameState::getFoodMap()
 void GameState::setGhostPoseMap(std::vector< std::vector<float> > ghost_pose_map, int ghost_index)
 {
     ghosts_poses_map_[ghost_index] = ghost_pose_map;
+}
+
+geometry_msgs::Pose GameState::getPacmanPose()
+{
+    return pacman_pose_;
+}
+
+geometry_msgs::Pose GameState::getGhostPose(int ghost_index)
+{
+    return ghosts_poses_[ghost_index];
+}
+
+std::vector< geometry_msgs::Pose > GameState::getGhostsPoses()
+{
+    return ghosts_poses_;
 }
