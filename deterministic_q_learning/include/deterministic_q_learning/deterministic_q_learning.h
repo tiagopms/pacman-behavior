@@ -15,6 +15,7 @@ class DeterministicQLearning
 
     std::vector<double> weights_;
     std::vector<double> features_;
+    std::vector<double> temp_features_;
     std::vector<double> old_features_;
 
     double old_q_value_;
@@ -23,7 +24,9 @@ class DeterministicQLearning
     double behavior_;
     std::vector<double> q_values_;
 
-    std::vector<double> getFeatures(DeterministicGameState *game_state);
+    void saveTempFeatures();
+
+    std::vector<double> getFeatures(DeterministicGameState *game_state, int behavior);
     double getQValue(DeterministicGameState *game_state, int behavior);
 
   public:
@@ -31,5 +34,6 @@ class DeterministicQLearning
 
     std::pair<int, double> getMaxQValue(DeterministicGameState *game_state);
     void updateWeights(DeterministicGameState *new_game_state, int reward);
+    int getTrainingBehavior(DeterministicGameState *game_state);
     int getBehavior(DeterministicGameState *game_state);
 };

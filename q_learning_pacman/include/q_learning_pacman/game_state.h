@@ -26,6 +26,7 @@ class GameState
     int getWidth();
     MapElements getMapElement(int x, int y);
 
+    std::vector< pacman_msgs::PacmanAction > getLegalActions();
     std::vector< pacman_msgs::PacmanAction > getLegalActions(int x, int y);
     std::vector< std::pair<int, int> > getLegalNextPositions(int x, int y);
     std::vector< std::pair< float, std::pair<int, int> > > getNextPositionsForActionWithProbabilities(int x, int y, pacman_msgs::PacmanAction action);

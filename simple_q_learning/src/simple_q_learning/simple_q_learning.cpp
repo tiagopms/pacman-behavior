@@ -4,8 +4,8 @@
 int SimpleQLearning::NUM_BEHAVIORS = 5;
 int SimpleQLearning::NUM_FEATURES = 7;
 double SimpleQLearning::learning_rate_ = 0.2;
-double SimpleQLearning::discount_factor_ = 0.95;
-double SimpleQLearning::exploration_rate_ = 0.5;
+double SimpleQLearning::discount_factor_ = 0.8;
+double SimpleQLearning::exploration_rate_ = 0.05;
 int SimpleQLearning::num_training_ = 10;
 
 SimpleQLearning::SimpleQLearning()
@@ -96,14 +96,43 @@ int SimpleQLearning::getBehavior(DeterministicGameState *game_state)
     return behavior;
 }
 
+int SimpleQLearning::getTrainingBehavior(DeterministicGameState *game_state)
+{
+    double random = rand() / (float) RAND_MAX;
+    if (random < exploration_rate_) {
+        std::vector< pacman_msgs::PacmanAction > legalActions = game_state->getLegalActions();
+
+        int randomAction = rand() % legalActions.size();
+        int behavior = legalActions[randomAction].action;
+
+        old_q_value_ = getQValue(game_state, behavior);
+        saveTempFeatures();
+
+        return behavior;
+    }
+    else
+        return getBehavior(game_state);
+}
+
 void SimpleQLearning::updateWeights(DeterministicGameState *new_game_state, int reward)
 {
     old_features_ = features_;
-    std::pair<int, double> behavior_q_value_pair = getMaxQValue(new_game_state);
+    if (new_game_state->isFinished())
+    {
+        new_q_value_ = 0;
+    }
+    else
+    {
+        std::pair<int, double> behavior_q_value_pair = getMaxQValue(new_game_state);
+        new_q_value_ = behavior_q_value_pair.second;
+    }
 
     // error = reward + discount_factor * q_value(new_state) - q_value(old_state)
     double error = reward + discount_factor_ * new_q_value_ - old_q_value_;
-    //ROS_INFO_STREAM(" - error " << error);
+    /*ROS_INFO_STREAM(" - reward " << reward);
+    ROS_INFO_STREAM(" - old q value " << old_q_value_);
+    ROS_INFO_STREAM(" - new q value " << new_q_value_);
+    ROS_INFO_STREAM(" - error " << error);*/
 
     std::vector<double>::iterator weights_it = weights_.begin();
     std::vector<double>::iterator features_it = old_features_.begin();

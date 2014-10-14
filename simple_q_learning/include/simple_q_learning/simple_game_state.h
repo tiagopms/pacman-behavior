@@ -17,6 +17,7 @@ class DeterministicGameState : public GameState
     void observeGhost(int measurement_x_dist, int measurement_y_dist, int ghost_index);
     void observePacman(int measurement_x, int measurement_y);
     bool observeAgent(pacman_msgs::AgentPoseService::Request &req, pacman_msgs::AgentPoseService::Response &res);
+    bool is_finished_;
 
     ros::ServiceServer pacman_observer_service_;
     ros::ServiceServer ghost_distance_observer_service_;
@@ -38,6 +39,7 @@ class DeterministicGameState : public GameState
     // helper functions
     bool isActionLegal(int action);
     bool isActionLegal(pacman_msgs::PacmanAction action);
+    bool isFinished();
     float getClosestFoodDistance(pacman_msgs::PacmanAction action);
     bool eatsFood(pacman_msgs::PacmanAction action);
     int getClosestGhostDistance(pacman_msgs::PacmanAction action);

@@ -285,6 +285,11 @@ int GameState::getWidth()
     return width_;
 }
 
+std::vector< pacman_msgs::PacmanAction > GameState::getLegalActions()
+{
+    return getLegalActions(pacman_pose_.position.x, pacman_pose_.position.y);
+}
+
 std::vector< pacman_msgs::PacmanAction > GameState::getLegalActions(int x, int y)
 {
     std::vector< pacman_msgs::PacmanAction > legal_actions;

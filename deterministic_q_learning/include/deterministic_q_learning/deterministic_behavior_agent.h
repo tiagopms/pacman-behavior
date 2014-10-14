@@ -9,7 +9,12 @@ class DeterministicBehaviorAgent : public PacmanAgent
 {
   private:
     typedef enum {STOP, EAT, EAT_BIG_FOOD, RUN, HUNT} Behaviors;
+    static int NUMBER_OF_BEHAVIORS_;
 
+    pacman_msgs::PacmanAction getWestAction(DeterministicGameState *game_state);
+    pacman_msgs::PacmanAction getEastAction(DeterministicGameState *game_state);
+    pacman_msgs::PacmanAction getNorthAction(DeterministicGameState *game_state);
+    pacman_msgs::PacmanAction getSouthAction(DeterministicGameState *game_state);
     pacman_msgs::PacmanAction getHuntAction(DeterministicGameState *game_state);
     pacman_msgs::PacmanAction getRunAction(DeterministicGameState *game_state);
     pacman_msgs::PacmanAction getEatBigFoodAction(DeterministicGameState *game_state);

@@ -702,6 +702,7 @@ class Game:
             agentAction.action = self.moveToAction[action]
             self.agentActionPublisher.publish(agentAction)
 
+            is_finished = self.state.isWin() or self.state.isLose()
             if agentIndex == 0:
                 pacmanPosition = self.state.getPacmanPosition()
 
@@ -711,11 +712,19 @@ class Game:
 
                 self.pacmanPosePublisher.publish(pacman_pose)
 
+                #get start time
+                import datetime
+                start_time = datetime.datetime.now()
+
                 rospy.wait_for_service('/pacman/pacman_pose')
                 try:
-                    self.pacman_pose_client(agent=0, pose=pacman_pose)
+                    self.pacman_pose_client(agent=0, pose=pacman_pose, is_finished=is_finished)
                 except rospy.ServiceException, e:
                     print "Service call failed: %s"%e
+
+                # print time diff
+                end_time = datetime.datetime.now()
+                print 'pacman_pose time: \t', (end_time - start_time)
             else:
                 ghostPosition = self.state.getGhostPositions()[agentIndex - 1]
                 pacmanPosition = self.state.getPacmanPosition()
@@ -726,12 +735,20 @@ class Game:
                 ghost_distance.pose.position.y = ( ghostPosition[1] - pacmanPosition[1] )
 
                 self.ghostDistancePublisher.publish(ghost_distance)
+                
+                #get start time
+                import datetime
+                start_time = datetime.datetime.now()
 
                 rospy.wait_for_service('/pacman/ghost_distance')
                 try:
-                    self.ghost_distance_client(agent=agentIndex, pose=ghost_distance.pose)
+                    self.ghost_distance_client(agent=agentIndex, pose=ghost_distance.pose, is_finished=is_finished)
                 except rospy.ServiceException, e:
                     print "Service call failed: %s"%e
+
+                # print time diff
+                end_time = datetime.datetime.now()
+                print 'ghost_distance time: \t', (end_time - start_time)
 
             # Change the display
             self.display.update( self.state.data )

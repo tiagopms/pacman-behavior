@@ -10,8 +10,9 @@
 #include "simple_q_learning/simple_behavior_agent.h"
 #include "simple_q_learning/simple_q_learning.h"
 
-int NUMBER_OF_GAMES = 60;
-int NUMBER_OF_TRAININGS = 0;
+int NUMBER_OF_GAMES = 20;
+int NUMBER_OF_TRAININGS = 10;
+bool is_training = true;
 
 bool endGame(pacman_msgs::EndGame::Request &req, pacman_msgs::EndGame::Response &res, 
         ros::ServiceClient *start_game_client, DeterministicGameState **game_state)
@@ -21,7 +22,7 @@ bool endGame(pacman_msgs::EndGame::Request &req, pacman_msgs::EndGame::Response 
     game_count++;
 
     if (req.win)
-        ROS_INFO_STREAM("Won game " << game_count);
+        ROS_ERROR_STREAM("Won game " << game_count);
     else
         ROS_WARN_STREAM("Lost game " << game_count);
 
@@ -31,8 +32,10 @@ bool endGame(pacman_msgs::EndGame::Request &req, pacman_msgs::EndGame::Response 
 
         if (game_count < NUMBER_OF_TRAININGS)
             start_game.request.show_gui = false;
-        else
+        else {
             start_game.request.show_gui = true;
+            is_training = false;
+        }
 
         if (start_game_client->call(start_game))
             if(start_game.response.started)
@@ -55,21 +58,29 @@ bool endGame(pacman_msgs::EndGame::Request &req, pacman_msgs::EndGame::Response 
 
     // game not restarted
     res.game_restarted = false;
+
     return true;
 }
 
 bool getAction(pacman_msgs::PacmanGetAction::Request &req, pacman_msgs::PacmanGetAction::Response &res, 
                     DeterministicGameState **game_state, SimplePacmanAgent pacman, SimpleQLearning *q_learning)
 {
+    int behavior;
+
     ROS_DEBUG_STREAM("Sending action");
 
     // predict next game state
-    int behavior = q_learning->getBehavior(*game_state);
+    if (is_training) {
+        behavior = q_learning->getTrainingBehavior(*game_state);
+    } else {
+        behavior = q_learning->getBehavior(*game_state);
+    }
     pacman_msgs::PacmanAction action = pacman.getAction(*game_state, behavior);
     (*game_state)->predictAgentsMoves(action);
 
     // game not restarted
     res.action = action.action;
+
     return true;
 }
 
@@ -90,6 +101,7 @@ int main(int argc, char **argv)
     ros::NodeHandle n;
     ros::Rate loop_rate(1);
 
+    srand (time(NULL)); // start random fucntions
     DeterministicGameState *game_state = new DeterministicGameState();
     SimplePacmanAgent pacman;
     SimpleQLearning *q_learning = new SimpleQLearning;
@@ -135,3 +147,5 @@ int main(int argc, char **argv)
     // shutdown ros node
     ros::shutdown();
 }
+
+// Working for deterministic non behavioral games

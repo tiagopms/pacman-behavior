@@ -41,7 +41,6 @@ class LearningAgent(Agent):
         """
         if not self.lastState is None:
             reward = state.getScore() - self.lastState.getScore()
-            print reward
             self.observeTransition(self.lastState, self.lastAction, state, reward)
         return state
 
@@ -53,6 +52,11 @@ class LearningAgent(Agent):
 
             NOTE: Do *not* override or call this function
         """
+        
+        #get start time
+        import datetime
+        start_time = datetime.datetime.now()
+
         # give reward
         rospy.wait_for_service('/pacman/reward')
         try:
@@ -61,12 +65,16 @@ class LearningAgent(Agent):
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
 
+        # print time diff
+        end_time = datetime.datetime.now()
+        print 'reward time: \t\t', (end_time - start_time)
+
     def final(self, state):
         """
           Called by Pacman game at the terminal state
         """
-        print "Ending game"
-        print "Score ", state.getScore()
+        #print "Ending game"
+        #print "Score ", state.getScore()
         deltaReward = state.getScore() - self.lastState.getScore()
         self.observeTransition(self.lastState, self.lastAction, state, deltaReward)
 
@@ -151,18 +159,26 @@ class RosWaitServiceAgent(LearningAgent):
         self.index = index
         self.keys = []
 
+        self.rosGetAction = rospy.ServiceProxy('/pacman/get_action', PacmanGetAction)
+
 
     def getAction(self, state):
         legal = state.getLegalActions(self.index)
         move = Directions.STOP
         
-        rospy.wait_for_service('/pacman/get_action')
+        #get start time
+        import datetime
+        start_time = datetime.datetime.now()
+
         try:
-            rosGetAction = rospy.ServiceProxy('/pacman/get_action', PacmanGetAction)
-            servResponse = rosGetAction()
+            servResponse = self.rosGetAction()
             move = self.actionToMovement[servResponse.action]
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
+
+        # print time diff
+        end_time = datetime.datetime.now()
+        print 'get_action time: \t', (end_time - start_time)
 
         if move not in legal:
             move = Directions.STOP

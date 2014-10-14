@@ -1,5 +1,7 @@
 #include "simple_q_learning/simple_behavior_agent.h"
 
+int SimplePacmanAgent::NUMBER_OF_BEHAVIORS_ = 5;
+
 SimplePacmanAgent::SimplePacmanAgent()
 {
     ROS_DEBUG("Behavior Agent initialized");

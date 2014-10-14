@@ -21,6 +21,8 @@ class PacmanGame():
 
         # game attributes
         a=["-p", "RosWaitServiceAgent", "-l", "smallClassic", "-k", "4"]
+        #a=["-p", "RosWaitServiceAgent", "-l", "originalClassic", "-k", "4"]
+        #a=["-p", "RosWaitServiceAgent", "-l", "mediumGrid", "-k", "4"]
         self.args = pacman.readCommand(a)
 
         # service and variables to start new game and end it

@@ -34,5 +34,6 @@ class SimpleQLearning
 
     std::pair<int, double> getMaxQValue(DeterministicGameState *game_state);
     void updateWeights(DeterministicGameState *new_game_state, int reward);
+    int getTrainingBehavior(DeterministicGameState *game_state);
     int getBehavior(DeterministicGameState *game_state);
 };

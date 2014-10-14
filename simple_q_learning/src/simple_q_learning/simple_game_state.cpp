@@ -9,6 +9,7 @@ DeterministicGameState::DeterministicGameState()
                                 ("/pacman/pacman_pose", boost::bind(&DeterministicGameState::observeAgent, this, _1, _2));
     ghost_distance_observer_service_ = n_.advertiseService<pacman_msgs::AgentPoseService::Request, pacman_msgs::AgentPoseService::Response>
                                 ("/pacman/ghost_distance", boost::bind(&DeterministicGameState::observeAgent, this, _1, _2));
+    is_finished_ = false;
 
     precalculateAllDistances();
     ROS_DEBUG_STREAM("Bayesian game state initialized");
@@ -42,6 +43,8 @@ bool DeterministicGameState::observeAgent(pacman_msgs::AgentPoseService::Request
     geometry_msgs::Pose pose = (geometry_msgs::Pose) req.pose;
     int measurement_x = pose.position.x;
     int measurement_y = pose.position.y;
+
+    is_finished_ = (bool) req.is_finished;
 
     if(agent == pacman_msgs::AgentPoseService::Request::PACMAN)
     {
@@ -112,6 +115,11 @@ bool DeterministicGameState::isActionLegal(pacman_msgs::PacmanAction action)
     if(map_[new_pose.position.y][new_pose.position.x] == WALL)
         return false;
     return true;
+}
+
+bool DeterministicGameState::isFinished()
+{
+    return is_finished_;
 }
 
 // TODO: dividing by map width*height

@@ -1,5 +1,7 @@
 #include "deterministic_q_learning/deterministic_behavior_agent.h"
 
+int DeterministicBehaviorAgent::NUMBER_OF_BEHAVIORS_ = 5;
+
 DeterministicBehaviorAgent::DeterministicBehaviorAgent()
 {
     ROS_DEBUG("Behavior Agent initialized");
@@ -33,7 +35,7 @@ pacman_msgs::PacmanAction DeterministicBehaviorAgent::getAction(DeterministicGam
             break;
         default:
             action.action = action.STOP;
-            ROS_DEBUG_STREAM("Unknown default behavior");
+            ROS_ERROR_STREAM("Unknown default behavior");
             break;
     }
 
@@ -45,28 +47,53 @@ std::string DeterministicBehaviorAgent::getAgentName()
     return "DeterministicBehaviorAgent";
 }
 
+pacman_msgs::PacmanAction DeterministicBehaviorAgent::getWestAction(DeterministicGameState *game_state) {
+    pacman_msgs::PacmanAction action;
+    action.action = action.WEST;
+
+    return action;
+}
+
+pacman_msgs::PacmanAction DeterministicBehaviorAgent::getEastAction(DeterministicGameState *game_state) {
+    pacman_msgs::PacmanAction action;
+    action.action = action.EAST;
+    return action;
+}
+
+pacman_msgs::PacmanAction DeterministicBehaviorAgent::getNorthAction(DeterministicGameState *game_state) {
+    pacman_msgs::PacmanAction action;
+    action.action = action.NORTH;
+    return action;
+}
+
+pacman_msgs::PacmanAction DeterministicBehaviorAgent::getSouthAction(DeterministicGameState *game_state) {
+    pacman_msgs::PacmanAction action;
+    action.action = action.SOUTH;
+    return action;
+}
+
 pacman_msgs::PacmanAction DeterministicBehaviorAgent::getHuntAction(DeterministicGameState *game_state) {
     pacman_msgs::PacmanAction action;
-    action.action = action.STOP;
+    action.action = action.EAST;
 
     return action;
 }
 
 pacman_msgs::PacmanAction DeterministicBehaviorAgent::getRunAction(DeterministicGameState *game_state) {
     pacman_msgs::PacmanAction action;
-    action.action = action.STOP;
+    action.action = action.NORTH;
     return action;
 }
 
 pacman_msgs::PacmanAction DeterministicBehaviorAgent::getEatBigFoodAction(DeterministicGameState *game_state) {
     pacman_msgs::PacmanAction action;
-    action.action = action.STOP;
+    action.action = action.WEST;
     return action;
 }
 
 pacman_msgs::PacmanAction DeterministicBehaviorAgent::getEatAction(DeterministicGameState *game_state) {
     pacman_msgs::PacmanAction action;
-    action.action = action.STOP;
+    action.action = action.SOUTH;
     return action;
 }
 
