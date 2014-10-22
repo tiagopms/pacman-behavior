@@ -47,34 +47,9 @@ std::string DeterministicBehaviorAgent::getAgentName()
     return "DeterministicBehaviorAgent";
 }
 
-pacman_msgs::PacmanAction DeterministicBehaviorAgent::getWestAction(DeterministicGameState *game_state) {
-    pacman_msgs::PacmanAction action;
-    action.action = action.WEST;
-
-    return action;
-}
-
-pacman_msgs::PacmanAction DeterministicBehaviorAgent::getEastAction(DeterministicGameState *game_state) {
-    pacman_msgs::PacmanAction action;
-    action.action = action.EAST;
-    return action;
-}
-
-pacman_msgs::PacmanAction DeterministicBehaviorAgent::getNorthAction(DeterministicGameState *game_state) {
-    pacman_msgs::PacmanAction action;
-    action.action = action.NORTH;
-    return action;
-}
-
-pacman_msgs::PacmanAction DeterministicBehaviorAgent::getSouthAction(DeterministicGameState *game_state) {
-    pacman_msgs::PacmanAction action;
-    action.action = action.SOUTH;
-    return action;
-}
-
 pacman_msgs::PacmanAction DeterministicBehaviorAgent::getHuntAction(DeterministicGameState *game_state) {
     pacman_msgs::PacmanAction action;
-    action.action = action.EAST;
+    action.action = action.SOUTH;
 
     return action;
 }
@@ -93,7 +68,7 @@ pacman_msgs::PacmanAction DeterministicBehaviorAgent::getEatBigFoodAction(Determ
 
 pacman_msgs::PacmanAction DeterministicBehaviorAgent::getEatAction(DeterministicGameState *game_state) {
     pacman_msgs::PacmanAction action;
-    action.action = action.SOUTH;
+    action.action = action.EAST;
     return action;
 }
 

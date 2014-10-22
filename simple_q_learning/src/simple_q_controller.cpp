@@ -31,7 +31,7 @@ bool endGame(pacman_msgs::EndGame::Request &req, pacman_msgs::EndGame::Response 
         pacman_msgs::StartGame start_game;
 
         if (game_count < NUMBER_OF_TRAININGS)
-            start_game.request.show_gui = false;
+            start_game.request.show_gui = true;
         else {
             start_game.request.show_gui = true;
             is_training = false;
