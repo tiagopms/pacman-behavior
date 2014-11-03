@@ -21,6 +21,7 @@ class LearningAgent(Agent):
         initialize the learning agent
         """
         print "Starting agent"
+        self.rosGiveReward = rospy.ServiceProxy('/pacman/reward', RewardService)
 
     def startEpisode(self):
         print "Starting new episode"
@@ -52,22 +53,15 @@ class LearningAgent(Agent):
 
             NOTE: Do *not* override or call this function
         """
-        
-        #get start time
-        import datetime
-        start_time = datetime.datetime.now()
 
         # give reward
-        rospy.wait_for_service('/pacman/reward')
+        # TODO: check if ok to comment this
+        # rospy.wait_for_service('/pacman/reward')
+        # service called here
         try:
-            rosGiveReward = rospy.ServiceProxy('/pacman/reward', RewardService)
-            rosGiveReward(deltaReward)
+            self.rosGiveReward(deltaReward)
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
-
-        # print time diff
-        end_time = datetime.datetime.now()
-        print 'reward time: \t\t', (end_time - start_time)
 
     def final(self, state):
         """
@@ -165,20 +159,12 @@ class RosWaitServiceAgent(LearningAgent):
     def getAction(self, state):
         legal = state.getLegalActions(self.index)
         move = Directions.STOP
-        
-        #get start time
-        import datetime
-        start_time = datetime.datetime.now()
 
         try:
             servResponse = self.rosGetAction()
             move = self.actionToMovement[servResponse.action]
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
-
-        # print time diff
-        end_time = datetime.datetime.now()
-        print 'get_action time: \t', (end_time - start_time)
 
         if move not in legal:
             move = Directions.STOP

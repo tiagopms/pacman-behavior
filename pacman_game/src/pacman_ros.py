@@ -5,6 +5,8 @@ import pacman
 from pacman_msgs.srv import StartGame
 from pacman_msgs.srv import EndGame
 
+import gc
+
 
 start_game = False
 show_gui = False
@@ -20,16 +22,18 @@ class PacmanGame():
         self.r = rospy.Rate(10) # 10hz
 
         # game attributes
-        a=["-p", "RosWaitServiceAgent", "-l", "smallClassic", "-k", "4"]
+        game_attributes = ["-p", "RosWaitServiceAgent", "-l", "smallClassic", "-k", "4"]
         #a=["-p", "RosWaitServiceAgent", "-l", "originalClassic", "-k", "4"]
         #a=["-p", "RosWaitServiceAgent", "-l", "mediumGrid", "-k", "4"]
-        self.args = pacman.readCommand(a)
+        self.args = pacman.readCommand(game_attributes)
 
         # service and variables to start new game and end it
         self.start_game_srv = rospy.Service('/pacman/start_game', StartGame, self.start_game_service)
         self.end_game_client = rospy.ServiceProxy('/pacman/end_game', EndGame)
         self.start_game = False
         self.show_gui = False
+
+        self.game_counter = 0
 
     def start_game_service(self, req):
         if self.start_game:
@@ -45,7 +49,8 @@ class PacmanGame():
         self.show_gui = False
 
         # call end game service
-        rospy.loginfo("Ending game!")
+        ending_game_string = "Ending game " + str(self.game_counter)
+        rospy.loginfo(ending_game_string)
         rospy.wait_for_service('/pacman/end_game')
         try:
           srv_resp = self.end_game_client(is_win)
@@ -56,11 +61,26 @@ class PacmanGame():
 
         return True
 
+    def runSingleGame(self):
+
+        # run game and get if win or lose
+        self.args['pacman'].startEpisode()
+        games = pacman.runGames(**self.args)
+        single_game = games.pop()
+        is_win = single_game.state.isWin()
+
+        # end game
+        self.end_game(is_win)
+
+
     # run game
     def run(self):
-        is_win = False
+        #gc.set_debug(gc.DEBUG_LEAK)
+        gc.enable()
+
         while not rospy.is_shutdown():
             if self.start_game:
+                self.game_counter += 1
 
                 #if not show gui, set game as in training mode
                 if not self.show_gui:
@@ -68,14 +88,10 @@ class PacmanGame():
                 else:
                     self.args['numTraining'] = 0
 
-                # run game and get if win or lose
-                self.args['pacman'].startEpisode()
-                games = pacman.runGames(**self.args)
-                single_game = games.pop()
-                is_win = single_game.state.isWin()
+                self.runSingleGame()
 
-                # end game
-                self.end_game(is_win)
+            gc.collect()
+            print len(gc.get_objects())
 
             #sleep while in loop
             self.r.sleep()

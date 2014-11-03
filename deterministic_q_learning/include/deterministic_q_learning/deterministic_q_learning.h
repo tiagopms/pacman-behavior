@@ -14,6 +14,7 @@ class DeterministicQLearning
     static int num_training_; // number of training episodes, i.e. no learning after these many episodes
 
     std::vector<double> weights_;
+    std::vector< std::vector<double> > behavioral_weights_;
     std::vector<double> features_;
     std::vector<double> temp_features_;
     std::vector<double> old_features_;
@@ -24,7 +25,7 @@ class DeterministicQLearning
     double behavior_;
     std::vector<double> q_values_;
 
-    void saveTempFeatures();
+    void saveTempFeatures(int behavior);
 
     std::vector<double> getFeatures(DeterministicGameState *game_state, int behavior);
     double getQValue(DeterministicGameState *game_state, int behavior);

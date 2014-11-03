@@ -137,7 +137,7 @@ bool DeterministicGameState::isFinished()
 // TODO: dividing by map width*height
 float DeterministicGameState::getClosestFoodDistance(pacman_msgs::PacmanAction action)
 {
-    geometry_msgs::Pose new_pose = getNextPacmanPose(action);
+    geometry_msgs::Pose new_pose = getPacmanPose();
     int new_x = new_pose.position.x;
     int new_y = new_pose.position.y;
 
@@ -156,12 +156,12 @@ float DeterministicGameState::getClosestFoodDistance(pacman_msgs::PacmanAction a
         }
     }
 
-    return min_dist / ( (float) height_ * width_);
+    return min_dist;// / ( (float) height_ * width_);
 }
 
 bool DeterministicGameState::eatsFood(pacman_msgs::PacmanAction action)
 {
-    geometry_msgs::Pose new_pose = getNextPacmanPose(action);
+    geometry_msgs::Pose new_pose = getPacmanPose();
     int new_x = new_pose.position.x;
     int new_y = new_pose.position.y;
 
@@ -172,7 +172,7 @@ bool DeterministicGameState::eatsFood(pacman_msgs::PacmanAction action)
 
 int DeterministicGameState::getClosestGhostDistance(pacman_msgs::PacmanAction action)
 {
-    geometry_msgs::Pose new_pose = getNextPacmanPose(action);
+    geometry_msgs::Pose new_pose = getPacmanPose();
     int new_x = new_pose.position.x;
     int new_y = new_pose.position.y;
 
@@ -190,12 +190,12 @@ int DeterministicGameState::getClosestGhostDistance(pacman_msgs::PacmanAction ac
         }
     }
 
-    return min_dist / ( (float) height_ * width_);
+    return min_dist;// / ( (float) height_ * width_);
 }
 
 bool DeterministicGameState::dies(pacman_msgs::PacmanAction action)
 {
-    geometry_msgs::Pose new_pose = getNextPacmanPose(action);
+    geometry_msgs::Pose new_pose = getPacmanPose();
     int new_x = new_pose.position.x;
     int new_y = new_pose.position.y;
 
@@ -211,7 +211,7 @@ bool DeterministicGameState::dies(pacman_msgs::PacmanAction action)
 
 int DeterministicGameState::getNumberOfGhostsOneStepAway(pacman_msgs::PacmanAction action)
 {
-    geometry_msgs::Pose new_pose = getNextPacmanPose(action);
+    geometry_msgs::Pose new_pose = getPacmanPose();
     int new_x = new_pose.position.x;
     int new_y = new_pose.position.y;
 
@@ -228,6 +228,32 @@ int DeterministicGameState::getNumberOfGhostsOneStepAway(pacman_msgs::PacmanActi
     }
 
     return number_ghost;
+}
+
+int DeterministicGameState::getNumberOfGhostsNStepsAway(int n)
+{
+    int new_x = pacman_pose_.position.x;
+    int new_y = pacman_pose_.position.y;
+
+    int number_ghost = 0;
+
+    for(std::vector< geometry_msgs:: Pose >::reverse_iterator it = ghosts_poses_.rbegin();
+                             it != ghosts_poses_.rend() ; ++it)
+    {
+        int dist = abs(new_x - it->position.x) + abs(new_y - it->position.y);
+
+        if (dist <= n) {
+            number_ghost++;
+        }
+    }
+
+    return number_ghost;
+}
+
+bool DeterministicGameState::hasGhostNStepsAway(int n)
+{
+    bool has_ghost = ( getNumberOfGhostsNStepsAway(n) > 0 );
+    return has_ghost;
 }
 
 std::map< std::pair<int, int>, int > DeterministicGameState::calculateDistances(int x, int y)

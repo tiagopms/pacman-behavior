@@ -45,6 +45,8 @@ class DeterministicGameState : public GameState
     bool eatsFood(pacman_msgs::PacmanAction action);
     int getClosestGhostDistance(pacman_msgs::PacmanAction action);
     int getNumberOfGhostsOneStepAway(pacman_msgs::PacmanAction action);
+    int getNumberOfGhostsNStepsAway(int n);
+    bool hasGhostNStepsAway(int n);
     bool dies(pacman_msgs::PacmanAction action);
 
     // usefull functions

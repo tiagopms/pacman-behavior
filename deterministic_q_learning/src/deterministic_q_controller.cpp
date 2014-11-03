@@ -10,8 +10,8 @@
 #include "deterministic_q_learning/deterministic_behavior_agent.h"
 #include "deterministic_q_learning/deterministic_q_learning.h"
 
-int NUMBER_OF_GAMES = 45;
-int NUMBER_OF_TRAININGS = 25;
+int NUMBER_OF_GAMES = 10005;
+int NUMBER_OF_TRAININGS = 5005;
 bool is_training = true;
 
 bool endGame(pacman_msgs::EndGame::Request &req, pacman_msgs::EndGame::Response &res, 

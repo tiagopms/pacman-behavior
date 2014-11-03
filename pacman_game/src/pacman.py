@@ -71,18 +71,18 @@ class GameState:
     ####################################################
 
     # static variable keeps track of which states have had getLegalActions called
-    explored = set()
-    def getAndResetExplored():
-        tmp = GameState.explored.copy()
-        GameState.explored = set()
-        return tmp
-    getAndResetExplored = staticmethod(getAndResetExplored)
+    #explored = set()
+    #def getAndResetExplored():
+    #    tmp = GameState.explored.copy()
+    #    GameState.explored = set()
+    #    return tmp
+    #getAndResetExplored = staticmethod(getAndResetExplored)
 
     def getLegalActions( self, agentIndex=0 ):
         """
         Returns the legal actions for the agent specified.
         """
-        GameState.explored.add(self)
+        #GameState.explored.add(self)
         if self.isWin() or self.isLose(): return []
 
         if agentIndex == 0:  # Pacman is moving
@@ -700,6 +700,9 @@ def runGames( layout, pacman, ghosts, display, numGames, record, numTraining = 0
         print 'Scores:       ', ', '.join([str(score) for score in scores])
         print 'Win Rate:      %d/%d (%.2f)' % (wins.count(True), len(wins), winRate)
         print 'Record:       ', ', '.join([ ['Loss', 'Win'][int(w)] for w in wins])
+
+
+    del rules
 
     return all_games
 
