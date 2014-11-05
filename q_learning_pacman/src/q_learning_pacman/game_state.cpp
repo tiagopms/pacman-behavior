@@ -113,23 +113,20 @@ GameState::~GameState()
         ROS_DEBUG_STREAM("Game state being destroyed");
 
         for(std::vector< std::vector<MapElements> >::reverse_iterator it = map_.rbegin(); it != map_.rend(); ++it) {
-            /* std::cout << *it; ... */
             it->clear();
         }
         map_.clear();
 
-        for(std::vector< std::vector<float> >::reverse_iterator it = pacman_pose_map_.rbegin(); it != pacman_pose_map_.rend(); ++it) {
-            /* std::cout << *it; ... */
+        for(std::vector< std::vector<float> >::reverse_iterator it = pacman_pose_map_.rbegin(); 
+                            it != pacman_pose_map_.rend(); ++it) {
             it->clear();
         }
         pacman_pose_map_.clear();
 
         for(std::vector< std::vector< std::vector<float> > >::reverse_iterator it = ghosts_poses_map_.rbegin();
                             it != ghosts_poses_map_.rend(); ++it) {
-            /* std::cout << *it; ... */
             for(std::vector< std::vector<float> >::reverse_iterator it_2 = it->rbegin();
                                 it_2 != it->rend(); ++it_2) {
-                /* std::cout << *it; ... */
                 it_2->clear();
             }
             it->clear();
@@ -137,7 +134,6 @@ GameState::~GameState()
         ghosts_poses_map_.clear();
 
         for(std::vector< std::vector<float> >::reverse_iterator it = foods_map_.rbegin(); it != foods_map_.rend(); ++it) {
-            /* std::cout << *it; ... */
             it->clear();
         }
         foods_map_.clear();
