@@ -75,7 +75,7 @@ geometry_msgs::Pose util::move(geometry_msgs::Pose agent_pose, int action)
     return new_pose;
 }
 
-double util::getProbOfMeasurementGivenPosition(int pos_x, int pos_y, int measurement_x, int measurement_y, double standard_deviation)
+double util::getProbOfMeasurementGivenPosition(double pos_x, double pos_y, double measurement_x, double measurement_y, double standard_deviation)
 {
     // e^( (-1/2) * ( ( x - mean ) / std_deviation ) ^ 2 )
     // e^( - ( ( ( x - mean_x ) ^ 2 + ( y - mean_y ) ^ 2 ) / ( 2 * std_deviation ) ) ^ 2 )

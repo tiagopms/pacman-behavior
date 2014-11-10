@@ -46,6 +46,7 @@ class GameState
     static int MAX_DISTANCE;
 
     void printPacmanOrGhostPose( bool is_pacman, int ghost_index);
+    void printFoodsMap();
 
   protected:
     ros::NodeHandle n_;

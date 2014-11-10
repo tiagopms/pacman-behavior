@@ -23,7 +23,7 @@ namespace util
     geometry_msgs::Pose actionToMovement(int action);
     geometry_msgs::Pose move(geometry_msgs::Pose agent_pose, int action);
 
-    double getProbOfMeasurementGivenPosition(int pos_x, int pos_y, int measurement_x, int measurement_y, double standard_deviation);
+    double getProbOfMeasurementGivenPosition(double pos_x, double pos_y, double measurement_x, double measurement_y, double standard_deviation);
 }
 
 #endif // UTIL_FUNCTIONS_H

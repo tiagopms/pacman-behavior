@@ -178,6 +178,62 @@ class RosWaitServiceAgent(LearningAgent):
         return move
 
 
+class RosServiceWithErrorsAgent(LearningAgent):
+    """
+    An agent controlled by ROS messages.
+    """
+    directions = [Directions.WEST,
+                  Directions.EAST,
+                  Directions.NORTH,
+                  Directions.SOUTH,
+                  Directions.STOP]
+    actionToMovement = {PacmanAction.WEST:  Directions.WEST,
+                        PacmanAction.EAST:  Directions.EAST,
+                        PacmanAction.NORTH: Directions.NORTH,
+                        PacmanAction.SOUTH: Directions.SOUTH,
+                        PacmanAction.STOP:  Directions.STOP}
+    chance_of_move_error = 0.1
+
+    def __init__( self, index = 0 ):
+        super(RosServiceWithErrorsAgent, self).__init__()
+
+        self.nextMove = None
+        self.lastMove = Directions.STOP
+        self.index = index
+        self.keys = []
+
+        self.rosGetAction = rospy.ServiceProxy('/pacman/get_action', PacmanGetAction)
+
+
+    def getAction(self, state):
+        legal = state.getLegalActions(self.index)
+        move = Directions.STOP
+
+        try:
+            servResponse = self.rosGetAction()
+            move = self.actionToMovement[servResponse.action]
+        except rospy.ServiceException, e:
+            print "Service call failed: %s"%e
+
+        is_error = random.random()
+        if is_error < self.chance_of_move_error:
+            error_directions = list(self.directions)
+            error_directions.remove(move)
+            move = random.choice(error_directions)
+
+        if move not in legal:
+            move = Directions.STOP
+
+        self.doAction(state, move)
+        return move
+
+    def fromActionToMove(self, action):
+        move = None
+
+        return move
+
+
+
 class RosWaitAgent(Agent):
     """
     An agent controlled by ROS messages.

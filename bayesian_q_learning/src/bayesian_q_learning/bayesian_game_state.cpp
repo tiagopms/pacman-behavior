@@ -1,14 +1,15 @@
 #include "bayesian_q_learning/bayesian_game_state.h"
 
 #include "pacman_abstract_classes/util_functions.h"
+#include <boost/math/special_functions/round.hpp>
 
 
 BayesianGameState::BayesianGameState()
 {
     pacman_observer_service_ = n_.advertiseService<pacman_msgs::AgentPoseService::Request, pacman_msgs::AgentPoseService::Response>
-                                ("/pacman/pacman_pose", boost::bind(&BayesianGameState::observeAgent, this, _1, _2));
+                                ("/pacman/pacman_pose/error", boost::bind(&BayesianGameState::observeAgent, this, _1, _2));
     ghost_distance_observer_service_ = n_.advertiseService<pacman_msgs::AgentPoseService::Request, pacman_msgs::AgentPoseService::Response>
-                                ("/pacman/ghost_distance", boost::bind(&BayesianGameState::observeAgent, this, _1, _2));
+                                ("/pacman/ghost_distance/error", boost::bind(&BayesianGameState::observeAgent, this, _1, _2));
 
     precalculateAllDistances();
     ROS_DEBUG_STREAM("Bayesian game state initialized");
@@ -24,9 +25,9 @@ BayesianGameState::~BayesianGameState()
     ROS_INFO_STREAM("Bayesian game state destroyed");
 }
 
-void BayesianGameState::observePacman(int measurement_x, int measurement_y)
+void BayesianGameState::observePacman(double measurement_x, double measurement_y)
 {
-    float SD_PACMAN_MEASUREMENT = 0.01;
+    float SD_PACMAN_MEASUREMENT = 0.5;
 
     std::vector<float> pacman_pose_map_line (width_, 0);
     std::vector< std::vector<float> > pacman_new_pose_map (height_, pacman_pose_map_line);
@@ -69,12 +70,24 @@ void BayesianGameState::observePacman(int measurement_x, int measurement_y)
     pacman_pose_map_.clear();
     pacman_pose_map_ = pacman_new_pose_map;
 
-    map_[measurement_y][measurement_x] = EMPTY;
+    int measurement_x_int = boost::math::iround(measurement_x);
+    int measurement_y_int = boost::math::iround(measurement_y);
+
+    if( measurement_x_int > 0 && measurement_x_int < width_ && 
+        measurement_y_int > 0 && measurement_y_int < height_ && 
+        map_[measurement_y_int][measurement_x_int] != WALL)
+    {
+        map_[measurement_y_int][measurement_x_int] = EMPTY;
+    }
+
+    ROS_WARN_STREAM("PAcman pose: x " << measurement_x << " y " << measurement_y);
+    printPacmanOrGhostPose(true, 0);
+    //printDeterministicMap();
 }
 
-void BayesianGameState::observeGhost(int measurement_x_dist, int measurement_y_dist, int ghost_index)
+void BayesianGameState::observeGhost(double measurement_x_dist, double measurement_y_dist, int ghost_index)
 {
-    double SD_GHOST_DIST_MEASUREMENT = 0.01;
+    double SD_GHOST_DIST_MEASUREMENT = 1;
 
     std::vector< std::vector<float> > ghost_pose_map = ghosts_poses_map_[ghost_index];
 
@@ -132,20 +145,20 @@ bool BayesianGameState::observeAgent(pacman_msgs::AgentPoseService::Request &req
 {
     int agent = (int) req.agent;
     geometry_msgs::Pose pose = (geometry_msgs::Pose) req.pose;
-    int measurement_x = pose.position.x;
-    int measurement_y = pose.position.y;
+    double measurement_x = pose.position.x;
+    double measurement_y = pose.position.y;
 
     is_finished_ = (bool) req.is_finished;
 
     if(agent == pacman_msgs::AgentPoseService::Request::PACMAN)
     {
-        ROS_DEBUG_STREAM("Observe pacman");
+        ROS_INFO_STREAM("Observe pacman");
         observePacman(measurement_x, measurement_y);
     }
     else
     {
         int ghost_index = agent - 1;
-        ROS_DEBUG_STREAM("Observe ghost " << ghost_index);
+        ROS_INFO_STREAM("Observe ghost " << ghost_index);
         observeGhost(measurement_x, measurement_y, ghost_index);
     }
 
@@ -155,11 +168,12 @@ bool BayesianGameState::observeAgent(pacman_msgs::AgentPoseService::Request &req
 
 void BayesianGameState::predictPacmanMove(pacman_msgs::PacmanAction action)
 {
-    ROS_DEBUG_STREAM("Predict pacman");
+    ROS_INFO_STREAM("Predict pacman");
 
-    std::vector<float> pacman_pose_map_line (width_, 0);
-    std::vector< std::vector<float> > pacman_new_pose_map (height_, pacman_pose_map_line);
-    pacman_pose_map_line.clear();
+    std::vector<float> map_line (width_, 0);
+    std::vector< std::vector<float> > pacman_new_pose_map (height_, map_line);
+    std::vector< std::vector<float> > new_foods_map (height_, map_line);
+    map_line.clear();
 
     for (int i = 0 ; i < width_ ; i++)
     {
@@ -180,18 +194,38 @@ void BayesianGameState::predictPacmanMove(pacman_msgs::PacmanAction action)
                     int x = it->second.first;
                     int y = it->second.second;
                     pacman_new_pose_map[y][x] += probability_of_move * probability_of_being_in_this_place;
+
+
                 }
+            }
+        }
+    }
+
+    for (int i = 0 ; i < width_ ; i++)
+    {
+        for (int j = 0 ; j < height_ ; j++)
+        {
+            if( map_[j][i] != WALL)
+            {
+                new_foods_map[j][i] = foods_map_[j][i] * ( 1 - pacman_new_pose_map[j][i]);
             }
         }
     }
 
     pacman_pose_map_.clear();
     pacman_pose_map_ = pacman_new_pose_map;
+
+    foods_map_.clear();
+    foods_map_ = new_foods_map;
+
+    printPacmanOrGhostPose(true, 0);
+    ROS_INFO_STREAM("Foods map");
+    printFoodsMap();
 }
 
 void BayesianGameState::predictGhostMove(int ghost_index)
 {
-    ROS_DEBUG_STREAM("Predict ghost " << ghost_index);
+    ROS_INFO_STREAM("Predict ghost " << ghost_index);
 
     double STOP_PROBABILITY = 0.2;
 

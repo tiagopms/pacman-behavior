@@ -268,11 +268,15 @@ class ClassicGameRules:
     def __init__(self, timeout=30):
         self.timeout = timeout
 
-    def newGame( self, layout, pacmanAgent, ghostAgents, display, quiet = False, catchExceptions=False):
+    def newGame( self, layout, pacmanAgent, ghostAgents, display, quiet = False, catchExceptions=False,
+                                        send_pose_as_service=False, send_pose_with_error=False, 
+                                        ghost_distance_error=0.01, pacman_pose_error=0.01):
         agents = [pacmanAgent] + ghostAgents[:layout.getNumGhosts()]
         initState = GameState()
         initState.initialize( layout, len(ghostAgents) )
-        game = Game(agents, display, self, catchExceptions=catchExceptions)
+        game = Game(agents, display, self, catchExceptions=catchExceptions, 
+                                send_pose_as_service=send_pose_as_service, send_pose_with_error=send_pose_with_error, 
+                                ghost_distance_error=ghost_distance_error, pacman_pose_error=pacman_pose_error)
         game.state = initState
         self.initialState = initState.deepCopy()
         self.quiet = quiet
@@ -661,7 +665,9 @@ def replayGame( layout, actions, display ):
 
     display.finish()
 
-def runGames( layout, pacman, ghosts, display, numGames, record, numTraining = 0, catchExceptions=False, timeout=30 ):
+def runGames( layout, pacman, ghosts, display, numGames, record, numTraining = 0, catchExceptions=False, timeout=30,
+                                send_pose_as_service=False, send_pose_with_error=False, 
+                                ghost_distance_error=0.01, pacman_pose_error=0.01 ):
     import __main__
     __main__.__dict__['_display'] = display
 
@@ -679,7 +685,9 @@ def runGames( layout, pacman, ghosts, display, numGames, record, numTraining = 0
         else:
             gameDisplay = display
             rules.quiet = False
-        game = rules.newGame( layout, pacman, ghosts, gameDisplay, beQuiet, catchExceptions)
+        game = rules.newGame( layout, pacman, ghosts, gameDisplay, beQuiet, catchExceptions, 
+                                send_pose_as_service=send_pose_as_service, send_pose_with_error=send_pose_with_error, 
+                                ghost_distance_error=ghost_distance_error, pacman_pose_error=pacman_pose_error)
         game.run()
         if not beQuiet: games.append(game)
         all_games.append(game)

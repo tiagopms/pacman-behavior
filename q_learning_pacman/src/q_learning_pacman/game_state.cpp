@@ -229,6 +229,38 @@ void GameState::printMap()
     ROS_INFO_STREAM("Sum: " << num_ghosts_ << std::endl);
 }
 
+void GameState::printFoodsMap()
+{
+    for (int i = height_ -1 ; i > -1  ; i--) {
+        std::ostringstream foo;
+        foo << std::fixed;
+        foo << std::setprecision(0);
+        //foo << std::setw(5) << std::setfill('0');
+        for (int j = 1 ; j < width_ - 1 ; j++) {
+            if( getMapElement(j, i) == WALL)
+                foo << "###" << ' ';
+            else
+            {
+                int chance = foods_map_[i][j]*100;
+
+                if (chance >= 90)
+                    foo << "\033[48;5;46m";
+                else if (chance >= 50)
+                    foo << "\033[48;5;30m";
+                else if (chance >= 30)
+                    foo << "\033[48;5;22m";
+                else
+                    foo << "\033[48;5;12m";
+
+                foo << std::setw(3) << std::setfill('0') << chance;
+
+                foo << "\033[0m" << ' ';
+            }
+        }
+        ROS_INFO_STREAM(foo.str());
+    }
+}
+
 void GameState::printPacmanOrGhostPose( bool is_pacman, int ghost_index)
 {
     for (int i = height_ -1 ; i > -1  ; i--) {

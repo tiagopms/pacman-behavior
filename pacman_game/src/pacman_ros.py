@@ -23,9 +23,15 @@ class PacmanGame():
 
         # game attributes
         game_attributes = ["-p", "RosWaitServiceAgent", "-l", "smallClassic", "-k", "4"]
+        # game_attributes = ["-p", "RosServiceWithErrorsAgent", "-l", "smallClassic", "-k", "4"]
         #a=["-p", "RosWaitServiceAgent", "-l", "originalClassic", "-k", "4"]
         #a=["-p", "RosWaitServiceAgent", "-l", "mediumGrid", "-k", "4"]
         self.args = pacman.readCommand(game_attributes)
+
+        self.args['send_pose_as_service'] = True
+        self.args['send_pose_with_error'] = True
+        self.args['ghost_distance_error'] = 1
+        self.args['pacman_pose_error'] = 0.5
 
         # service and variables to start new game and end it
         self.start_game_srv = rospy.Service('/pacman/start_game', StartGame, self.start_game_service)

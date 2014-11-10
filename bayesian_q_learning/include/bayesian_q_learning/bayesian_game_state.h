@@ -14,8 +14,8 @@
 class BayesianGameState : public GameState
 {
   protected:
-    void observeGhost(int measurement_x_dist, int measurement_y_dist, int ghost_index);
-    void observePacman(int measurement_x, int measurement_y);
+    void observeGhost(double measurement_x_dist, double measurement_y_dist, int ghost_index);
+    void observePacman(double measurement_x, double measurement_y);
     bool observeAgent(pacman_msgs::AgentPoseService::Request &req, pacman_msgs::AgentPoseService::Response &res);
     bool is_finished_;
 

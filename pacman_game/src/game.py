@@ -503,7 +503,9 @@ class Game:
                      Directions.SOUTH: AgentAction.SOUTH,
                      Directions.STOP:  AgentAction.STOP,} 
 
-    def __init__( self, agents, display, rules, startingIndex=0, muteAgents=False, catchExceptions=False ):
+    def __init__( self, agents, display, rules, startingIndex=0, muteAgents=False, catchExceptions=False, 
+                                            send_pose_as_service=False, send_pose_with_error=False, 
+                                            ghost_distance_error=0.01, pacman_pose_error=0.01 ):
         self.agentCrashed = False
         self.agents = agents
         self.display = display
@@ -519,14 +521,39 @@ class Game:
         import cStringIO
         self.agentOutput = [cStringIO.StringIO() for agent in agents]
 
-        # declare this as a publisher of messages to /pacman/ topic
+        self.send_pose_as_service=send_pose_as_service
+        self.send_pose_with_error=send_pose_with_error
+
+        # declare this as a publisher of messages to /pacman/ topics
         self.agentActionPublisher = rospy.Publisher('/pacman/agent_action', AgentAction, queue_size=10)
         self.ghostDistancePublisher = rospy.Publisher('/pacman/ghost_distance', AgentPose, queue_size=10)
         self.pacmanPosePublisher = rospy.Publisher('/pacman/pacman_pose', Pose, queue_size=10)
 
-        # declare this as a client of services in /pacman/ topics
-        self.pacman_pose_client = rospy.ServiceProxy('/pacman/pacman_pose', AgentPoseService)
-        self.ghost_distance_client = rospy.ServiceProxy('/pacman/ghost_distance', AgentPoseService)
+        # declare this as a publisher of pose messages to /pacman/.../error topics
+        if self.send_pose_with_error:
+            self.ghost_distance_error = ghost_distance_error
+            self.pacman_pose_error = pacman_pose_error
+            self.ghostDistanceWithErrorPublisher = rospy.Publisher('/pacman/ghost_distance/error', AgentPose, queue_size=10)
+            self.pacmanPoseWithErrorPublisher = rospy.Publisher('/pacman/pacman_pose/error', Pose, queue_size=10)
+
+        if self.send_pose_as_service:
+            
+            if not self.send_pose_with_error:
+                # declare this as a client of services in /pacman/ topics
+                self.pacman_pose_client = rospy.ServiceProxy('/pacman/pacman_pose', AgentPoseService)
+                self.ghost_distance_client = rospy.ServiceProxy('/pacman/ghost_distance', AgentPoseService)
+
+                print "Waiting for service /pacman/pacman_pose"
+                rospy.wait_for_service('/pacman/pacman_pose')
+                print "Service /pacman/pacman_pose is now available"
+            else:
+                # declare this as a client of services in /pacman/.../error topics
+                self.pacman_pose_client = rospy.ServiceProxy('/pacman/pacman_pose/error', AgentPoseService)
+                self.ghost_distance_client = rospy.ServiceProxy('/pacman/ghost_distance/error', AgentPoseService)
+
+                print "Waiting for service /pacman/pacman_pose/error"
+                rospy.wait_for_service('/pacman/pacman_pose/error')
+                print "Service /pacman/pacman_pose/error is now available"
         
 
     def getProgress(self):
@@ -712,13 +739,24 @@ class Game:
 
                 self.pacmanPosePublisher.publish(pacman_pose)
 
+                if self.send_pose_with_error:
+                    pacman_pose_with_error = Pose()
+                    pacman_pose_with_error.position.x = pacmanPosition[0] + random.gauss(0, self.pacman_pose_error)
+                    pacman_pose_with_error.position.y = pacmanPosition[1] + random.gauss(0, self.pacman_pose_error)
+
+                    self.pacmanPoseWithErrorPublisher.publish(pacman_pose_with_error)
+
                 # TODO: check if ok to comment this
                 # rospy.wait_for_service('/pacman/pacman_pose')
                 # service called here
-                try:
-                    self.pacman_pose_client(agent=0, pose=pacman_pose, is_finished=is_finished)
-                except rospy.ServiceException, e:
-                    print "Service call failed: %s"%e
+                if self.send_pose_as_service:
+                    try:
+                        if not self.send_pose_with_error:
+                            self.pacman_pose_client(agent=0, pose=pacman_pose, is_finished=is_finished)
+                        else:
+                            self.pacman_pose_client(agent=0, pose=pacman_pose_with_error, is_finished=is_finished)
+                    except rospy.ServiceException, e:
+                        print "Service call failed: %s"%e
 
             else:
                 ghostPosition = self.state.getGhostPositions()[agentIndex - 1]
@@ -731,13 +769,26 @@ class Game:
 
                 self.ghostDistancePublisher.publish(ghost_distance)
 
+                if self.send_pose_with_error:
+                    ghost_distance_with_error = AgentPose()
+                    ghost_distance_with_error.agent = agentIndex
+                    ghost_distance_with_error.pose.position.x = ( ghostPosition[0] - pacmanPosition[0] ) + random.gauss(0, self.ghost_distance_error)
+                    ghost_distance_with_error.pose.position.y = ( ghostPosition[1] - pacmanPosition[1] ) + random.gauss(0, self.ghost_distance_error)
+
+                    self.ghostDistanceWithErrorPublisher.publish(ghost_distance_with_error)
+
+
                 # TODO: check if ok to comment this
                 # rospy.wait_for_service('/pacman/ghost_distance')
                 # service called here
-                try:
-                    self.ghost_distance_client(agent=agentIndex, pose=ghost_distance.pose, is_finished=is_finished)
-                except rospy.ServiceException, e:
-                    print "Service call failed: %s"%e
+                if self.send_pose_as_service:
+                    try:
+                        if not self.send_pose_with_error:
+                            self.ghost_distance_client(agent=agentIndex, pose=ghost_distance.pose, is_finished=is_finished)
+                        else:
+                            self.ghost_distance_client(agent=agentIndex, pose=ghost_distance_with_error.pose, is_finished=is_finished)
+                    except rospy.ServiceException, e:
+                        print "Service call failed: %s"%e
 
             # Change the display
             self.display.update( self.state.data )

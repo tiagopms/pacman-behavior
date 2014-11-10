@@ -13,7 +13,7 @@
 #include <mcheck.h>
 
 int NUMBER_OF_GAMES = 10005;
-int NUMBER_OF_TRAININGS = 5000;
+int NUMBER_OF_TRAININGS = 0;
 bool is_training = true;
 
 bool endGame(pacman_msgs::EndGame::Request &req, pacman_msgs::EndGame::Response &res, 
@@ -73,12 +73,12 @@ bool getAction(pacman_msgs::PacmanGetAction::Request &req, pacman_msgs::PacmanGe
 
     // predict next game state
     if (is_training) {
-        behavior = q_learning->getTrainingBehavior(*game_state);
+        //behavior = q_learning->getTrainingBehavior(*game_state);
     } else {
-        behavior = q_learning->getBehavior(*game_state);
+        //behavior = q_learning->getBehavior(*game_state);
     }
     // TODO: remove this
-    //behavior = 1;
+    behavior = 1;
 
     pacman_msgs::PacmanAction action = pacman.getAction(*game_state, behavior);
     (*game_state)->predictAgentsMoves(action);
@@ -94,7 +94,7 @@ bool receiveReward(pacman_msgs::RewardService::Request &req, pacman_msgs::Reward
 {
     int reward = (int) req.reward;
     ROS_DEBUG_STREAM("Received reward " << reward);
-    q_learning->updateWeights(*game_state, reward);
+    //q_learning->updateWeights(*game_state, reward);
 
     return true;
 }
@@ -149,7 +149,7 @@ int main(int argc, char **argv)
     // spin to answer services
     ros::spin();
 
-    q_learning->logWeights();
+    //q_learning->logWeights();
 
     // shutdown ros node
     ros::shutdown();
