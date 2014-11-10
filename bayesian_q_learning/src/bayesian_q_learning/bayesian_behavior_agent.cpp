@@ -106,6 +106,8 @@ pacman_msgs::PacmanAction BayesianBehaviorAgent::getEatAction(BayesianGameState 
 
     geometry_msgs::Pose pacman_pose = game_state->getMostProbablePacmanPose();
     std::map< std::pair<int, int>, int > distances = game_state->getDistances(pacman_pose.position.x, pacman_pose.position.y);
+    std::vector< std::vector<float> > foods_map = game_state->getFoodMap();
+    float food_probability_threshold = game_state->getMaxFoodProbability()/2.0;
 
     int width = game_state->getWidth();
     int height = game_state->getHeight();
@@ -117,7 +119,7 @@ pacman_msgs::PacmanAction BayesianBehaviorAgent::getEatAction(BayesianGameState 
     {
         for (int j = 0 ; j < height ; j++)
         {
-            if( game_state->getMapElement(i, j) == BayesianGameState::FOOD)
+            if( foods_map[j][i] >= food_probability_threshold)
             {
                 int distance = distances[std::make_pair(i, j)];
                 if(distance < min_distance)

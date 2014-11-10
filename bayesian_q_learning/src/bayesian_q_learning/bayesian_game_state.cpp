@@ -87,7 +87,7 @@ void BayesianGameState::observePacman(double measurement_x, double measurement_y
 
 void BayesianGameState::observeGhost(double measurement_x_dist, double measurement_y_dist, int ghost_index)
 {
-    double SD_GHOST_DIST_MEASUREMENT = 1;
+    double SD_GHOST_DIST_MEASUREMENT = 0.5;
 
     std::vector< std::vector<float> > ghost_pose_map = ghosts_poses_map_[ghost_index];
 
@@ -218,8 +218,8 @@ void BayesianGameState::predictPacmanMove(pacman_msgs::PacmanAction action)
     foods_map_.clear();
     foods_map_ = new_foods_map;
 
-    printPacmanOrGhostPose(true, 0);
-    ROS_INFO_STREAM("Foods map");
+    //printPacmanOrGhostPose(true, 0);
+    //ROS_INFO_STREAM("Foods map");
     printFoodsMap();
 }
 
@@ -290,13 +290,15 @@ float BayesianGameState::getClosestFoodDistance()
     int new_x = new_pose.position.x;
     int new_y = new_pose.position.y;
 
+    float food_probability_threshold = getMaxFoodProbability()/2.0;
+
     std::map< std::pair<int, int>, int > distances = getDistances(new_x, new_y);
 
     int min_dist = util::INFINITE;
 
     for (int i = 0 ; i < height_ ; i++) {
         for (int j = 0 ; j < width_ ; j++) {
-            if(map_[i][j] == FOOD) {
+            if(foods_map_[i][j] >= food_probability_threshold) {
                 int dist = distances[std::make_pair(j, i)];
                 if (dist < min_dist) {
                     min_dist = dist;
@@ -319,18 +321,19 @@ bool BayesianGameState::eatsFood(pacman_msgs::PacmanAction action)
     return false;
 }
 
-int BayesianGameState::getClosestGhostDistance(pacman_msgs::PacmanAction action)
+int BayesianGameState::getClosestGhostDistance()
 {
     geometry_msgs::Pose new_pose = getPacmanPose();
     int new_x = new_pose.position.x;
     int new_y = new_pose.position.y;
+    std::vector< geometry_msgs::Pose > ghosts_poses = getMostProbableGhostsPoses();
 
     std::map< std::pair<int, int>, int > distances = getDistances(new_x, new_y);
 
     int min_dist = util::INFINITE;
 
-    for(std::vector< geometry_msgs:: Pose >::reverse_iterator it = ghosts_poses_.rbegin();
-                             it != ghosts_poses_.rend() ; ++it)
+    for(std::vector< geometry_msgs:: Pose >::reverse_iterator it = ghosts_poses.rbegin();
+                             it != ghosts_poses.rend() ; ++it)
     {
         int dist = distances[std::make_pair(it->position.x, it->position.y)];
 
@@ -338,6 +341,9 @@ int BayesianGameState::getClosestGhostDistance(pacman_msgs::PacmanAction action)
             min_dist = dist;
         }
     }
+
+    if (min_dist == 0)
+        min_dist = 1;
 
     return min_dist;// / ( (float) height_ * width_);
 }
@@ -466,6 +472,25 @@ std::map< std::pair<int, int>, int > BayesianGameState::getDistances(int x, int 
     std::map< std::pair<int, int>, int > distances = precalculated_distances_[std::make_pair(x, y)];
     
     return distances;
+}
+
+float BayesianGameState::getMaxFoodProbability()
+{
+    double max_probability = -util::INFINITE;
+
+    for (int i = 0 ; i < width_ ; i++)
+    {
+        for (int j = 0 ; j < height_ ; j++)
+        {
+            double probability = this->foods_map_[j][i];
+            if (probability > max_probability)
+            {
+                max_probability = probability;
+            }
+        }
+    }
+
+    return max_probability;
 }
 
 geometry_msgs::Pose BayesianGameState::getMostProbablePacmanPose()
