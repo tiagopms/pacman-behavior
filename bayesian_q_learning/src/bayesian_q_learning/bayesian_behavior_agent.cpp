@@ -57,12 +57,12 @@ pacman_msgs::PacmanAction BayesianBehaviorAgent::getHuntAction(BayesianGameState
 pacman_msgs::PacmanAction BayesianBehaviorAgent::getRunAction(BayesianGameState *game_state) {
     pacman_msgs::PacmanAction action;
 
-    geometry_msgs::Pose pacman_pose = game_state->getPacmanPose();
+    geometry_msgs::Pose pacman_pose = game_state->getMostProbablePacmanPose();
     std::map< std::pair<int, int>, int > distances = game_state->getDistances(pacman_pose.position.x, pacman_pose.position.y);
 
     int min_distance = util::MAX_DISTANCE;
 
-    std::vector< geometry_msgs::Pose > ghosts_poses = game_state->getGhostsPoses();
+    std::vector< geometry_msgs::Pose > ghosts_poses = game_state->getMostProbableGhostsPoses();
     std::vector< geometry_msgs::Pose >::reverse_iterator closest_ghost;
     for(std::vector< geometry_msgs::Pose >::reverse_iterator it = ghosts_poses.rbegin(); it != ghosts_poses.rend(); ++it) {
         /* std::cout << *it; ... */
@@ -104,7 +104,7 @@ pacman_msgs::PacmanAction BayesianBehaviorAgent::getEatBigFoodAction(BayesianGam
 pacman_msgs::PacmanAction BayesianBehaviorAgent::getEatAction(BayesianGameState *game_state) {
     pacman_msgs::PacmanAction action;
 
-    geometry_msgs::Pose pacman_pose = game_state->getPacmanPose();
+    geometry_msgs::Pose pacman_pose = game_state->getMostProbablePacmanPose();
     std::map< std::pair<int, int>, int > distances = game_state->getDistances(pacman_pose.position.x, pacman_pose.position.y);
 
     int width = game_state->getWidth();

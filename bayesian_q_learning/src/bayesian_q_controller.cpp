@@ -13,7 +13,7 @@
 #include <mcheck.h>
 
 int NUMBER_OF_GAMES = 10005;
-int NUMBER_OF_TRAININGS = 5005;
+int NUMBER_OF_TRAININGS = 5000;
 bool is_training = true;
 
 bool endGame(pacman_msgs::EndGame::Request &req, pacman_msgs::EndGame::Response &res, 
@@ -77,6 +77,9 @@ bool getAction(pacman_msgs::PacmanGetAction::Request &req, pacman_msgs::PacmanGe
     } else {
         behavior = q_learning->getBehavior(*game_state);
     }
+    // TODO: remove this
+    //behavior = 1;
+
     pacman_msgs::PacmanAction action = pacman.getAction(*game_state, behavior);
     (*game_state)->predictAgentsMoves(action);
 
@@ -152,4 +155,6 @@ int main(int argc, char **argv)
     ros::shutdown();
 }
 
-// Working for deterministic non behavioral games
+// Working for deterministic behavioral games
+
+// TODO: uncomment q_learnings

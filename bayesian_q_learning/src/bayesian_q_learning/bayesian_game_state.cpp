@@ -16,26 +16,116 @@ BayesianGameState::BayesianGameState()
 
 BayesianGameState::~BayesianGameState()
 {
-        pacman_observer_service_.shutdown();
-        ghost_distance_observer_service_.shutdown();
+    pacman_observer_service_.shutdown();
+    ghost_distance_observer_service_.shutdown();
 
-        precalculated_distances_.clear();
+    precalculated_distances_.clear();
 
-        ROS_INFO_STREAM("Bayesian game state destroyed");
+    ROS_INFO_STREAM("Bayesian game state destroyed");
 }
 
 void BayesianGameState::observePacman(int measurement_x, int measurement_y)
 {
-    pacman_pose_.position.x = measurement_x;
-    pacman_pose_.position.y = measurement_y;
+    float SD_PACMAN_MEASUREMENT = 0.01;
+
+    std::vector<float> pacman_pose_map_line (width_, 0);
+    std::vector< std::vector<float> > pacman_new_pose_map (height_, pacman_pose_map_line);
+    float sum_probabilities = 0.0;
+
+    for (int i = 0 ; i < width_ ; i++)
+    {
+        for (int j = 0 ; j < height_ ; j++)
+        {
+            if( map_[j][i] != WALL)
+            {
+                float old_probability_of_being_in_this_place = pacman_pose_map_[j][i];
+                float probability_of_place_given_z = util::getProbOfMeasurementGivenPosition(i, j, measurement_x, measurement_y, SD_PACMAN_MEASUREMENT);
+
+                //ROS_INFO_STREAM("" << random_probability);
+                pacman_new_pose_map[j][i] = probability_of_place_given_z * old_probability_of_being_in_this_place;
+
+                sum_probabilities += pacman_new_pose_map[j][i];
+            }
+        }
+    }
+
+    for (int i = 0 ; i < width_ ; i++)
+    {
+        for (int j = 0 ; j < height_ ; j++)
+        {
+            if( map_[j][i] != WALL)
+            {
+                if(sum_probabilities != 0)
+                    pacman_new_pose_map[j][i] = pacman_new_pose_map[j][i]/sum_probabilities;
+                else
+                {
+                    ROS_WARN_STREAM_THROTTLE(1, "Probability 0 for pacman, redistributing");
+                    pacman_new_pose_map[j][i] = 1.0 / (float) ( height_ * width_ );
+                }
+            }
+        }
+    }
+
+    pacman_pose_map_.clear();
+    pacman_pose_map_ = pacman_new_pose_map;
 
     map_[measurement_y][measurement_x] = EMPTY;
 }
 
 void BayesianGameState::observeGhost(int measurement_x_dist, int measurement_y_dist, int ghost_index)
 {
-    ghosts_poses_[ghost_index].position.x = pacman_pose_.position.x + measurement_x_dist;
-    ghosts_poses_[ghost_index].position.y = pacman_pose_.position.y + measurement_y_dist;
+    double SD_GHOST_DIST_MEASUREMENT = 0.01;
+
+    std::vector< std::vector<float> > ghost_pose_map = ghosts_poses_map_[ghost_index];
+
+    std::vector<float> ghost_pose_map_line (width_, 0);
+    std::vector< std::vector<float> > ghost_new_pose_map (height_, ghost_pose_map_line);
+    float sum_probabilities = 0.0;
+
+    for (int i = 0 ; i < width_ ; i++)
+    {
+        for (int j = 0 ; j < height_ ; j++)
+        {
+            if( map_[j][i] != WALL)
+            {
+                float old_probability_of_being_in_this_place = ghost_pose_map[j][i];
+                for (int pacman_i = 0 ; pacman_i < width_ ; pacman_i++)
+                {
+                    for (int pacman_j = 0 ; pacman_j < height_ ; pacman_j++)
+                    {
+                        float probability_of_pacman = pacman_pose_map_[pacman_j][pacman_i];
+                        float probability_of_place_given_z = util::getProbOfMeasurementGivenPosition(i - pacman_i, j - pacman_j, measurement_x_dist, measurement_y_dist, SD_GHOST_DIST_MEASUREMENT);
+
+                        //ROS_INFO_STREAM("" << random_probability);
+                        ghost_new_pose_map[j][i] += probability_of_place_given_z * old_probability_of_being_in_this_place * probability_of_pacman;
+                    }
+                }
+                sum_probabilities += ghost_new_pose_map[j][i];
+            }
+        }
+    }
+
+    if(sum_probabilities == 0)
+    {
+        ROS_WARN_STREAM("Probability 0 for ghost " << ghost_index << ", redistributing");
+    }
+
+    for (int i = 0 ; i < width_ ; i++)
+    {
+        for (int j = 0 ; j < height_ ; j++)
+        {
+            if( map_[j][i] != WALL)
+            {
+                if(sum_probabilities != 0)
+                    ghost_new_pose_map[j][i] = ghost_new_pose_map[j][i]/sum_probabilities;
+                else
+                    ghost_new_pose_map[j][i] = 1.0 / (float) ( height_ * width_ );
+            }
+        }
+    }
+
+    ghosts_poses_map_[ghost_index].clear();
+    ghosts_poses_map_[ghost_index] = ghost_new_pose_map;
 }
 
 bool BayesianGameState::observeAgent(pacman_msgs::AgentPoseService::Request &req, pacman_msgs::AgentPoseService::Response &res)
@@ -59,8 +149,6 @@ bool BayesianGameState::observeAgent(pacman_msgs::AgentPoseService::Request &req
         observeGhost(measurement_x, measurement_y, ghost_index);
     }
 
-    //printDeterministicMap();
-
     res.observed = true;
     return true;
 }
@@ -69,21 +157,77 @@ void BayesianGameState::predictPacmanMove(pacman_msgs::PacmanAction action)
 {
     ROS_DEBUG_STREAM("Predict pacman");
 
-    // TODO: check if ok to predict stop when invalid
-    geometry_msgs::Pose action_pose = util::actionToMovement(action.action);
-    geometry_msgs::Pose new_pose = util::sumPoses(pacman_pose_, action_pose);
+    std::vector<float> pacman_pose_map_line (width_, 0);
+    std::vector< std::vector<float> > pacman_new_pose_map (height_, pacman_pose_map_line);
+    pacman_pose_map_line.clear();
 
-    if (map_[new_pose.position.y][new_pose.position.x] != WALL)
+    for (int i = 0 ; i < width_ ; i++)
     {
-        pacman_pose_ = new_pose;
+        for (int j = 0 ; j < height_ ; j++)
+        {
+            if( map_[j][i] != WALL)
+            {
+                float probability_of_being_in_this_place = pacman_pose_map_[j][i];
+
+                std::vector< std::pair< float, std::pair<int, int> > > next_positions = getNextPositionsForActionWithProbabilities(i, j, action);
+
+                //ROS_INFO_STREAM("" << random_probability);
+
+                for(std::vector< std::pair< float, std::pair<int, int> > >::reverse_iterator it = next_positions.rbegin(); it != next_positions.rend(); ++it)
+                {
+                    /* std::cout << *it; ... */
+                    float probability_of_move = it->first;
+                    int x = it->second.first;
+                    int y = it->second.second;
+                    pacman_new_pose_map[y][x] += probability_of_move * probability_of_being_in_this_place;
+                }
+            }
+        }
     }
+
+    pacman_pose_map_.clear();
+    pacman_pose_map_ = pacman_new_pose_map;
 }
 
 void BayesianGameState::predictGhostMove(int ghost_index)
 {
     ROS_DEBUG_STREAM("Predict ghost " << ghost_index);
 
-    // TODO: add things here
+    double STOP_PROBABILITY = 0.2;
+
+    std::vector<float> ghost_pose_map_line (width_, 0);
+    std::vector< std::vector<float> > ghost_new_pose_map (height_, ghost_pose_map_line);
+
+    std::vector< std::vector<float> > ghost_pose_map = ghosts_poses_map_[ghost_index];
+
+    for (int i = 0 ; i < width_ ; i++)
+    {
+        for (int j = 0 ; j < height_ ; j++)
+        {
+            if( map_[j][i] != WALL)
+            {
+                float probability_of_being_in_this_place = ghost_pose_map[j][i];
+
+                std::vector< std::pair<int, int> > next_positions = getLegalNextPositions(i, j);
+                float random_probability = (1.0 - STOP_PROBABILITY)/next_positions.size();
+
+                ghost_new_pose_map[j][i] += STOP_PROBABILITY * probability_of_being_in_this_place;
+
+                //ROS_INFO_STREAM("" << random_probability);
+
+                for(std::vector< std::pair<int, int> >::reverse_iterator it = next_positions.rbegin(); it != next_positions.rend(); ++it)
+                {
+                    /* std::cout << *it; ... */
+                    int x = it->first;
+                    int y = it->second;
+                    ghost_new_pose_map[y][x] += random_probability * probability_of_being_in_this_place;
+                }
+            }
+        }
+    }
+
+    ghosts_poses_map_[ghost_index].clear();
+    ghosts_poses_map_[ghost_index] = ghost_new_pose_map;
 }
 
 void BayesianGameState::predictGhostsMoves()
@@ -100,46 +244,15 @@ void BayesianGameState::predictAgentsMoves(pacman_msgs::PacmanAction action)
     predictGhostsMoves();
 }
 
-bool BayesianGameState::isActionLegal(int action)
-{
-    geometry_msgs::Pose new_pose = util::move(pacman_pose_, action);
-
-    if(map_[new_pose.position.y][new_pose.position.x] == WALL)
-        return false;
-    return true;
-}
-
-bool BayesianGameState::isActionLegal(pacman_msgs::PacmanAction action)
-{
-    geometry_msgs::Pose new_pose = util::move(pacman_pose_, (int) action.action);
-
-    if(map_[new_pose.position.y][new_pose.position.x] == WALL)
-        return false;
-    return true;
-}
-
-geometry_msgs::Pose BayesianGameState::getNextPacmanPose(pacman_msgs::PacmanAction action)
-{
-    geometry_msgs::Pose new_pose = util::move(pacman_pose_, (int) action.action);
-    int new_x = new_pose.position.x;
-    int new_y = new_pose.position.y;
-
-    if (map_[new_y][new_x] == WALL) {
-        new_pose = pacman_pose_;
-    }
-
-    return new_pose;
-}
-
 bool BayesianGameState::isFinished()
 {
     return is_finished_;
 }
 
 // TODO: dividing by map width*height
-float BayesianGameState::getClosestFoodDistance(pacman_msgs::PacmanAction action)
+float BayesianGameState::getClosestFoodDistance()
 {
-    geometry_msgs::Pose new_pose = getPacmanPose();
+    geometry_msgs::Pose new_pose = getMostProbablePacmanPose();
     int new_x = new_pose.position.x;
     int new_y = new_pose.position.y;
 
@@ -163,7 +276,7 @@ float BayesianGameState::getClosestFoodDistance(pacman_msgs::PacmanAction action
 
 bool BayesianGameState::eatsFood(pacman_msgs::PacmanAction action)
 {
-    geometry_msgs::Pose new_pose = getPacmanPose();
+    geometry_msgs::Pose new_pose = getMostProbablePacmanPose();
     int new_x = new_pose.position.x;
     int new_y = new_pose.position.y;
 
@@ -234,13 +347,15 @@ int BayesianGameState::getNumberOfGhostsOneStepAway(pacman_msgs::PacmanAction ac
 
 int BayesianGameState::getNumberOfGhostsNStepsAway(int n)
 {
-    int new_x = pacman_pose_.position.x;
-    int new_y = pacman_pose_.position.y;
+    geometry_msgs::Pose pacman_pose = getMostProbablePacmanPose();
+    std::vector< geometry_msgs::Pose > ghosts_poses = getMostProbableGhostsPoses();
+    int new_x = pacman_pose.position.x;
+    int new_y = pacman_pose.position.y;
 
     int number_ghost = 0;
 
-    for(std::vector< geometry_msgs:: Pose >::reverse_iterator it = ghosts_poses_.rbegin();
-                             it != ghosts_poses_.rend() ; ++it)
+    for(std::vector< geometry_msgs:: Pose >::reverse_iterator it = ghosts_poses.rbegin();
+                             it != ghosts_poses.rend() ; ++it)
     {
         int dist = abs(new_x - it->position.x) + abs(new_y - it->position.y);
 
@@ -318,3 +433,75 @@ std::map< std::pair<int, int>, int > BayesianGameState::getDistances(int x, int 
     
     return distances;
 }
+
+geometry_msgs::Pose BayesianGameState::getMostProbablePacmanPose()
+{
+    geometry_msgs::Pose probable_pose;
+
+    int probable_x = -1;
+    int probable_y = -1;
+    double max_probability = -util::INFINITE;
+
+    for (int i = 0 ; i < width_ ; i++)
+    {
+        for (int j = 0 ; j < height_ ; j++)
+        {
+            double probability = this->pacman_pose_map_[j][i];
+            if (probability > max_probability)
+            {
+                probable_x = i;
+                probable_y = j;
+
+                max_probability = probability;
+            }
+        }
+    }
+
+    probable_pose.position.x = probable_x;
+    probable_pose.position.y = probable_y;
+
+    return probable_pose;
+}
+
+geometry_msgs::Pose BayesianGameState::getMostProbableGhostPose(int ghost_index)
+{
+    geometry_msgs::Pose probable_pose;
+
+    int probable_x = -1;
+    int probable_y = -1;
+    double max_probability = -util::INFINITE;
+
+    for (int i = 0 ; i < width_ ; i++)
+    {
+        for (int j = 0 ; j < height_ ; j++)
+        {
+            double probability = this->ghosts_poses_map_[ghost_index][j][i];
+            if (probability > max_probability)
+            {
+                probable_x = i;
+                probable_y = j;
+
+                max_probability = probability;
+            }
+        }
+    }
+
+    probable_pose.position.x = probable_x;
+    probable_pose.position.y = probable_y;
+
+    return probable_pose;
+}
+
+std::vector< geometry_msgs::Pose > BayesianGameState::getMostProbableGhostsPoses()
+{
+    std::vector< geometry_msgs::Pose > probable_poses;
+
+    for(int i = 0 ; i < num_ghosts_ ; ++i)
+    {
+        probable_poses.push_back(getMostProbableGhostPose(i));
+    }
+
+    return probable_poses;
+}
+
+// TODO: update food probabilities

@@ -10,7 +10,7 @@ int BayesianQLearning::NUM_BEHAVIORS = 5;
 int BayesianQLearning::NUM_FEATURES = 3;
 double BayesianQLearning::learning_rate_ = 0.002;
 double BayesianQLearning::discount_factor_ = 0.99;
-double BayesianQLearning::exploration_rate_ = 0.8;
+double BayesianQLearning::exploration_rate_ = 0.1;
 int BayesianQLearning::num_training_ = 10;
 
 BayesianQLearning::BayesianQLearning()
@@ -39,17 +39,17 @@ std::vector<double> BayesianQLearning::getFeatures(BayesianGameState *game_state
     // TODO: get features
     features.push_back(1.0); // bias
 
-    pacman_msgs::PacmanAction action;
-    BayesianBehaviorAgent pacman_agent;
-    action = pacman_agent.getAction(game_state, behavior);
+    
 
     // get distances can't be manhattan
     //features.push_back( game_state->eatsFood(action) / 10.0 );
-    features.push_back( game_state->getClosestFoodDistance(action) / ( 1.0 * game_state->getHeight() * game_state->getWidth() ) );
+    features.push_back( game_state->getClosestFoodDistance() / ( 1.0 * game_state->getHeight() * game_state->getWidth() ) );
     //features.push_back( game_state->getNumberOfGhostsOneStepAway(action) / 10.0 );
-    //features.push_back( game_state->getNumberOfGhostsNStepsAway(2) );
-    features.push_back( 1.0/game_state->getClosestGhostDistance(action) );
+    features.push_back( game_state->getNumberOfGhostsNStepsAway(2) );
+    //features.push_back( 1.0/game_state->getClosestGhostDistance(action) );
     //features.push_back( game_state->dies(action) );
+
+    
 
     return features;
 }
@@ -229,7 +229,7 @@ void BayesianQLearning::logWeights()
     for (int i = 0; i < NUM_BEHAVIORS ; i++)
     {
         char file_name_buffer [50];
-        sprintf(file_name_buffer, "behavior_%d__%s.txt", i, time_buf);
+        sprintf(file_name_buffer, "/home/tiago/pacman_ws/log/behavior_%d__%s.txt", i, time_buf);
 
         output_files.push_back( boost::make_shared< std::ofstream > (file_name_buffer) );
 

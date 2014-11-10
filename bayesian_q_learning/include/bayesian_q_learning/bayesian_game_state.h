@@ -37,17 +37,18 @@ class BayesianGameState : public GameState
     void predictAgentsMoves(pacman_msgs::PacmanAction action);
 
     // helper functions
-    bool isActionLegal(int action);
-    bool isActionLegal(pacman_msgs::PacmanAction action);
-    geometry_msgs::Pose getNextPacmanPose(pacman_msgs::PacmanAction action);
     bool isFinished();
-    float getClosestFoodDistance(pacman_msgs::PacmanAction action);
+    float getClosestFoodDistance();
     bool eatsFood(pacman_msgs::PacmanAction action);
     int getClosestGhostDistance(pacman_msgs::PacmanAction action);
     int getNumberOfGhostsOneStepAway(pacman_msgs::PacmanAction action);
     int getNumberOfGhostsNStepsAway(int n);
     bool hasGhostNStepsAway(int n);
     bool dies(pacman_msgs::PacmanAction action);
+
+    geometry_msgs::Pose getMostProbablePacmanPose();
+    geometry_msgs::Pose getMostProbableGhostPose(int ghost_index);
+    std::vector< geometry_msgs::Pose > getMostProbableGhostsPoses();
 
     // usefull functions
     std::map< std::pair<int, int>, int > getDistances(int x, int y);
