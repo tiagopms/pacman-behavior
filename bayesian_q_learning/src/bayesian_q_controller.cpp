@@ -13,7 +13,7 @@
 #include <mcheck.h>
 
 int NUMBER_OF_GAMES = 10005;
-int NUMBER_OF_TRAININGS = 1000;
+int NUMBER_OF_TRAININGS = 2000;
 bool is_training = true;
 
 bool endGame(pacman_msgs::EndGame::Request &req, pacman_msgs::EndGame::Response &res, 

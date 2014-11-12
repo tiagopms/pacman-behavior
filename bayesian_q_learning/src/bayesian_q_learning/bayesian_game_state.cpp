@@ -80,8 +80,8 @@ void BayesianGameState::observePacman(double measurement_x, double measurement_y
         map_[measurement_y_int][measurement_x_int] = EMPTY;
     }
 
-    ROS_WARN_STREAM("PAcman pose: x " << measurement_x << " y " << measurement_y);
-    printPacmanOrGhostPose(true, 0);
+    //ROS_WARN_STREAM("PAcman pose: x " << measurement_x << " y " << measurement_y);
+    //printPacmanOrGhostPose(true, 0);
     //printDeterministicMap();
 }
 
@@ -220,7 +220,7 @@ void BayesianGameState::predictPacmanMove(pacman_msgs::PacmanAction action)
 
     //printPacmanOrGhostPose(true, 0);
     //ROS_INFO_STREAM("Foods map");
-    printFoodsMap();
+    //printFoodsMap();
 }
 
 void BayesianGameState::predictGhostMove(int ghost_index)
@@ -392,12 +392,15 @@ int BayesianGameState::getNumberOfGhostsNStepsAway(int n)
     int new_x = pacman_pose.position.x;
     int new_y = pacman_pose.position.y;
 
+    std::map< std::pair<int, int>, int > distances = getDistances(new_x, new_y);
+
     int number_ghost = 0;
 
     for(std::vector< geometry_msgs:: Pose >::reverse_iterator it = ghosts_poses.rbegin();
                              it != ghosts_poses.rend() ; ++it)
     {
-        int dist = abs(new_x - it->position.x) + abs(new_y - it->position.y);
+        //int dist = abs(new_x - it->position.x) + abs(new_y - it->position.y);
+        int dist = distances[std::make_pair(it->position.x, it->position.y)];
 
         if (dist <= n) {
             number_ghost++;
@@ -411,6 +414,41 @@ bool BayesianGameState::hasGhostNStepsAway(int n)
 {
     bool has_ghost = ( getNumberOfGhostsNStepsAway(n) > 0 );
     return has_ghost;
+}
+
+float BayesianGameState::getProbabilityOfAGhostNStepsAway(int n)
+{
+    double probability = 0;
+
+    for (int i = 0 ; i < width_ ; i++)
+    {
+        for (int j = 0 ; j < height_ ; j++)
+        {
+            if( map_[j][i] != WALL)
+            {
+                float probability_of_being_in_this_place = pacman_pose_map_[j][i];
+                std::map< std::pair<int, int>, int > distances = getDistances(i, j);
+
+                for (int ghost_i = 0 ; ghost_i < width_ ; ghost_i++)
+                {
+                    for (int ghost_j = 0 ; ghost_j < height_ ; ghost_j++)
+                    {
+                        int dist = distances[std::make_pair(ghost_i, ghost_j)];
+
+                        if( map_[ghost_j][ghost_i] != WALL && dist < n)
+                        {
+                            for (int ghost_index = 0 ; ghost_index < num_ghosts_ ; ghost_index++)
+                            {
+                                probability += probability_of_being_in_this_place * ghosts_poses_map_[ghost_index][ghost_j][ghost_i];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return probability;
 }
 
 std::map< std::pair<int, int>, int > BayesianGameState::calculateDistances(int x, int y)

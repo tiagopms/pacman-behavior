@@ -46,7 +46,8 @@ std::vector<double> BayesianQLearning::getFeatures(BayesianGameState *game_state
     features.push_back( game_state->getClosestFoodDistance() / ( 1.0 * game_state->getHeight() * game_state->getWidth() ) );
     //features.push_back( game_state->getNumberOfGhostsOneStepAway(action) / 10.0 );
     //features.push_back( game_state->getNumberOfGhostsNStepsAway(3) );
-    features.push_back( 1.0 / game_state->getClosestGhostDistance() );
+    //features.push_back( 1.0 / game_state->getClosestGhostDistance() );
+    features.push_back( game_state->getProbabilityOfAGhostNStepsAway(3) );
     //features.push_back( game_state->dies(action) );
 
     
