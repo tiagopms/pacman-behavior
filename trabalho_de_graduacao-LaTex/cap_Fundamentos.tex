@@ -39,7 +39,7 @@ Outras estratégias de aprendizagem por reforço permitem aprender uma política
 Nesse trabalho nós criaremos uma nova abordagem, baseada em [1, 10], para fazer uma seleção de comportamento e ação para um agente móvel com sensores probabilísticos. Além disso, utilizaremos o algoritmo de aprendizagem por reforço q learning, presente em [ref reinforcement learning book], para aprender uma política ótima de escolha de comportamento.
 
 
-\section{Filtro Bayesiano}
+\section{Filtro Bayesiano} \label{section:FiltroBayesiano}
 
 Um filtro bayesiano é uma abordagem probabilística para estimar uma função de densidade de probabilidade desconhecida de forma recursiva no tempo, utilizando ações e observações, além de um modelo matemático do processo.
 
@@ -82,164 +82,47 @@ Essa equação explicita quatro itens:
 
 Com essas densidades probabilísticas podemos decidir por uma estratégia de ação em qualquer instante de tempo utilizando a ação $ M^t = m $ que maximize essa função. Podemos também descobrir o estado mais provável de o sistema se encontrar fazendo a mesma coisa para $ S^j $.
 
-
-\subsection{Independências condicionais}
-
-Podemos simplificar esse problema, devido à existencia de independências condicionais no sistema. Num sistema em que existem $ N_i $ grupos de variáveis de estado e observação independentes entre si [1]:
+Esse modelo pode, ainda, ser discretizado para cada instante de tempo, ficando:
 
 \begin{equation}
-    P \left( M^{0: t} S^{0: t} Z^{0: t} \lambda^{0: t}  \mid \pi_f \right) = P \left( M^0 S^0 Z^0 \lambda^0 \mid \pi_f \right) \cdot \prod\limits_{j =1}^{t} 
+        P ( M^{0: t} S^{0: t} Z^{0: t} \mid \pi_f ) = P ( M^{0: t-1} S^{0: t-1} Z^{0: t-1} \mid \pi_f ) \cdot 
         \left(
             \begin{array}{l}
-                \prod\limits_{i =1}^{N_i} P \left( S_i^j \mid S_i^{j -1} M^{j-1} \pi_i \right) \\
-                \times \prod\limits_{i=1}^{N_i} P \left( Z_i^j \mid S_i^j \pi_i \right) \\
-                \times P \left( M^j \mid \pi_f \right) \cdot \prod\limits_{i =1}^{N_i} P \left( \lambda_i^j \mid M^j S_i^j M^{j-1} \pi_i \right)
-            \end{array}
-        \right)
-\end{equation}
-
-Com isso, separamos os termos com independência condicional entre si do sistema, mas continuamos tendo um filtro global do sistema. Podemos então dividi-lo em $ N_i $ filtros elementares:
-
-\begin{equation}
-    P \left( M^{0: t} S_i^{0: t} Z_i^{0: t} \lambda_i^{0: t}  \mid \pi_i \right) = P \left( M^0 S_i^0 Z_i^0 \lambda_i^0 \mid \pi_i \right) \cdot \prod\limits_{j =1}^{t} 
-        \left(
-            \begin{array}{l}
-                P \left( S_i^j \mid S_i^{j -1} M^{j-1} \pi_i \right) \\
-                \times P \left( Z_i^j \mid S_i^j \pi_i \right) \\
-                \times P \left( M^j \mid \pi_i \right) \cdot P \left( \lambda_i^j \mid M^j S_i^j M^{j-1} \pi_i \right)
-            \end{array}
-        \right)
-\end{equation}
-
-Sendo $ \lambda_i^j $ um conjunto de variáveis binárias de coerência para o sistema motor:
-
-\begin{equation}
-    P \left( \left[ \lambda_i^j = 1 \right] \mid M^j S_i^j B^j M^{j -1} \pi_i \right) = P \left( M^j \mid S_i^j M^{j -1} \pi_i \right)
-\end{equation}
-\begin{equation}
-    P \left( \left[ \lambda_i^j = 0 \right] \mid M^j S_i^j B^j M^{j -1} \pi_i \right) = 1 - P \left( M^j \mid S_i^j M^{j -1} \pi_i \right)
-\end{equation}
-
-Temos 4 termos principais nessa nova equação:
-
-\begin{itemize}
-    \item $ P \left( M^0 S_i^0 Z_i^0 \lambda_i^0 \mid \pi_i \right) $ : Novamente as probabilidades do estado inicial do sistema são necessárias para se obter seus futuros valores;
-    \item $ P \left( S_i^j \mid S_i^{j-1} M^{j-1} \pi_i \right) $ : Cada subgrupo das variáveis de estado  depende apenas do subgrupo das variáveis de estado correspondente no tempo anterior e de que ação foi tomada (termo de predição);
-    \item $ P \left( Z_i^j \mid S_i^j \pi_i \right) $ : É necessário um modelo de probabilidades do sensor, mas, agora, cada subgrupo de sensores $ Z_i $ só depende de um subconjunto da variáveis de estado $ S_i $ (termo de observação)
-    \item $ P \left( M^j \mid \pi_i \right) \cdot P \left( \lambda_i^j \mid M^j S_i^j M^{j-1} \pi_i \right) $ : Esse termo é o mais diferente do correspondente na equação original do filtro bayesiano. Ele indica que a escolha da próxima ação depende tanto da probabilidade de se escolher essa ação, quanto da coerência (explicitada pelo termo $ \lambda_i^j $) de se tomar essa ação, dado o estado atual do sistema e qual a ação tomada no estado anterior (termo de decisão de ação). Esse termo é o modelo motor do sistema definido apenas no subgrupo $ S_i $ de variáveis de estado.
-\end{itemize}
-
-Agora podemos adicionar o modelo de comportamento para o sistema. Para esse novo problema, temos como distribuição conjunta de probabilidades: 
-
-\begin{equation}
-    P \left( M^{0: t} S_i^{0: t} Z_i^{0: t} B^{0: t} \lambda_i^{0: t} \beta_i^{0: t} \mid \pi_i \right) = P \left( M^0 S_i^0 Z_i^0 B^0 \lambda_i^0 \beta_i^0 \mid \pi_i \right) \cdot \prod\limits_{j =1}^{t} 
-        \left(
-            \begin{array}{l}
-                P \left( S_i^j \mid S_i^{j -1} M^{j-1} \pi_i \right) \\
-                \times P \left( Z_i^j \mid S_i^j \pi_i \right) \\
-                \times P \left( B^j \mid \pi_i \right) \cdot P \left( \beta_i^j \mid B^j S_i^j B^{j-1} \pi_i \right) \\
-                \times P \left( M^j \mid \pi_i \right) \cdot P \left( \lambda_i^j \mid M^j S_i^j B^j M^{j-1} \pi_i \right)
-            \end{array}
-        \right)
-\end{equation}
-
-Essa nova equação explicita cinco itens:
-
-
-\begin{itemize}
-    \item $ P \left( M^0 S_i^0 Z_i^0 B^0 \lambda_i^0 \beta_i^0 \mid \pi_i \right) $ : As probabilidades do estado inicial do sistema são necessárias para se obter seus futuros valores;
-    \item $ P \left( S_i^j \mid S_i^{j-1} M^{j-1} \pi_i \right) $ : Cada estado depende do estado anterior e de que ação foi tomada (termo de predição);
-    \item $ P \left( Z_i^j \mid S_i^j \pi_i \right) $ : É necessário um modelo de probabilidades do sensor (termo de observação);
-    \item $ P \left( B^j \mid \pi_i \right) \cdot P \left( \beta_i^j \mid B^j S_i^j B^{j-1} \pi_i \right) $ : Esse termo explicita a decisão por um comportamento, ele indica que essa escolha depende tanto a probabilidade de se escolher esse comportamento, quanto da coerência (explicitada pelo termo ) de escolhê-lo dado o comportamento do estado anterior e o estado atual;
-    \item $ P \left( M^j \mid \pi_i \right) \cdot P \left( \lambda_i^j \mid M^j S_i^j B^j M^{j-1} \pi_i \right) $ : A escolha da próxima ação depende tanto da probabilidade de se escolher essa ação, quanto da coerência (explicitada pelo termo $ \lambda_i^j $) de se tomar essa ação, dado o estado atual do sistema, o comportamento sendo executado e qual a ação tomada no estado anterior (termo de decisão de ação).
-\end{itemize}
-
-Com isso nós obtemos um modelo matemático preciso para tomada decisão de comportamentos e ações. O modelo de ação:
-
-\begin{equation}
-    P \left( \lambda_i^j \mid M^j S_i^j B^j M^{j-1} \pi_i \right) \rightarrow P \left( M^j \mid S_i^j B^j M^{j-1} \pi_i \right)
-\end{equation}
-
-Agora depende do comportamento sendo utilizado:
-
-\begin{equation}
-    P \left( M^j \mid S_i^j B^j M^{j-1} \pi_i \right) = 
-        \left\{
-            \begin{array}{l}
-                P \left( M^j \mid S_i^j \left[ B^j=b_1 \right] M^{j-1} \pi_i \right) \\
-                P \left( M^j \mid S_i^j \left[ B^j=b_2 \right] M^{j-1} \pi_i \right) \\
-                \cdots \\
-                P \left( M^j \mid S_i^j \left[ B^j=b_{N_b} \right] M^{j-1} \pi_i \right)
-            \end{array}
-        \right.
-\end{equation}
-
-A vantagem disso é que podemos ter, para cada comportamento, um modelo de ação diferente. Esse modelo pode ser discretizado para cada instante de tempo, ficando:
-
-\begin{equation}
-    P \left( M^{0: t} S_i^{0: t} Z_i^{0: t} B^{0: t} \lambda_i^{0: t} \beta_i^{0: t} \mid \pi_i \right) = P \left( M^{0:t-1} S_i^{0:t-1} Z_i^{0:t-1} B^{0:t-1} \lambda_i^{0:t-1} \beta_i^{0:t-1} \mid \pi_i \right) \cdot 
-        \left(
-            \begin{array}{l}
-                P \left( S_i^t \mid S_i^{t -1} M^{t-1} \pi_i \right) \\
-                \times P \left( Z_i^t \mid S_i^t \pi_i \right) \\
-                \times P \left( B^t \mid \pi_i \right) \cdot P \left( \beta_i^t \mid B^t S_i^t B^{t-1} \pi_i \right) \\
-                \times P \left( M^t \mid \pi_i \right) \cdot P \left( \lambda_i^t \mid M^t S_i^t B^t M^{t-1} \pi_i \right)
+                P( S^j \mid S^{j -1} M^{j -1} \pi_f ) \\
+                \times P( Z^j \mid S^j \pi_f ) \\
+                \times P( M^j \mid S^j M^{j -1} \pi_f )
             \end{array}
         \right)
 \end{equation}
 
 Com isso temos um modelo recursivo que pode ser chamado a cada instante de tempo para atualizar o modelo de probabilidades. Essa atualização pode ainda ser dividida em quatro partes distintas:
 
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=120mm]{images/modelo_probabilistico-carla}
-    \caption{\label{img:ModeloProbabilisticoCarla}Modelo Probabilístico de Seleção de Comportamento. Fonte: \cite{INCA2005} [Trocar por tese da Carla]}
-\end{figure}
-
 \subsection{Predição}
 
 Nessa etapa, a partir da ação escolhida no período anterior de tempo, se faz uma estimativa de qual será o estado após sua execução.
 
 \begin{equation}
-    P \left( S_i^t \mid z_i^{0: t-1} b^{0: t-1} m^{0: t-1} \lambda_i^{0: t-1} \beta_i^{0: t-1} \pi_i \right) \propto \sum\limits_{S_i^{t-1}}
+    P \left( S^t \mid z^{0: t-1} m^{0: t-1} \pi_f \right) \propto \sum\limits_{S^{t-1}}
         \left(
             \begin{array}{l}
-                P \left( S_i^t \mid S_i^{t-1} m^{t-1} \pi_i \right) \\
-                \times P \left( m^{t-1} \mid \pi_i \right) \times P \left( \lambda_i^{t-1} \mid m^{t-1} S_i^{t-1} b^{t-1} m^{t-2} \pi_i \right)\\
-                \times P \left( S_i^{t-1} \mid z_i^{0: t-1} b^{0: t-1} m^{0: t-2} \lambda_i^{0: t-2} \beta_i^{0: t-1} \pi_i \right)
+                P \left( S^t \mid S^{t-1} m^{t-1} \pi_f \right) \\
+                \times P \left( m^{t-1} \mid S^{t-1} m^{t-2} \pi_f \right)\\
+                \times P \left( S^{t-1} \mid z^{0: t-1} m^{0: t-2} \pi_f \right)
             \end{array}
         \right)
 \end{equation}
 
-
-\subsection{Escolha de comportamento}
-
-Essa etapa é onde a escolha do comportamento acontece. Primeiro se calcula a probabilidade à seguir para cada comportamento .
-
-\begin{equation}
-    P \left( B^t \mid z_i^{0: t} b^{0: t-1} m^{0: t-1} \lambda_i^{0: t-1} \beta_i^{0: t} \pi_i \right) \propto \sum\limits_{S_i^{t-1}}
-        \left(
-            \begin{array}{l}
-                P \left( z_i^t \mid S_i^t \pi_i \right) \\
-                \times P \left( B^t \mid \pi_i \right) \times   P \left( \beta_i^t \mid B^t S_i^t b^{t-1} \pi_i \right) \\
-                \times P \left( S_i^t \mid z_i^{0: t-1} b^{0: t-1} m^{0: t-1} \lambda_i^{0: t-1} \beta_i^{0: t-1} \pi_i \right)
-            \end{array}
-        \right)
-\end{equation}
-
-Depois, se escolhe um comportamento a partir dessas probabilidades calculadas, sendo o escolhido o com a maior probabilidade.
 
 \subsection{Observação}
 
 Tendo, agora, um dos comportamentos escolhido, se atualiza o belief state do agente a partir dos sensores presentes no robô.
 
 \begin{equation}
-    P \left( S_i^t \mid z_i^{0: t} b^{0: t} m^{0: t-1} \lambda_i^{0: t-1} \beta_i^{0: t} \pi_i \right) \propto \sum\limits_{S_i^{t-1}}
+    P \left( S^t \mid z^{0: t} m^{0: t-1} \pi_i \right) \propto 
         \left(
             \begin{array}{l}
-                P \left( z_i^t \mid S_i^t \pi_i \right) \\
-                \times P \left( b^t \mid \pi_i \right) \times   P \left( \beta_i^t \mid b^t S_i^t b^{t-1} \pi_i \right) \\
-                \times P \left( S_i^t \mid z_i^{0: t-1} b^{0: t-1} m^{0: t-1} \lambda_i^{0: t-1} \beta_i^{0: t-1} \pi_i \right)
+                P \left( z^t \mid S^t \pi_f \right) \\
+                \times P \left( S^t \mid z^{0: t-1} m^{0: t-1} \pi_f \right)
             \end{array}
         \right)
 \end{equation}
@@ -250,17 +133,17 @@ Tendo, agora, um dos comportamentos escolhido, se atualiza o belief state do age
 Por último se faz a seleção de uma ação a ser executada pelo robô de forma análoga à seleção de comportamentos. Calcula-se as probabilidade de se executar cada ação  e se escolhe a com maior valor.
 
 \begin{equation}
-    P \left( M^t \mid z_i^{0: t} b^{0: t} m^{0: t-1} \lambda_i^{0: t} \beta_i^{0: t} \pi_i \right) \propto \sum\limits_{S_i^{t-1}}
+    P \left( M^t \mid z^{0: t} m^{0: t-1} \pi_f \right) \propto \sum\limits_{S_i^t}
         \left(
             \begin{array}{l}
-                P \left( M^t \mid \pi_i \right) x   P \left( \lambda_i^t \mid M^t S_i^t b^t m^{t-1} \pi_i \right)\\
-                \times P \left( S_i^t \mid z_i^{0: t} b^{0: t} m^{0: t-1} \lambda_i^{0: t-1} \beta_i^{0: t} \pi_i \right)
+                \times P \left( M^t \mid S^t m^{t-1} \pi_f \right)\\
+                \times P \left( S^t \mid z^{0: t} m^{0: t-1} \pi_f \right)
             \end{array}
         \right)
 \end{equation}
 
 
-\section{MDP (Processo de Decisão de Markov)} \label{section:SecaoMDP}
+\section{MDP (Processo de Decisão de Markov)} \label{section:MDP}
 
 MDPs são utilizados em várias áreas, como economia, manufatura de processos e robótica. Ele foi nomeado a partir de Andrey Markov e provê uma base matemática para o modelamento de tomada de decisões. Eles são uma extensão de cadeias de Markov, tendo como diferença a adição de ações e recompensas (escolha e motivação).
 
@@ -268,7 +151,7 @@ MDP é, mais precisamente, um processo de controle estocástico de tempo discret
 
 Após executada essa ação, o robô se encontrará em um novo estado $ s' \in S $ com probabilidade $ p \left( s' \mid u, s \right) $, essa equação é conhecida como modelo de atuação (action model). O modelo de atuação não é, em geral, determinístico, ou seja, uma ação pode ter várias consequências com diferentes probabilidades. Uma consequência disso é que planejar uma única sequência de ações não é o suficiente, o planejador de decidir por uma ação para cada um de uma gama de estados em que o robô pode se encontrar.
 
-Considere o sistema a seguir em que para uma dada ação A ou B tem-se indicada as probabilidades $ p \left( s' \mid u, s \right) $ através da percentagem indicada nas setas saindo do estado $ s $ para $ s' $.
+Considere o sistema de figura a seguir em que para uma dada ação A ou B tem-se indicada as probabilidades $ p \left( s' \mid u, s \right) $ através da percentagem indicada nas setas saindo do estado $ s $ para $ s' $.
 
 
 \begin{figure}[h]
@@ -277,15 +160,15 @@ Considere o sistema a seguir em que para uma dada ação A ou B tem-se indicada 
     \caption{\label{img:MapaDeProbabilidadesMarkov}Mapa de Probabilidades}
 \end{figure}
 
-Podemos, por exemplo, ver que para esse sistema $ P \left( S2 \mid a, S1 \right) = 0.2 $ e $ P \left( S4 \mid a, S1 \right) = 0.8 $. Se nós tivermos o estado $ S6 $ como objetivo, note que não adianta se obter uma sequência de ações $ a \rightarrow a \rightarrow b$, por exemplo, pois nós podemos nos encontrar em uma gama de estados ao final dessa sequência. Poderíamos nos encontrar em $ S4 $, $ S2 $ ou $ S6 $.
+Podemos, por exemplo, ver que para esse sistema $ P \left( s2 \mid a, s1 \right) = 0.2 $ e $ P \left( s4 \mid a, s1 \right) = 0.8 $. Se nós tivermos o estado $ s6 $ como objetivo, note que não adianta se obter uma sequência de ações $ a \rightarrow a \rightarrow b$, por exemplo, pois nós podemos nos encontrar em uma gama de estados ao final dessa sequência. Poderíamos nos encontrar em $ s4 $, $ s2 $ ou $ s6 $.
 
-Temos então de mapear uma ação para cada estado possível em que pudermos nos encontrar, gerando o que é chamado de política de controle (control policy). Essa política de controle terá formato $ \pi: S_t \rightarrow u_t $, a política $ \pi $ recebe um estado e retorna a ação planejada para ele. Note então que, tendo essa política $ \pi \left( S \right) $, não temos problemas como no caso anterior, pois sempre teremos planejado que ação tomar em um dado instante, baseado no estado em que nos encontrarmos.
+Temos então de mapear uma ação para cada estado possível em que pudermos nos encontrar, gerando o que é chamado de política de controle (control policy). Essa política de controle terá formato $ \pi: S_t \rightarrow U_t $, a política $ \pi $ recebe um estado e retorna a ação planejada para ele. Note então que, tendo essa política $ \pi \left( S \right) $, não temos problemas como no caso anterior, pois sempre teremos planejado que ação tomar em um dado instante, baseado no estado em que nos encontrarmos.
 
-Calcular essa política não é um problema trivial, devido, entre outros motivos, à existência de infinitos caminhos para se chegar de um estado $ S1 $ a $ S6 $. Um caminho seria $ S1 \rightarrow S2 \rightarrow S3 \rightarrow S6 $, por exemplo, e outro seria $ S1 \rightarrow S2 \rightarrow S5 \rightarrow S2 \rightarrow S3 \rightarrow S6 $, outro ainda seria $ S1 \rightarrow S2 \rightarrow S5 \rightarrow S2 \rightarrow S5 \rightarrow S2 \rightarrow S3 \rightarrow S6 $.
+Calcular essa política não é um problema trivial, devido, entre outros motivos, à existência de infinitos caminhos para se chegar de um estado $ s1 $ a $ s6 $. Um caminho seria $ s1 \rightarrow s2 \rightarrow s3 \rightarrow s6 $, por exemplo, e outro seria $ s1 \rightarrow s2 \rightarrow s5 \rightarrow s2 \rightarrow s3 \rightarrow s6 $, outro ainda seria $ s1 \rightarrow s2 \rightarrow s5 \rightarrow s2 \rightarrow s5 \rightarrow s2 \rightarrow s3 \rightarrow s6 $.
 
 Antes de poder obter um algoritmo definitivo, temos de modelar o que seria o objetivo de um problema. Para isso utilizaremos uma função de recompensa para o robô $ r \left( S, U, S' \right) $ que retorna um número real. Ela indica quão desejado é se chegar a uma estado $ s' $ a partir de $ s $ executando a ação $ u $. Para sistemas em que só se preocupe em chegar ao estado desejado pode-se simplifica-la para $ r \left( s' \right) $, por exemplo.
 
-Sabendo que queremos achar uma política que maximize o ganho de recompensas podemos gerar um plano de políticas ótimo pensando-se apenas na próxima ação. Caso nossas recompensas fossem dadas apenas pela escolha de uma ação baseada no estado atual $ r \left( S, U \right) $ (sem considerar o estado alcançado) teríamos como escolha de política:
+Sabendo que queremos achar uma política que maximize o ganho de recompensas podemos gerar um plano de políticas ótimo pensando-se apenas na próxima ação, maximizando uma recompensa imediata. Caso nossas recompensas fossem dadas apenas pela escolha de uma ação baseada no estado atual $ r \left( S, U \right) $ (sem considerar o estado alcançado) teríamos como escolha de política:
 
 \begin{equation}
     \pi_1 \left( s \right) = \underset{u}{argmax} \left( r \left( s, u \right) \right)
@@ -297,13 +180,13 @@ Como nossa recompensa depende também do estado alcançado, devemos pesar cada r
     \pi_1 \left( s \right) = \underset{u}{argmax} \left( \int \! r \left( s, u, s' \right) \cdot P \left( s' \mid u, s \right) \, \mathrm{d}s'. \right)
 \end{equation}
 
-Podemos gerar para essa política um função de valor (value function) que represente a recompensa esperada para cada estado $ s $ seguindo $ \pi $.
+Podemos gerar para essa política um função de valor (value function) que represente a recompensa esperada para cada estado $ s $ seguindo a política $ \pi $.
 
 \begin{equation}
     V_1 \left( s \right) = \underset{u}{max} \left( \int \! r \left( s, u, s' \right) \cdot P \left( s' \mid u, s \right) \, \mathrm{d}s'. \right)
 \end{equation}
 
-Pensando no passo seguinte podemos utilizar esse valor para calcular uma política planejando agora um passo à frente e depois generalizar para qualquer caso futuro.
+Pensando no passo seguinte, podemos utilizar esse novo valor $ V_1 \left( S \right) $ para calcular uma política planejando agora um passo à frente e depois generalizar para qualquer caso futuro.
 
 \begin{equation}
     \pi_t \left( s \right) = \underset{u}{argmax} \left( \int \! \left( r \left( s, u, s' \right) + \gamma \cdot V_{t-1} \left( s' \right) \right) \cdot P \left( s' \mid u, s \right) \, \mathrm{d}s'. \right)
@@ -326,62 +209,77 @@ Para um tempo $ t = \infty $, a política geralmente converge e uma ótima para 
 \end{equation}
 
 
-\section{Diferença Temporal}
+\section{TD (Diferença Temporal)} \label{section:TD}
 
-O que fazer se você não conhece os valores das recompensas $ r \left( S, U, S' \right) $ ou qual o resultado de uma ação $ P \left( s' \mid u, s \right) $? O algoritmo de diferença temporal visa, a partir de uma política fixa $ \pi \left( S \right) $, aprender os valores finais de $ V \left( S \right) $ através da execução de ações em diferentes estados sem um conhecimento prévio de recompensas ou do modelos das ações.
+O que fazer se você não conhece os valores das recompensas $ r \left( S, U, S' \right) $ ou qual o resultado de uma ação $ P \left( s' \mid u, s \right) $? O algoritmo de diferença temporal visa, a partir de uma política fixa $ \pi \left( S \right) $, aprender os valores finais de $ V \left( S \right) $ através da execução de ações em diferentes estados, sem ter um conhecimento prévio das recompensas recebidas ou do modelo probabilístico do resultado de suas ações.
 
-Esse algoritmo se baseia na equação \ref{equation:ValueFunctionMDP} obtida no seção \ref{section:SecaoMDP} e parte da premissa de que se tem uma política já escolhida e fixa. Utilizando isso ele atualiza o valor de $ V \left( S \right) $ cada vez que experiencia $ \left( s, u, s', r \right) $, ou seja, que alcança um estado $ s' \in S $ a partir do estado $ s \in S $, com uma ação $ u \in U $ e recebendo uma recompensa $ r \in \mathbb{R} $. A partir de cada dessas experiências, pode-se obter um valor amostra tal que:
+Esse algoritmo se baseia na equação \ref{equation:ValueFunctionMDP} obtida no seção \ref{section:MDP} e parte da premissa de que se tem uma política $ \pi_{td} $ já escolhida e fixa. Utilizando isso ele atualiza o valor de $ V \left( S \right) $ cada vez que experiencia um $ \left( s, u, s', r \right) $ qualquer, ou seja, que alcança um estado $ s' \in S $ a partir do estado $ s \in S $, com uma ação $ u \in U $ e recebendo uma recompensa $ r \in \mathbb{R} $. A partir de cada dessas experiências, pode-se obter um valor amostra tal que:
 
 \begin{equation} \label{equation:AmostraTD}
-	amostra = r \left( s, u, s' \right) + \gamma \cdot V_t^\pi \left( s' \right)
+	amostra = r \left( s, u, s' \right) + \gamma \cdot V_{\pi_{td}}^t \left( s' \right)
 \end{equation}
 
-Agora, escolhendo-se uma constante de aprendizagem $ \alpha $, pode-se atualizar o valor de  tal que:
+Agora, escolhendo-se uma constante de aprendizagem $ \alpha $, pode-se atualizar o valor de $ V_{\pi_{td}} \left( s \right) $ tal que:
 
 \begin{equation} \label{equation:UpdateValueFunctionTD}
-	V_t^\pi \left( s \right) = \left( 1 - \alpha \right) \cdot V_{t-1}^\pi \left( s \right) + \alpha \cdot amostra
+	V_{\pi_{td}}^t \left( s \right) = \left( 1 - \alpha \right) \cdot V_{\pi_{td}}^{t-1} \left( s \right) + \alpha \cdot amostra
 \end{equation}
 
-Note que, utilizando valores suficientemente pequenos de $ \alpha $, consegue-se valores de $ V^\pi \left( s \right) $ que convergem com o tempo e que, mais importante, convergem para os mesmos valores que o algoritmo MDP, considerando que a política $ \pi $ utilizada é ótima.
+Note que, utilizando valores suficientemente pequenos de $ \alpha $, consegue-se valores de $ V_{\pi_{td}} \left( s \right) $ que convergem com o tempo e que, mais importante, convergem para os mesmos valores que o algoritmo MDP, considerando que a política $ \pi_{td} $ utilizada é ótima.
 
-O problema com a diferença temporal é que ele apenas avalia uma política, mas caso queiramos mudar nossa política teríamos um problema, todos os valores de $ V \left( S \right) $ dependem apenas do estado e não da ação executada.
+O problema com a diferença temporal é que ela apenas avalia uma política fixa e já existente. Caso queiramos mudar nossa política, ou gerar uma utilizando esse algorítmo, teríamos um problema, todos os valores de $ V \left( S \right) $ dependem somento do estado e não da ação executada. Caso se mudasse a política $ \pi_{td} $ executada, teríamos de recalcular todos os valores $ V \left( S \right) $.
 
-\section{Q Learning}
+\section{Q Learning} \label{section:QLearning}
 
 Q Learning é um dos mais conhecidos e mais utilizados algoritmos de aprendizagem por reforço, sendo utilizado para controle de robôs [adicionar ref], tratamento de problemas em processamento de imagens [adicionar ref] e criação de sistemas de troca financeiros [adicionar ref]. Esse é um algoritmo, diferentemente do TD, de aprendizagem ativa, ou seja, a escolha da política e das ações é feita juntamente com a aprendizagem e se consegue alcançar uma nova política ótima o utilizando.
 
-Ao invés de se basear na equação \ref{equation:ValueFunctionMDP}, ele utiliza um valor $ Q \left( S, U \right) $, tal que:
+Ao invés de utilizar o valor de $ V \left( S \right) $ e se basear na equação \ref{equation:ValueFunctionMDP}, ele utiliza um valor $ Q \left( S, U \right) $, tal que:
 
-\begin{equation} \label{equation:QValueFunctionQLearning}
-    Q_t \left( s, u \right) = \int \! \left( r \left( s, u, s' \right) + \gamma \cdot V_{t-1} \left( s' \right) \right) \cdot P \left( s' \mid u, s \right) \, \mathrm{d}s'
+\begin{equation} \label{equation:PolicySelectionQLearning}
+    \pi^t \left( s \right) = \underset{u}{argmax} \left( Q^t \left( s, u \right) \right)
+\end{equation}
+
+\begin{equation}
+    V^t \left( s \right) = \underset{u}{max} \left( Q^t \left( s, u \right) \right)
 \end{equation}
 
 Ou seja:
 
-\begin{equation} \label{equation:PolicySelectionQLearning}
-    \pi_t \left( s \right) = \underset{u}{argmax} \left( Q_t \left( s, u \right) \right)
+\begin{equation} \label{equation:QValueFunctionQLearning}
+    Q^t \left( s, u \right) = \int \! \left( r \left( s, u, s' \right) + \gamma \cdot V^{t-1} \left( s' \right) \right) \cdot P \left( s' \mid u, s \right) \, \mathrm{d}s'
+\end{equation}
+
+Que pode ser reescrito como:
+
+\begin{equation} \label{equation:QValueFunctionQLearningFinal}
+    Q^t \left( s, u \right) = \int \! \left( r \left( s, u, s' \right) + \gamma \cdot \underset{u'}{max} \left( Q^{t-1} \left( s', u' \right) \right) \right) \cdot P \left( s' \mid u, s \right) \, \mathrm{d}s'
+\end{equation}
+
+Ao aprender o valor de $ Q^t \left( S, U \right) $, ao invés do de $ V^t \left( S \right) $, você pode modificar sua política sem ter que reaprender todos os seus valores. Analogamente às equações \ref{equation:AmostraTD} e \ref{equation:UpdateValueFunctionTD} em TD, aprende-se através de amostras obtidas a partir de experiências $ \left( s, u, s', r \right) $.
+
+
+\begin{equation}
+	amostra = r \left( s, u, s' \right) + \gamma \cdot \underset{u}{max} \left( Q^{t-1} \left( s', u' \right) \right)
 \end{equation}
 
 \begin{equation}
-    V_t \left( s \right) = \underset{u}{max} \left( Q_t \left( s, u \right) \right)
+	Q^t \left( s, u \right) = \left( 1 - \alpha \right) \cdot Q^{t-1} \left( s, u \right) + \alpha \cdot amostra
 \end{equation}
 
-Ao aprender o valor de $ Q_t \left( s, u \right) $, ao invés do de $ V_t \left( s \right) $, você pode modificar sua política sem ter que reaprender todos os seus valores. Analogamente às equações \ref{equation:AmostraTD} e \ref{equation:UpdateValueFunctionTD} em TD, aprende-se através de amostras obtidas a partir de experiências $ \left( s, u, s', r \right) $.
+Com um número suficiente de iterações e com um decaimento apropriado do parâmetro de aprendizagem $ \alpha $, $ Q^t \left( S, U \right) $ tende a um valor ótimo  com uma probabilidade 1 [adicionar refs convergência de q] e uma política escolhida com base na função \ref{equation:PolicySelectionQLearning} também seria ótima.
 
+Alguns problemas com esse algoritmo são:
 
-\begin{equation}
-	amostra = r \left( s, u, s' \right) + \gamma \cdot \underset{u}{max} \left( Q_{t-1} \left( s', u' \right) \right)
-\end{equation}
+\begin{itemize}
+	\item Podem existir muitos estados para se visitar, para um espaço contínuo, por exemplo, seriam infinitos;
+	\item Podem existir muitas ações possíveis para cada estado, para o acionamento analógico de um motor, por exemplo, seriam infinitas;
+	\item Se houverem muitos pares ação-estado $ \left( S, U \right) $, mesmo que se consiga aprender por um tempo muito grande, tem que se conseguir armazenar o valor de $ Q_t \left( S, U \right) $ para cada ação que for possível de ser executada em cada estado;
+	\item O algoritmo não consegue aplicar o que aprendeu em um estado para outros com características parecidas.
+\end{itemize}
 
-\begin{equation}
-	Q_t \left( s, u \right) = \left( 1 - \alpha \right) \cdot Q_{t-1} \left( s, u \right) + \alpha \cdot amostra
-\end{equation}
+\subsection{Generalização dos Pares Estado-Ação}
 
-Com um número suficiente de iterações e com um decaimento apropriado do parâmetro de aprendizagem $ \alpha $, $ Q_t \left( S, U \right) $ tende a um valor ótimo  com uma probabilidade 1 [adicionar refs convergência de q] e uma política escolhida com base na função \ref{equation:PolicySelectionQLearning} também seria ótima.
-
-Dois problemas com esse algoritmo são, que existem muitos estados para se visitar, caso se considere um espaço contínuo seriam infinitos. Além disso, mesmo que se consiga visitar todos os estados, teria que se conseguir armazenar o valor de $ \alpha $, $ Q_t \left( S, U \right) $ para cada ação que possível de ser executada neles.
-
-Uma solução para esse problema é generalizar uma informação de um estado para estados similares. Para isso utilizaremos um vetor de características $ f $ para descrever o estado. Essas características podem ser coisas como:
+Uma solução para esse problema é generalizar a informação de um par estado-ação para outros similares. Para isso utilizaremos um vetor de características $ f $ para descrever o estado. Essas características podem ser coisas como:
 
 \begin{itemize}
 	\item Distância para uma posição que oferece uma recompensa positiva;
@@ -391,36 +289,34 @@ Uma solução para esse problema é generalizar uma informação de um estado pa
 \end{itemize}
 
 Essas características podem descrever também a ação a ser executada, como:
-Captura um objeto;
-Economiza energia.
 
 \begin{itemize}
-	\item Captura um objeto;
+	\item Captura um alvo;
 	\item Economiza energia.
 \end{itemize}
 
-Com isso obtemos um valor $ Q \left( S, U \right) $ tal que:
+Podemos utilizar esse vetor de características $ f_j \left( S, U \right) $ para obter um valor $ Q \left( S, U \right) $ tal que:
 
 \begin{equation}
-	Q \left( S, U \right) = \omega^1 \cdot f^1 + \omega^2 \cdot f^2 + \cdots + \omega^n \cdot f^n
+	Q \left( S, U \right) = \omega_1 \cdot f_1 \left( S, U \right) + \omega_2 \cdot f_2 \left( S, U \right) + \cdots + \omega_n \cdot f_n \left( S, U \right)
 \end{equation}
 
-As vantagens disso é que podemos relacionar estados diferentes que possuem valores parecidos. A desvantagem é que devemos escolher esses valores para obter uma boa representação do nosso estado a partir deles, ou podemos ter estamos com valores parecidos, mas que são muito diferentes.
+Com essa equação conseguimos um valor parecido de $ Q \left( S, U \right) $ para estados distintos que possuam características $ f_j \left( S, U \right) $ com valores parecidos. A desvantagem é que devemos escolher esses valores/características com cuidado para obter uma boa representação do nosso par estado-ação a partir deles, ou podemos ter estados-ações com valores de $ f_j \left( S, U \right)$ parecidos, e, consequentemente, valores de $ Q \left( S, U \right) $ também parecidos, mas que são muito diferentes.
 
 Com esse novo modelo, podemos aprender valores, a partir de cada experiência, utilizando o erro atual do modelo:
 
 \begin{equation}
-	erro = r \left( s, u, s' \right) + \gamma \cdot \underset{u}{max} \left( Q_{t-1} \left( s', u' \right) \right) - Q_{t-1} \left( s, u \right)
+	erro = r \left( s, u, s' \right) + \gamma \cdot \underset{u}{max} \left( Q^{t-1} \left( s', u' \right) \right) - Q^{t-1} \left( s, u \right)
 \end{equation}
 
-E o utilizando para atualizar cada um dos pesos usados para obter $ Q_t \left( S, U \right) $:
+Dada pela diferença entre a recompensa recebida somada com o valor de ganho esperado para o novo estado alcançado e o valor atual esperado para o par estado-ação executada. E o utilizando para atualizar cada um dos pesos usados para obter $ Q_t \left( S, U \right) $:
 
 \begin{equation}
-	\omega_t^i = \omega_{t-1}^i + \alpha \cdot erro \cdot f^i \left( s, u \right)
+	\omega_i^t = \omega_i^{t-1} + \alpha \cdot erro \cdot f_i \left( s, u \right)
 \end{equation}
 
-Assim, caso tenhamos um erro grande para um dado estado, iremos atualizar os valores de todos os estados com características similares àquele. E caso esse estado tenha um valor maior para uma das características, o peso dela será mais modificado que as outras.
+Assim, caso tenhamos um erro grande para um dado estado, iremos atualizar os valores de todos os estados com características similares àquele. É importante notar também que, caso esse estado tenha um valor maior para uma das características $ f_j $, o peso dela, $ \omega_j $, será mais modificado que os da outras características.
 
-Note que a função utilizada para calcular $ Q \left( S, U \right) $ é um perceptron e ele possuí limitações, sendo a principal a de ser capaz de aprender apenas problemas linearmente separáveis [ref perceptron limitations]. Por isso os parâmetros $ f^i \left( S, U \right) $ devem ser bem escolhidos, não só para caracterizar bem um estado, mas também para permitir essa aprendizagem.
+Note que a função utilizada para calcular $ Q \left( S, U \right) $ é um perceptron e que esse tipo de função possuí limitações, sendo a principal a de ser capaz de aprender apenas problemas linearmente separáveis [ref perceptron limitations]. Por isso os parâmetros $ f_i \left( S, U \right) $ devem ser bem escolhidos, não só para caracterizar bem um estado e permitir uma boa diferenciação entre dois deles, mas também para permitir essa aprendizagem.
 
 
