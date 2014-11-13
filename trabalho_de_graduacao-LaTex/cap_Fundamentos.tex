@@ -95,7 +95,7 @@ Esse modelo pode, ainda, ser discretizado para cada instante de tempo, ficando:
         \right)
 \end{equation}
 
-Com isso temos um modelo recursivo que pode ser chamado a cada instante de tempo para atualizar o modelo de probabilidades. Essa atualização pode ainda ser dividida em quatro partes distintas:
+Com isso temos um modelo recursivo que pode ser chamado a cada instante de tempo para atualizar o modelo de probabilidades. Essa atualização pode ainda ser dividida em três partes distintas:
 
 \subsection{Predição}
 
@@ -258,11 +258,11 @@ Que pode ser reescrito como:
 Ao aprender o valor de $ Q^t \left( S, U \right) $, ao invés do de $ V^t \left( S \right) $, você pode modificar sua política sem ter que reaprender todos os seus valores. Analogamente às equações \ref{equation:AmostraTD} e \ref{equation:UpdateValueFunctionTD} em TD, aprende-se através de amostras obtidas a partir de experiências $ \left( s, u, s', r \right) $.
 
 
-\begin{equation}
+\begin{equation} \label{equation:AmostraQLearning}
 	amostra = r \left( s, u, s' \right) + \gamma \cdot \underset{u}{max} \left( Q^{t-1} \left( s', u' \right) \right)
 \end{equation}
 
-\begin{equation}
+\begin{equation} \label{equation:QUpdateQLearning}
 	Q^t \left( s, u \right) = \left( 1 - \alpha \right) \cdot Q^{t-1} \left( s, u \right) + \alpha \cdot amostra
 \end{equation}
 
@@ -277,7 +277,7 @@ Alguns problemas com esse algoritmo são:
 	\item O algoritmo não consegue aplicar o que aprendeu em um estado para outros com características parecidas.
 \end{itemize}
 
-\subsection{Generalização dos Pares Estado-Ação}
+\subsection{Generalização dos Pares Estado-Ação} \label{subsection:GeneralizaçãoParesEstadoAção}
 
 Uma solução para esse problema é generalizar a informação de um par estado-ação para outros similares. Para isso utilizaremos um vetor de características $ f $ para descrever o estado. Essas características podem ser coisas como:
 
