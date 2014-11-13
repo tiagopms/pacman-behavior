@@ -411,7 +411,7 @@ E o utilizando para atualizar cada um dos pesos usados para obter $ Q_t \left( S
 	\omega_t^i = \omega_{t-1}^i + \alpha \cdot erro \cdot f^i \left( s, u \right)
 \end{equation}
 
-ssim, caso tenhamos um erro grande para um dado estado, iremos atualizar os valores de todos os estados com características similares àquele. E caso esse estado tenha um valor maior para uma das características, o peso dela será mais modificado que as outras.
+Assim, caso tenhamos um erro grande para um dado estado, iremos atualizar os valores de todos os estados com características similares àquele. E caso esse estado tenha um valor maior para uma das características, o peso dela será mais modificado que as outras.
 
 Note que a função utilizada para calcular $ Q \left( S, U \right) $ é um perceptron e ele possuí limitações, sendo a principal a de ser capaz de aprender apenas problemas linearmente separáveis [ref perceptron limitations]. Por isso os parâmetros $ f^i \left( S, U \right) $ devem ser bem escolhidos, não só para caracterizar bem um estado, mas também para permitir essa aprendizagem.
 
