@@ -291,13 +291,23 @@ Esse filtro simplificado pode, como o na seção \ref{section:FiltroBayesiano}, 
 
 Em posse da modelagem matemática introduzida no capítulo \ref{chap:FundamentacaoMatematica} e explorada nos tópicos \ref{subsection:QLearningSelecaoDeComportamento}, \ref{subsection:QLearningParcialmenteObservavel} e \ref{subsection:BayesComSelecaoDeComportamento} podemos demonstrar agora o modelo completo.
 
-\begin{figure}[h!]
+Podemos separar esse modelo em duas partes: uma de treinamento e outra em que a aprendizagem já foi comcluída.
+
+Durante a fase de treinamento temos, então, um modelo com cinco etapas. As já conhecidas: predição; observação; seleção de ação. Integradas com a seleção de comportamento e aprendizagem. Esse modelo está representado na figura \ref{img:ModeloFinalTreinamento}.
+
+\begin{figure}[H]
     \centering
-    \includegraphics[width=120mm]{images/modelo_probabilistico-carla}
-    \caption{\label{img:ModeloProbabilisticoCarla}Filtro Bayesiano utilizando Q Learning para Seleção de Comportamento.}
+    \includegraphics[width=150mm]{images/modelo_bayesiano_treino-tiago}
+    \caption{\label{img:ModeloFinalTreinamento}Filtro Bayesiano utilizando Q Learning para Seleção de Comportamento. Durante treinamento.}
 \end{figure}
 
-Temos então um modelo com 4 etapas. As já conhecidas: predição; observação; seleção de ação. E a seleção de comportamento. Além disso, durante a fase de treinamento temos uma quinta etapa: aprendizagem.
+Após acabar o treinamento, não temos mais a etapa de aprendizagem, ficando então com um modelo com apenas 4 etapas. Esse modelo pode ser representado pela figura \ref{img:ModeloFinalPosTreinamento}.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=120mm]{images/modelo_bayesiano_final-tiago}
+    \caption{\label{img:ModeloFinalPosTreinamento}Filtro Bayesiano utilizando Q Learning para Seleção de Comportamento. Após treinamento completo.}
+\end{figure}
 
 \subsubsection{Predição} \label{subsubsection:ModeloFinalPredicao}
 
@@ -348,7 +358,7 @@ A partir dos sensores presentes no robô e do valor $ b \in B $, obtido com o al
 \end{equation}
 
 
-\subsubsection{Escolha de ação motor}
+\subsubsection{Escolha de ação motora}
 
 Por último se faz a seleção de uma ação a ser executada pelo robô. Para isso, calcula-se as probabilidade de se executar cada ação e se escolhe a com maior valor.
 		
@@ -445,3 +455,5 @@ A atuação, como é um valor discreto e não numérico, não possui um erro gau
 \end{algorithm}
 
 Ou seja, a atuação tem uma chance $ \sigma_{atuacao} = \textit{FATOR\_DE\_ACERTO} $ de ser executada como experado. Ela tem também uma proabilidade $ 1 - \sigma_{atuacao} $ de ser selecionada uma ação randômica diferente da escolhida.
+
+A recompensa $ r $ é, por sua vez, enviada da plataforma de simulação para o sistema de aprendizagem. Nela não inserimos qualquer forma de erro e ela representa a diferença de pontuação entre a etapa atual e a anterior no jogo, ou seja, a pontuação recebida pela última ação executada.
