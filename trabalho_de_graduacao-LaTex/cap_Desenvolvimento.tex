@@ -379,3 +379,69 @@ $$
 
 \section{Ambiente de testes e simulação}
 
+Para poder testar as teorias aqui descritas foi utilizado uma plataforma de Pacman [referência http://ai.berkeley.edu/project\_overview.html], criada em Berkeley para suas aulas de inteligência artificial.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=120mm]{images/pacman_platform}
+    \caption{\label{img:ModeloProbabilisticoCarla}Plataforma do jogo Pacman desenvolvida em Berkeley para aulas de IA.}
+\end{figure}
+
+A plataforma provê um sistema com informação completa%
+\footnote{Todas as propriedades do jogo são conhecidas a todo momento, como por exemplo: posição do Pacman, posição dos fantasmas e localizações com ou se comida.%
+} e sem erros na movimentação%
+\footnote{Uma ação executada em um dado estado do sistema terá sempre o mesmo resultado.%
+}. Essa plataforma foi programada em python e a integramos com ROS [refs ROS] para criar um sistema de forma mais generalizada. Utilizando ROS nós conectamos essa plataforma com um programa em C++, no qual foi programado o modelo de aprendizagem e seleção de comportamento proposto nesse trabalho.
+
+A comunicação entre a plataforma em Python e o programa em C++ se deu a partir de quatro mensagens diferentes, as quais simulavam os sensores, atuadores e recompensas do sistema.
+
+\begin{itemize}
+	\item Posição do agente (Pacman) --- $ \left( x, y \right) \in \mathbb{R}^2 $
+	\item Distância para os fantasmas --- $ \left( d_x, d_y \right) = \left( \Delta x, \Delta y \right) \in \mathbb{R}^2 $
+	\item Ação a ser executada --- $ u \in \left\{Norte, Sul, Leste, Oeste, Esperar \right\} $
+	\item Recompensa recebida do ambiente --- $ r \in \mathbb{R} $
+\end{itemize}
+
+Para simular erros de sensoriamento, comuns em aplicação de robótica móvel, antes de enviar essas informações são inseridos erros Gaussianos tanto na posição do agente (Pacman), quanto nas distâncias pros fantasmas. Para simular erros de atuação, foi inserido um erro na forma de atuação a ser executada também.
+
+$$
+	\left( x, y \right) = \left( x^*, y^* \right) + \left( \delta\left( 0, \sigma_{pacman} \right), \delta\left( 0, \sigma_{pacman} \right) \right)
+$$
+
+\begin{equation}
+	\left( x, y \right) = \left( \delta\left( x^*, \sigma_{pacman} \right), \delta\left( y^*, \sigma_{pacman} \right) \right)
+\end{equation}
+
+Sendo:
+
+\begin{itemize}
+	\item $ \delta \left( \mu, \sigma \right) $ uma função que gera um número aleatório baseado numa gaussiana com média $ \mu $ e desvio padrão $ 
+sigma $;
+	\item $ \sigma_{pacman} $ o desvio padrão do erro inserido na posição do agente;
+	\item $ \left( x^*, y^* \right) $ a posição exata do agente.
+\end{itemize}
+
+Analogamente a distância ``vista'' dos fantasmas ficou:
+
+\begin{equation}
+	\left( d_x, d_y \right) = \left( \delta\left( d_x^*, \sigma_{dist\_fant} \right), \delta\left( d_y^*, \sigma_{dist\_fant} \right) \right)
+\end{equation}
+
+A atuação, como é um valor discreto e não numérico, não possui um erro gaussiano. Ela é recebida pela plataforma de simulação e um erro é inserido nela de acordo com a função a seguir:
+
+\begin{algorithm}[H]
+	\caption{Erro na Atuação} \label{euclid}
+	\begin{algorithmic}[1]
+		\Procedure{ExecutarAção}{\textit{ação\_escolhida}}
+			\State $\textit{numero\_randomico} \gets \text{random }\textit{numero}$
+			\If {$\textit{numero\_randomico} > \text{FATOR\_DE\_ACERTO} $ }
+				\State $\textit{acao\_randomica} \gets \text{random }\textit{ação} \in \textit{Ações}-\textit{\{ação\_escolhida\}}$
+				\State \Return $\textit{acao\_randomica}$
+			\Else
+				\State \Return $\textit{ação\_escolhida}$
+			\EndIf
+		\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
+Ou seja, a atuação tem uma chance $ \sigma_{atuacao} = \textit{FATOR\_DE\_ACERTO} $ de ser executada como experado. Ela tem também uma proabilidade $ 1 - \sigma_{atuacao} $ de ser selecionada uma ação randômica diferente da escolhida.
