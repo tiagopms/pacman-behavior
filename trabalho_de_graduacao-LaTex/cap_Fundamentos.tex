@@ -257,7 +257,6 @@ Que pode ser reescrito como:
 
 Ao aprender o valor de $ Q^t \left( S, U \right) $, ao invés do de $ V^t \left( S \right) $, você pode modificar sua política sem ter que reaprender todos os seus valores. Analogamente às equações \ref{equation:AmostraTD} e \ref{equation:UpdateValueFunctionTD} em TD, aprende-se através de amostras obtidas a partir de experiências $ \left( s, u, s', r \right) $.
 
-
 \begin{equation} \label{equation:AmostraQLearning}
 	amostra = r \left( s, u, s' \right) + \gamma \cdot \underset{u}{max} \left( Q^{t-1} \left( s', u' \right) \right)
 \end{equation}
@@ -288,16 +287,19 @@ Uma solução para esse problema é generalizar a informação de um par estado-
 	\item Estado do robô (Com ou sem problema).
 \end{itemize}
 
-Essas características podem descrever também a ação a ser executada, como:
+Elas também podem descrever a ação a ser executada, como:
 
 \begin{itemize}
-	\item Captura um alvo;
+	\item Fica parado;
+	\item Move uma garra;
 	\item Economiza energia.
 \end{itemize}
 
+Essas características podem até descrever um estado futuro $ s' $ (possivelmente utilizando alguma das características descritas acima) que tenha alta chance de ser alcançado por esse par estado-ação.
+
 Podemos utilizar esse vetor de características $ f_j \left( S, U \right) $ para obter um valor $ Q \left( S, U \right) $ tal que:
 
-\begin{equation}
+\begin{equation} \label{equation:QValueGeneralizado}
 	Q \left( S, U \right) = \omega_1 \cdot f_1 \left( S, U \right) + \omega_2 \cdot f_2 \left( S, U \right) + \cdots + \omega_n \cdot f_n \left( S, U \right)
 \end{equation}
 
@@ -319,4 +321,28 @@ Assim, caso tenhamos um erro grande para um dado estado, iremos atualizar os val
 
 Note que a função utilizada para calcular $ Q \left( S, U \right) $ é um perceptron e que esse tipo de função possuí limitações, sendo a principal a de ser capaz de aprender apenas problemas linearmente separáveis [ref perceptron limitations]. Por isso os parâmetros $ f_i \left( S, U \right) $ devem ser bem escolhidos, não só para caracterizar bem um estado e permitir uma boa diferenciação entre dois deles, mas também para permitir essa aprendizagem.
 
+\subsection{Escolha de Ações e Exploração Gulosa} \label{subsection:EscolhaDeAçõesExploraçãoGulosa}
 
+Utilizando a equação \ref{equation:PolicySelectionQLearning}, em conjunto com \ref{equation:QValueGeneralizado}, podemos criar uma política $ \pi $ para escolha de ações. Essa política, caso o valor de $ Q \left( S, U \right) $ já tenha sido aprendido com sucesso, será ótima.
+
+Mas, caso desde o começo do aprendizado se utilize apenas esse método para escolher a ação executada, pode se ficar preso em máximas locais%
+\footnote{Uma política de ação que é melhor do que outras com pequenas variações, mas, caso se mude mais os parâmetros, existem outras melhores.%
+}, sem explorar outras opções de ação. Um meio de evitar esse problema é utilizar outros métodos de exploração durante o treinamento, que podem ser desativados quando o treinamento acabar. 
+
+Um desses métodos é chamado de exploração gulosa (\textit{greedy exploration}). É um método bem simples em que antes de se selecionar uma ação se ``arremessa uma moeda'', dependendo do resultado você ou executa uma ação randômica ou seleciona uma ação baseado no valor de $ Q^t \left( S, U \right) $ atual.
+
+\begin{algorithm}[H]
+	\caption{Exploração Gulosa} \label{euclid}
+	\begin{algorithmic}[1]
+		\Procedure{PegarAcao}{}
+			\State $\textit{numero\_randomico} \gets \text{random }\textit{numero}$
+			\If {$\textit{numero\_randomico} < \text{FATOR\_DE\_EXPLORACAO} $ }
+				\State \Return $\textit{acao\_randomica}$
+			\Else
+				\State \Return $\textit{acao\_aprendida}$
+			\EndIf
+		\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
+Note que esse parâmetro $ \gamma = \textit{FATOR\_DE\_EXPLORACAO} $ é muito importante e deve ser bem escolhido. Um valor mais baixo dele limita a exploração, enquanto um mais alto atrasa a aprendizagem e pode impedir a aprendizagem de uma política que execute uma sequência de ações mais complexa.

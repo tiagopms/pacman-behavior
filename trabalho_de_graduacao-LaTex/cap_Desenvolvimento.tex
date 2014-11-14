@@ -13,6 +13,8 @@ Este capítulo irá apresentar as soluções adotadas para os problemas de plane
 
 \section{Modelagem Matemática}
 
+Nessa seção iremos descrever as mudanças que foram feitas nos modelos matemáticos utilizados nesse projeto. Faremos também uma explicação de como ficou o modelo final do projeto e de como as várias teorias se encaixam.
+
 \subsection{Aprendizagem por Reforço para Seleção de Comportamentos} \label{subsection:QLearningSelecaoDeComportamento}
 
 Nesse trabalho, queremos utilizar a aprendizagem por reforço para aprender uma política de seleção de comportamento e não de ações. Para isso nós devemos alterar as equações do algoritmo Q Learning para, ao invés de escolher uma ação $ u \in U $, escolher um comportamento $ b \in B $. Reescrevendo as principais equações desse algoritmo elas são:
@@ -121,13 +123,13 @@ Com isso obtemos um valor $ Q \left( A, B \right) $ tal que:
 
 Com esse novo modelo, podemos aprender valores, a partir de cada experiência, utilizando o erro atual do modelo:
 
-\begin{equation}
+\begin{equation} \label{equation:ErroQPartiallyObservable}
 	erro = r \left( a, b, a' \right) + \gamma \cdot \underset{b}{max} \left( Q^{t-1} \left( a', b' \right) \right) - Q^{t-1} \left( a, b \right)
 \end{equation}
 
 E o utilizando para atualizar cada um dos pesos usados para obter $ Q^t \left( A, B \right) $:
 
-\begin{equation}
+\begin{equation} \label{equation:UpdateOmegaQPartiallyObservable}
 	\omega_i^t = \omega_i^{t-1} + \alpha \cdot erro \cdot f_i \left( a, b \right)
 \end{equation}
 
@@ -315,7 +317,11 @@ Nessa etapa, a partir da ação escolhida no período anterior de tempo, se faz 
 
 \subsubsection{Escolha de comportamento}
 
-Essa etapa é onde a escolha do comportamento acontece. Primeiro se calcula a função à seguir para cada comportamento $ b \in B^t $ e para o conjunto de probabilidades%
+Essa etapa é onde a escolha do comportamento acontece. Ela pode ter dois métodos distintos, um durante a fase de treinamento e outro após acabar a aprendizagem.
+
+Durante a aprendizagem se utiliza uma exploração gulosa, descrita no tópico \ref{subsection:EscolhaDeAçõesExploraçãoGulosa}, para a escolha do comportamento. Nela, primeiro se sorteia um número randômico $ x \in [0,1] $. Se esse número for menor que um fator de exploração $ \gamma $, se escolhe uma ação randômica entre todas as possíveis. No caso contrário, se escolhe uma ação da seguinte forma, que é como é feita a escolha após a aprendizagem ter acabado.
+
+Primeiro se calcula a função à seguir para cada comportamento $ b \in B^t $ e para o conjunto de probabilidades%
 \footnote{É importante ressaltar que $ a^t $ equivale ao conjunto de probabilidades $ P \left( S^t S_b^t \mid z^{0: t-1} b^{0: t-1} m^{0: t-1} \pi_f \right) $, obtido em \ref{subsubsection:ModeloFinalPredicao}.%
 } $ a^t \in A^t $ de se encontrar em cada estado $ S^t $.
 
@@ -323,7 +329,7 @@ Essa etapa é onde a escolha do comportamento acontece. Primeiro se calcula a fu
     	Q \left( a^t, B^t \right) = \omega^1 \cdot f^1 \left( a^t, B^t \right) + \omega^2 \cdot f^2 \left( a^t, B^t \right) + \cdots + \omega^n \cdot f^n \left( a^t, B^t \right)
 \end{equation}
 
-Depois, se escolhe um comportamento a partir desses valores calculados, sendo o escolhido o que maximize essa função%
+Depois, se escolhe um comportamento a partir desses valores calculados, sendo escolhido o que maximize essa função%
 \footnote{Durante as etapas de aprendizagem se escolhe um comportamentos aleatório com uma probabilidade $ \gamma $, chamada parâmetro de exploração, para se explorar outros comportamentos.}.
 
 
@@ -359,7 +365,16 @@ Por último se faz a seleção de uma ação a ser executada pelo robô. Para is
 
 \subsubsection{Aprendizagem}
 
-Etapa de aprendizagem.
+Nessa etapa são atualizados os valores do modelo de seleção de comportamento $ Q \left( A, B \right) $ a partir de uma recompensa $ r $ recebida. Tendo posse dessa recompensa, das probabilidades $ a^{t-1} \in A^{t-1} $ do estado anterior e atual $ a^t \in A^t $ do sistema e de qual o comportamento $ b^{t-1} \in B^{t-1} $ escolhido no tempo anterior pelo algoritmo de aprendizagem, podemos atualizar os pesos $ \omega_i $ do sistema de aprendizagem, como descrito nas equações \ref{equation:ErroQPartiallyObservable} e \ref{equation:UpdateOmegaQPartiallyObservable}, reescritas aqui.
+
+$$
+	erro = r \left( a, b, a' \right) + \gamma \cdot \underset{b}{max} \left( Q^{t-1} \left( a', b' \right) \right) - Q^{t-1} \left( a, b \right)
+$$
+
+$$
+	\omega_i^t = \omega_i^{t-1} + \alpha \cdot erro \cdot f_i \left( a, b \right)
+$$
+
 
 
 \section{Ambiente de testes e simulação}
