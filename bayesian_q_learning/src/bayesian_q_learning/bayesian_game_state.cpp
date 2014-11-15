@@ -152,13 +152,13 @@ bool BayesianGameState::observeAgent(pacman_msgs::AgentPoseService::Request &req
 
     if(agent == pacman_msgs::AgentPoseService::Request::PACMAN)
     {
-        ROS_INFO_STREAM("Observe pacman");
+        ROS_DEBUG_STREAM("Observe pacman");
         observePacman(measurement_x, measurement_y);
     }
     else
     {
         int ghost_index = agent - 1;
-        ROS_INFO_STREAM("Observe ghost " << ghost_index);
+        ROS_DEBUG_STREAM("Observe ghost " << ghost_index);
         observeGhost(measurement_x, measurement_y, ghost_index);
     }
 
@@ -168,7 +168,7 @@ bool BayesianGameState::observeAgent(pacman_msgs::AgentPoseService::Request &req
 
 void BayesianGameState::predictPacmanMove(pacman_msgs::PacmanAction action)
 {
-    ROS_INFO_STREAM("Predict pacman");
+    ROS_DEBUG_STREAM("Predict pacman");
 
     std::vector<float> map_line (width_, 0);
     std::vector< std::vector<float> > pacman_new_pose_map (height_, map_line);
@@ -225,7 +225,7 @@ void BayesianGameState::predictPacmanMove(pacman_msgs::PacmanAction action)
 
 void BayesianGameState::predictGhostMove(int ghost_index)
 {
-    ROS_INFO_STREAM("Predict ghost " << ghost_index);
+    ROS_DEBUG_STREAM("Predict ghost " << ghost_index);
 
     double STOP_PROBABILITY = 0.2;
 

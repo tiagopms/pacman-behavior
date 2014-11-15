@@ -8,7 +8,7 @@
 class BayesianBehaviorAgent : public PacmanAgent
 {
   private:
-    typedef enum {STOP, EAT, EAT_BIG_FOOD, RUN, HUNT} Behaviors;
+    typedef enum {STOP, EAT, RUN, EAT_BIG_FOOD, HUNT} Behaviors;
     static int NUMBER_OF_BEHAVIORS_;
 
     pacman_msgs::PacmanAction getWestAction(BayesianGameState *game_state);

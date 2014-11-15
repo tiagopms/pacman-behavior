@@ -543,17 +543,13 @@ class Game:
                 self.pacman_pose_client = rospy.ServiceProxy('/pacman/pacman_pose', AgentPoseService)
                 self.ghost_distance_client = rospy.ServiceProxy('/pacman/ghost_distance', AgentPoseService)
 
-                print "Waiting for service /pacman/pacman_pose"
                 rospy.wait_for_service('/pacman/pacman_pose')
-                print "Service /pacman/pacman_pose is now available"
             else:
                 # declare this as a client of services in /pacman/.../error topics
                 self.pacman_pose_client = rospy.ServiceProxy('/pacman/pacman_pose/error', AgentPoseService)
                 self.ghost_distance_client = rospy.ServiceProxy('/pacman/ghost_distance/error', AgentPoseService)
 
-                print "Waiting for service /pacman/pacman_pose/error"
                 rospy.wait_for_service('/pacman/pacman_pose/error')
-                print "Service /pacman/pacman_pose/error is now available"
         
 
     def getProgress(self):

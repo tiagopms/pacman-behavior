@@ -12,16 +12,22 @@
 
 #include <mcheck.h>
 
-int NUMBER_OF_GAMES = 10005;
+int NUMBER_OF_GAMES_WITH_NO_GUI = 2300;
+int NUMBER_OF_GAMES = 2500;
 int NUMBER_OF_TRAININGS = 2000;
 bool is_training = true;
 
 bool endGame(pacman_msgs::EndGame::Request &req, pacman_msgs::EndGame::Response &res, 
-        ros::ServiceClient *start_game_client, BayesianGameState **game_state)
+        ros::ServiceClient *start_game_client, BayesianGameState **game_state, BayesianQLearning *q_learning)
 {
     // count number of games
     static int game_count = 0;
     game_count++;
+
+    // save scores and learning weights in end of match
+    int match_score = (int) req.score;
+    q_learning->saveMatchScore(match_score);
+    q_learning->saveEndOfMatchWeights();
 
     if (req.win)
         ROS_INFO_STREAM("Won game " << game_count);
@@ -32,12 +38,13 @@ bool endGame(pacman_msgs::EndGame::Request &req, pacman_msgs::EndGame::Response 
     {
         pacman_msgs::StartGame start_game;
 
-        if (game_count < NUMBER_OF_TRAININGS)
-            start_game.request.show_gui = false;
-        else {
-            start_game.request.show_gui = true;
+        if (game_count >= NUMBER_OF_TRAININGS)
             is_training = false;
-        }
+
+        if (game_count < NUMBER_OF_GAMES_WITH_NO_GUI)
+            start_game.request.show_gui = false;
+        else
+            start_game.request.show_gui = true;
 
         if (start_game_client->call(start_game))
             if(start_game.response.started)
@@ -77,8 +84,6 @@ bool getAction(pacman_msgs::PacmanGetAction::Request &req, pacman_msgs::PacmanGe
     } else {
         behavior = q_learning->getBehavior(*game_state);
     }
-    // TODO: remove this
-    // behavior = 1;
 
     pacman_msgs::PacmanAction action = pacman.getAction(*game_state, behavior);
     (*game_state)->predictAgentsMoves(action);
@@ -94,7 +99,10 @@ bool receiveReward(pacman_msgs::RewardService::Request &req, pacman_msgs::Reward
 {
     int reward = (int) req.reward;
     ROS_DEBUG_STREAM("Received reward " << reward);
-    q_learning->updateWeights(*game_state, reward);
+
+    if (is_training) {
+        q_learning->updateWeights(*game_state, reward);
+    }
 
     return true;
 }
@@ -121,7 +129,7 @@ int main(int argc, char **argv)
     // client to start game service and server for end game service
     ros::ServiceClient start_game_client = n.serviceClient<pacman_msgs::StartGame>("/pacman/start_game");
     ros::ServiceServer end_game_service = n.advertiseService<pacman_msgs::EndGame::Request, pacman_msgs::EndGame::Response>
-                                ("/pacman/end_game", boost::bind(endGame, _1, _2, &start_game_client, &game_state));
+                                ("/pacman/end_game", boost::bind(endGame, _1, _2, &start_game_client, &game_state, q_learning));
     ros::service::waitForService("/pacman/start_game", -1);
 
     // start first game

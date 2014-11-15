@@ -393,7 +393,7 @@ std::vector< std::pair< float, std::pair<int, int> > > GameState::getNextPositio
         return legal_next_positions_with_probabilities;
     }
 
-    float CHANCE_OF_ACTION_SUCCESS = 0.9;
+    float CHANCE_OF_ACTION_SUCCESS = 0.98;
     float chance_of_other_moves = (1 - CHANCE_OF_ACTION_SUCCESS )/4.0;
 
     float north_probability = ( action.action == pacman_msgs::PacmanAction::NORTH ) ? CHANCE_OF_ACTION_SUCCESS : chance_of_other_moves;

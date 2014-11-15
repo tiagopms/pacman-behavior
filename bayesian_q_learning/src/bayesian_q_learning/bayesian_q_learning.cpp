@@ -6,12 +6,13 @@
 #include <fstream>
 #include <ctime>
 
-int BayesianQLearning::NUM_BEHAVIORS = 5;
+int BayesianQLearning::NUM_BEHAVIORS = 3;
 int BayesianQLearning::NUM_FEATURES = 3;
 double BayesianQLearning::learning_rate_ = 0.002;
 double BayesianQLearning::discount_factor_ = 0.99;
-double BayesianQLearning::exploration_rate_ = 0.1;
-int BayesianQLearning::num_training_ = 10;
+double BayesianQLearning::exploration_rate_ = 1;
+int BayesianQLearning::num_training_ = 2000;
+int BayesianQLearning::no_exploration_training_matches_ = 250;
 
 BayesianQLearning::BayesianQLearning()
 {
@@ -20,6 +21,7 @@ BayesianQLearning::BayesianQLearning()
     //weights_ = std::vector<double> (NUM_BEHAVIORS + NUM_FEATURES, 0);
     std::vector<double> temp_weights = std::vector<double> (NUM_FEATURES, 0);
     behavioral_weights_ = std::vector< std::vector<double> > (NUM_BEHAVIORS, temp_weights);
+    temp_per_match_chosen_behaviors_ = std::vector<int> (NUM_BEHAVIORS, 0);
     old_q_value_ = 0;
     new_q_value_ = 0;
     old_behavior_ = 0;
@@ -92,10 +94,7 @@ std::pair<int, double> BayesianQLearning::getMaxQValue(BayesianGameState *game_s
         }
     }
 
-    if (behavior == 3)
-        ROS_ERROR_STREAM("max q behavior " << behavior << " with value " << max_q_value);
-    else
-        ROS_INFO_STREAM("max q behavior " << behavior << " with value " << max_q_value);
+    ROS_DEBUG_STREAM("max q behavior " << behavior << " with value " << max_q_value);
 
     return std::make_pair(behavior, max_q_value);
 }
@@ -117,10 +116,7 @@ int BayesianQLearning::getTrainingBehavior(BayesianGameState *game_state)
         old_q_value_ = getQValue(game_state, behavior);
         saveTempFeatures(behavior);
 
-        if (behavior == 3)
-            ROS_ERROR_STREAM("random behavior " << behavior);
-        else
-            ROS_INFO_STREAM("random behavior " << behavior);
+        ROS_DEBUG_STREAM("random behavior " << behavior);
 
         return behavior;
     }
@@ -144,7 +140,7 @@ void BayesianQLearning::updateWeights(BayesianGameState *new_game_state, int rew
 
     // error = reward + discount_factor * q_value(new_state) - q_value(old_state)
     double error = reward + discount_factor_ * new_q_value_ - old_q_value_;
-    if(old_behavior_ == 1)
+    /*if(old_behavior_ == 1)
     {
         ROS_INFO_STREAM("updating behavior " << old_behavior_);
         ROS_ERROR_STREAM(" - error " << error);
@@ -159,7 +155,7 @@ void BayesianQLearning::updateWeights(BayesianGameState *new_game_state, int rew
         ROS_WARN_STREAM(" - old q value " << old_q_value_);
         ROS_WARN_STREAM(" - new q value " << new_q_value_);
         ROS_WARN_STREAM(" - q value " << getQValue(new_game_state, old_behavior_));
-    }
+    }*/
 
     //std::vector<double>::iterator weights_it = weights_.begin();
 
@@ -186,42 +182,60 @@ void BayesianQLearning::updateWeights(BayesianGameState *new_game_state, int rew
 
 
     // TODO: remove after this
-    if(old_behavior_ == 1 || old_behavior_ == 3)
+    ROS_INFO_STREAM("Error " << error << " executed behavior " << old_behavior_);
+    weights = behavioral_weights_[0];
+    weights_it = weights.begin();
+    for(int i = 0; weights_it != weights.end() ; ++weights_it)
     {
-        weights = behavioral_weights_[1];
-        weights_it = weights.begin();
-
-        for(int i = 0; weights_it != weights.end() ; ++weights_it)
-        {
-            ROS_ERROR_STREAM(" - 1 weight " << *weights_it);
-        }
-        weights = behavioral_weights_[3];
-        weights_it = weights.begin();
-
-        for(int i = 0; weights_it != weights.end() ; ++weights_it)
-        {
-            ROS_WARN_STREAM(" - 3 weight " << *weights_it);
-        }
+        ROS_INFO_STREAM(" - 0 weight " << *weights_it);
+    }
+    weights = behavioral_weights_[1];
+    weights_it = weights.begin();
+    for(int i = 0; weights_it != weights.end() ; ++weights_it)
+    {
+        ROS_ERROR_STREAM(" - 1 weight " << *weights_it);
+    }
+    weights = behavioral_weights_[2];
+    weights_it = weights.begin();
+    for(int i = 0; weights_it != weights.end() ; ++weights_it)
+    {
+        ROS_WARN_STREAM(" - 2 weight " << *weights_it);
     }
 
     saved_behavioral_weights_.push_back(behavioral_weights_);
+    saved_chosen_behaviors_.push_back(old_behavior_);
+    temp_per_match_chosen_behaviors_[old_behavior_]++;
 
-    if(old_behavior_ == 1)
+    /*if(old_behavior_ == 1)
     {
         ROS_ERROR_STREAM(" - new q value " << getQValue(new_game_state, old_behavior_));
     }
     if(old_behavior_ == 3)
     {
         ROS_WARN_STREAM(" - new q value " << getQValue(new_game_state, old_behavior_));
-    }
+    }*/
 }
 
+void BayesianQLearning::saveMatchScore(int score)
+{
+    saved_match_scores_.push_back(score);
+}
 
-void BayesianQLearning::logWeights()
+void BayesianQLearning::saveEndOfMatchWeights()
+{
+    saved_match_behavioral_weights_.push_back(behavioral_weights_);
+    saved_per_match_chosen_behaviors_.push_back(temp_per_match_chosen_behaviors_);
+
+    temp_per_match_chosen_behaviors_.clear();
+    temp_per_match_chosen_behaviors_ = std::vector<int> (NUM_BEHAVIORS, 0);
+
+    exploration_rate_ -= 1.0/( num_training_ - no_exploration_training_matches_ );
+}
+
+void BayesianQLearning::logWeights(std::vector< std::vector< std::vector<double> > > logged_weights, time_t time_now, bool log_per_match)
 {
     // get current time to create unique file name
-    time_t t = time(0);
-    struct tm *now = localtime( & t );
+    struct tm *now = localtime( & time_now );
     char time_buf[80];
     strftime(time_buf, sizeof(time_buf), "%Y-%m-%d.%X", now);
 
@@ -229,8 +243,11 @@ void BayesianQLearning::logWeights()
     std::vector< boost::shared_ptr<std::ofstream> > output_files;
     for (int i = 0; i < NUM_BEHAVIORS ; i++)
     {
-        char file_name_buffer [50];
-        sprintf(file_name_buffer, "/home/tiago/pacman_ws/log/behavior_%d__%s.txt", i, time_buf);
+        char file_name_buffer [100];
+        if (log_per_match)
+            sprintf(file_name_buffer, "/home/tiago/pacman_ws/log/per_match_behavior_%d__%s.txt", i, time_buf);
+        else
+            sprintf(file_name_buffer, "/home/tiago/pacman_ws/log/behavior_%d__%s.txt", i, time_buf);
 
         output_files.push_back( boost::make_shared< std::ofstream > (file_name_buffer) );
 
@@ -241,11 +258,9 @@ void BayesianQLearning::logWeights()
         }
     }
 
-    std::cout << "Logging weights" << std::endl;
-
     // log weights to files
-    for(std::vector< std::vector< std::vector<double> > >::iterator it = saved_behavioral_weights_.begin(); 
-                        it != saved_behavioral_weights_.end(); ++it)
+    for(std::vector< std::vector< std::vector<double> > >::iterator it = logged_weights.begin(); 
+                        it != logged_weights.end(); ++it)
     {
         int file = 0;
         for(std::vector< std::vector<double> >::iterator it2 = it->begin(); 
@@ -266,6 +281,117 @@ void BayesianQLearning::logWeights()
     {
         output_files[i]->close();
     }
+}
+
+void BayesianQLearning::logScores(time_t time_now)
+{
+    // get current time to create unique file name
+    struct tm *now = localtime( & time_now );
+    char time_buf[80];
+    strftime(time_buf, sizeof(time_buf), "%Y-%m-%d.%X", now);
+
+    // output file
+
+    char file_name_buffer [50];
+    sprintf(file_name_buffer, "/home/tiago/pacman_ws/log/match_scores__%s.txt", time_buf);
+    std::ofstream output_file (file_name_buffer);
+
+    if(! output_file.is_open())
+    {
+        std::cout << "Unable to open file";
+        return;
+    }
+
+    // log weights to files
+    for(std::vector<double>::iterator it = saved_match_scores_.begin(); 
+                        it != saved_match_scores_.end(); ++it)
+    {
+        
+        output_file << *it << "\n";        
+    }
+
+    // close output file
+    output_file.close();
+}
+
+void BayesianQLearning::logChosenBehaviors(time_t time_now)
+{
+    // get current time to create unique file name
+    struct tm *now = localtime( & time_now );
+    char time_buf[80];
+    strftime(time_buf, sizeof(time_buf), "%Y-%m-%d.%X", now);
+
+    // output file
+
+    char file_name_buffer [50];
+    sprintf(file_name_buffer, "/home/tiago/pacman_ws/log/chosen_behaviors__%s.txt", time_buf);
+    std::ofstream output_file (file_name_buffer);
+
+    if(! output_file.is_open())
+    {
+        std::cout << "Unable to open file";
+        return;
+    }
+
+    // log weights to files
+    for(std::vector<int>::iterator it = saved_chosen_behaviors_.begin(); 
+                        it != saved_chosen_behaviors_.end(); ++it)
+    {
+        output_file << *it << "\n";        
+    }
+
+    // close output file
+    output_file.close();
+}
+
+void BayesianQLearning::logEndOfMatchBehaviors(time_t time_now)
+{
+    // get current time to create unique file name
+    struct tm *now = localtime( & time_now );
+    char time_buf[80];
+    strftime(time_buf, sizeof(time_buf), "%Y-%m-%d.%X", now);
+
+    // output file
+
+    char file_name_buffer [50];
+    sprintf(file_name_buffer, "/home/tiago/pacman_ws/log/match_behaviors__%s.txt", time_buf);
+    std::ofstream output_file (file_name_buffer);
+
+    if(! output_file.is_open())
+    {
+        std::cout << "Unable to open file";
+        return;
+    }
+
+    // log weights to files
+    for(std::vector< std::vector<int> >::iterator it = saved_per_match_chosen_behaviors_.begin(); 
+                        it != saved_per_match_chosen_behaviors_.end(); ++it)
+    {
+        for(std::vector<int>::iterator it2 = it->begin(); 
+                            it2 != it->end(); ++it2)
+        {
+            output_file << *it2 << " ";
+        }
+        output_file << "\n";
+    }
+
+    // close output file
+    output_file.close();
+}
+
+void BayesianQLearning::logWeights()
+{
+    std::cout << "Logging weights" << std::endl;
+    
+    // get current time to create unique file names
+    time_t now = time(0);
+
+    logWeights(saved_behavioral_weights_, now, false);
+    logWeights(saved_match_behavioral_weights_, now, true);
+    logScores(now);
+
+    logChosenBehaviors(now);
+    logEndOfMatchBehaviors(now);
 }
 
 // TODO: features ideas: closest food with min probability_of_close_enemy

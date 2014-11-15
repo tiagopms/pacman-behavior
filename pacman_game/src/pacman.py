@@ -599,14 +599,11 @@ def readCommand( argv ):
             if (i == False):
                 mapLayout.map[y * mapLayout.width + x] = mapLayout.GHOST
             else:
-                print "Pacman: ", x, ", ", y
                 mapLayout.map[y * mapLayout.width + x] = mapLayout.PACMAN
         for i, j in thisLayout.capsules:
             x = i;
             y = j;
             mapLayout.map[y * mapLayout.width + x] = mapLayout.BIG_FOOD
-
-        print mapLayout.map
 
         info = [mapLayout, options.numGhosts]
         return info

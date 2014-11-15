@@ -24,7 +24,6 @@ class LearningAgent(Agent):
         self.rosGiveReward = rospy.ServiceProxy('/pacman/reward', RewardService)
 
     def startEpisode(self):
-        print "Starting new episode"
         self.lastState = None
 
     def doAction(self,state,action):
@@ -192,7 +191,7 @@ class RosServiceWithErrorsAgent(LearningAgent):
                         PacmanAction.NORTH: Directions.NORTH,
                         PacmanAction.SOUTH: Directions.SOUTH,
                         PacmanAction.STOP:  Directions.STOP}
-    chance_of_move_error = 0.1
+    chance_of_move_error = 0.02
 
     def __init__( self, index = 0 ):
         super(RosServiceWithErrorsAgent, self).__init__()

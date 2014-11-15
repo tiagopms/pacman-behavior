@@ -49,7 +49,7 @@ class PacmanGame():
         self.show_gui = req.show_gui
         return True
 
-    def end_game(self, is_win):
+    def end_game(self, is_win, match_score):
         # set game as not running
         self.start_game = False
         self.show_gui = False
@@ -59,7 +59,7 @@ class PacmanGame():
         rospy.loginfo(ending_game_string)
         rospy.wait_for_service('/pacman/end_game')
         try:
-          srv_resp = self.end_game_client(is_win)
+          srv_resp = self.end_game_client(is_win, match_score)
           if not srv_resp.game_restarted:
             rospy.signal_shutdown("Shuting down node, game ended and wasn't restarted")
         except rospy.ServiceException as exc:
@@ -74,9 +74,10 @@ class PacmanGame():
         games = pacman.runGames(**self.args)
         single_game = games.pop()
         is_win = single_game.state.isWin()
+        match_score = single_game.state.getScore()
 
         # end game
-        self.end_game(is_win)
+        self.end_game(is_win, match_score)
 
 
     # run game
@@ -97,7 +98,7 @@ class PacmanGame():
                 self.runSingleGame()
 
             gc.collect()
-            print len(gc.get_objects())
+            len(gc.get_objects())
 
             #sleep while in loop
             self.r.sleep()

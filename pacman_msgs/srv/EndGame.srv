@@ -1,3 +1,4 @@
 bool win
+int64 score
 ---
 bool game_restarted
