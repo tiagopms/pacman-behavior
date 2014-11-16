@@ -1,4 +1,4 @@
-#include "bayesian_q_learning/bayesian_game_state.h"
+#include "bayesian_q_5_behaviors/bayesian_game_state_5_behaviors.h"
 
 #include "pacman_abstract_classes/util_functions.h"
 #include <boost/math/special_functions/round.hpp>

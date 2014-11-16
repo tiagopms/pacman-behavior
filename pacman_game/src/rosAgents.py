@@ -191,7 +191,7 @@ class RosServiceWithErrorsAgent(LearningAgent):
                         PacmanAction.NORTH: Directions.NORTH,
                         PacmanAction.SOUTH: Directions.SOUTH,
                         PacmanAction.STOP:  Directions.STOP}
-    chance_of_move_error = 0.02
+    chance_of_move_error = 0.1
 
     def __init__( self, index = 0 ):
         super(RosServiceWithErrorsAgent, self).__init__()

@@ -6,9 +6,9 @@
 #include "pacman_msgs/PacmanGetAction.h"
 #include "pacman_msgs/RewardService.h"
 
-#include "bayesian_q_learning/bayesian_game_state.h"
-#include "bayesian_q_learning/bayesian_behavior_agent.h"
-#include "bayesian_q_learning/bayesian_q_learning.h"
+#include "bayesian_q_5_behaviors/bayesian_game_state_5_behaviors.h"
+#include "bayesian_q_5_behaviors/bayesian_5_behaviors_agent.h"
+#include "bayesian_q_5_behaviors/bayesian_q_learning_5_behaviors.h"
 
 #include <mcheck.h>
 

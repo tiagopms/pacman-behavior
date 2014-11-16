@@ -24,6 +24,7 @@ class PacmanGame():
         # game attributes
         # game_attributes = ["-p", "RosWaitServiceAgent", "-l", "smallClassic", "-k", "4"]
         game_attributes = ["-p", "RosServiceWithErrorsAgent", "-l", "smallClassic", "-k", "4"]
+        # game_attributes = ["-p", "RosServiceWithErrorsAgent", "-l", "originalClassic", "-k", "4"]
         #a=["-p", "RosWaitServiceAgent", "-l", "originalClassic", "-k", "4"]
         #a=["-p", "RosWaitServiceAgent", "-l", "mediumGrid", "-k", "4"]
         self.args = pacman.readCommand(game_attributes)
