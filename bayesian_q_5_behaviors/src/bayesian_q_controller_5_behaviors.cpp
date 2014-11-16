@@ -12,9 +12,9 @@
 
 #include <mcheck.h>
 
-int NUMBER_OF_GAMES_WITH_NO_GUI = 1000;
+int NUMBER_OF_GAMES_WITH_NO_GUI = 700;
 int NUMBER_OF_GAMES = 1500;
-int NUMBER_OF_TRAININGS = 700;
+int NUMBER_OF_TRAININGS = 500;
 bool is_training = true;
 
 bool endGame(pacman_msgs::EndGame::Request &req, pacman_msgs::EndGame::Response &res, 
@@ -102,6 +102,8 @@ bool receiveReward(pacman_msgs::RewardService::Request &req, pacman_msgs::Reward
 
     if (is_training) {
         q_learning->updateWeights(*game_state, reward);
+    } else {
+        q_learning->saveWeightsToBeLogged();
     }
 
     return true;
@@ -157,7 +159,7 @@ int main(int argc, char **argv)
     // spin to answer services
     ros::spin();
 
-    q_learning->logWeights();
+    //q_learning->logWeights();
 
     // shutdown ros node
     ros::shutdown();

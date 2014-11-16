@@ -11,11 +11,13 @@ int BayesianQLearning::NUM_FEATURES = 3;
 double BayesianQLearning::learning_rate_ = 0.002;
 double BayesianQLearning::discount_factor_ = 0.99;
 double BayesianQLearning::exploration_rate_ = 1;
-int BayesianQLearning::num_training_ = 700;
+int BayesianQLearning::num_training_ = 500;
 int BayesianQLearning::no_exploration_training_matches_ = 200;
 
 BayesianQLearning::BayesianQLearning()
 {
+    begin_time_ = std::clock();
+
     //features_= std::vector<double> (NUM_BEHAVIORS + NUM_FEATURES, 0);
     //old_features_= std::vector<double> (NUM_BEHAVIORS + NUM_FEATURES, 0);
     //weights_ = std::vector<double> (NUM_BEHAVIORS + NUM_FEATURES, 0);
@@ -202,9 +204,7 @@ void BayesianQLearning::updateWeights(BayesianGameState *new_game_state, int rew
         ROS_WARN_STREAM(" - 2 weight " << *weights_it);
     }
 
-    saved_behavioral_weights_.push_back(behavioral_weights_);
-    saved_chosen_behaviors_.push_back(old_behavior_);
-    temp_per_match_chosen_behaviors_[old_behavior_]++;
+    saveWeightsToBeLogged();
 
     /*if(old_behavior_ == 1)
     {
@@ -214,6 +214,14 @@ void BayesianQLearning::updateWeights(BayesianGameState *new_game_state, int rew
     {
         ROS_WARN_STREAM(" - new q value " << getQValue(new_game_state, old_behavior_));
     }*/
+}
+
+void BayesianQLearning::saveWeightsToBeLogged()
+{
+    saved_behavioral_weights_.push_back(behavioral_weights_);
+    saved_chosen_behaviors_.push_back(old_behavior_);
+    temp_per_match_chosen_behaviors_[old_behavior_]++;
+    saved_time_diffs_.push_back( (double) clock () - begin_time_ );
 }
 
 void BayesianQLearning::saveMatchScore(int score)
@@ -379,6 +387,36 @@ void BayesianQLearning::logEndOfMatchBehaviors(time_t time_now)
     output_file.close();
 }
 
+void BayesianQLearning::logTimes(time_t time_now)
+{
+    // get current time to create unique file name
+    struct tm *now = localtime( & time_now );
+    char time_buf[80];
+    strftime(time_buf, sizeof(time_buf), "%Y-%m-%d.%X", now);
+
+    // output file
+
+    char file_name_buffer [50];
+    sprintf(file_name_buffer, "/home/tiago/pacman_ws/log/match_times__%s.txt", time_buf);
+    std::ofstream output_file (file_name_buffer);
+
+    if(! output_file.is_open())
+    {
+        std::cout << "Unable to open file";
+        return;
+    }
+
+    // log weights to files
+    for(std::vector<double>::iterator it = saved_time_diffs_.begin(); 
+                        it != saved_time_diffs_.end(); ++it)
+    {
+        output_file << *it << "\n";
+    }
+
+    // close output file
+    output_file.close();
+}
+
 void BayesianQLearning::logWeights()
 {
     std::cout << "Logging weights" << std::endl;
@@ -392,6 +430,7 @@ void BayesianQLearning::logWeights()
 
     logChosenBehaviors(now);
     logEndOfMatchBehaviors(now);
+    logTimes(now);
 }
 
 // TODO: features ideas: closest food with min probability_of_close_enemy

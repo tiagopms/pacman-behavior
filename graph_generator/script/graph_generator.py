@@ -15,7 +15,7 @@ matplotlib.rcParams['lines.markersize'] = .5*matplotlib.rcParams['lines.markersi
 def get_path_to_package():
     rospack = rospkg.RosPack()
     path = rospack.get_path('graph_generator')
-    return path + '/logs/log_1/'
+    return path + '/logs/log_4/'
 
 def get_log_files(path):
     log_files = [ f for f in listdir(path) if isfile(join(path,f)) ]

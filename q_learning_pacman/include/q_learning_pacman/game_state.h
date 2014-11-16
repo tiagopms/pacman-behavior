@@ -47,6 +47,8 @@ class GameState
 
     void printPacmanOrGhostPose( bool is_pacman, int ghost_index);
     void printFoodsMap();
+    void printBigFoodsMap();
+    void printWhiteGhostsProbabilities();
 
   protected:
     ros::NodeHandle n_;
@@ -60,6 +62,10 @@ class GameState
     std::vector< std::vector<float> > pacman_pose_map_;
     std::vector< std::vector< std::vector<float> > > ghosts_poses_map_;
     std::vector< std::vector<float> > foods_map_;
+    std::vector< std::vector<float> > big_foods_map_;
+    std::vector< std::vector<float> > probability_ghosts_white_;
+
+    std::vector< geometry_msgs::Pose > ghosts_spawn_poses_;
 
     // deterministic variables
     geometry_msgs::Pose pacman_pose_;

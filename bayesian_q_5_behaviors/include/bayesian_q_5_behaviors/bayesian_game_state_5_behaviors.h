@@ -45,6 +45,7 @@ class BayesianGameState : public GameState
     int getNumberOfGhostsNStepsAway(int n);
     bool hasGhostNStepsAway(int n);
     float getProbabilityOfAGhostNStepsAway(int n);
+    float getProbableTimeWhiteGhosts();
     bool dies(pacman_msgs::PacmanAction action);
 
     float getMaxFoodProbability();

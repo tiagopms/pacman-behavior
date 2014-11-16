@@ -173,7 +173,10 @@ void BayesianGameState::predictPacmanMove(pacman_msgs::PacmanAction action)
     std::vector<float> map_line (width_, 0);
     std::vector< std::vector<float> > pacman_new_pose_map (height_, map_line);
     std::vector< std::vector<float> > new_foods_map (height_, map_line);
+    std::vector< std::vector<float> > new_big_foods_map (height_, map_line);
     map_line.clear();
+
+    std::vector<double> total_chance_pacman_or_ghost_killed (num_ghosts_, 0.0);
 
     for (int i = 0 ; i < width_ ; i++)
     {
@@ -195,11 +198,31 @@ void BayesianGameState::predictPacmanMove(pacman_msgs::PacmanAction action)
                     int y = it->second.second;
                     pacman_new_pose_map[y][x] += probability_of_move * probability_of_being_in_this_place;
 
+                    // it can be done like this, without checking if ghost is white, 
+                    // because if pacman survives, it doesnt matter if moved the ghost
+                    for(int ghost_index = 0; ghost_index < num_ghosts_ ; ++ghost_index)
+                    {
+                        geometry_msgs::Pose ghost_spawn = ghosts_spawn_poses_[ghost_index];
+                        double chance_pacman_or_ghost_killed = pacman_new_pose_map[y][x] * ghosts_poses_map_[ghost_index][y][x];
 
+                        ghosts_poses_map_[ghost_index][y][x] -= chance_pacman_or_ghost_killed;
+                        ghosts_poses_map_[ghost_index][ghost_spawn.position.y][ghost_spawn.position.x] += \
+                                        chance_pacman_or_ghost_killed;
+
+                        total_chance_pacman_or_ghost_killed[ghost_index] += chance_pacman_or_ghost_killed;
+                    }
                 }
             }
         }
     }
+
+    for(std::vector< std::vector<float> >::reverse_iterator it = probability_ghosts_white_.rbegin(); it != probability_ghosts_white_.rend(); ++it)
+    {
+        for(int ghost_index = 0; ghost_index < num_ghosts_ ; ++ghost_index)
+            (*it)[ghost_index] *= (1 - total_chance_pacman_or_ghost_killed[ghost_index]);
+    }
+
+    double chance_eaten_big_foood = 0.0;
 
     for (int i = 0 ; i < width_ ; i++)
     {
@@ -208,6 +231,9 @@ void BayesianGameState::predictPacmanMove(pacman_msgs::PacmanAction action)
             if( map_[j][i] != WALL)
             {
                 new_foods_map[j][i] = foods_map_[j][i] * ( 1 - pacman_new_pose_map[j][i]);
+                new_big_foods_map[j][i] = big_foods_map_[j][i] * ( 1 - pacman_new_pose_map[j][i]);
+
+                chance_eaten_big_foood += big_foods_map_[j][i] * pacman_new_pose_map[j][i];
             }
         }
     }
@@ -218,9 +244,17 @@ void BayesianGameState::predictPacmanMove(pacman_msgs::PacmanAction action)
     foods_map_.clear();
     foods_map_ = new_foods_map;
 
+    big_foods_map_.clear();
+    big_foods_map_ = new_big_foods_map;
+
+    probability_ghosts_white_.erase( probability_ghosts_white_.begin() );
+    probability_ghosts_white_.push_back( std::vector<float> (num_ghosts_, chance_eaten_big_foood) );
+
     //printPacmanOrGhostPose(true, 0);
     //ROS_INFO_STREAM("Foods map");
     //printFoodsMap();
+    //printBigFoodsMap();
+    //printWhiteGhostsProbabilities();
 }
 
 void BayesianGameState::predictGhostMove(int ghost_index)
@@ -233,6 +267,7 @@ void BayesianGameState::predictGhostMove(int ghost_index)
     std::vector< std::vector<float> > ghost_new_pose_map (height_, ghost_pose_map_line);
 
     std::vector< std::vector<float> > ghost_pose_map = ghosts_poses_map_[ghost_index];
+    double total_chance_pacman_or_ghost_killed = 0.0;
 
     for (int i = 0 ; i < width_ ; i++)
     {
@@ -255,9 +290,28 @@ void BayesianGameState::predictGhostMove(int ghost_index)
                     int x = it->first;
                     int y = it->second;
                     ghost_new_pose_map[y][x] += random_probability * probability_of_being_in_this_place;
+
+                    // it can be done like this, without checking if ghost is white, 
+                    // because if pacman survives, it doesnt matter if moved the ghost
+                    for(int ghost_index = 0; ghost_index < num_ghosts_ ; ++ghost_index)
+                    {
+                        geometry_msgs::Pose ghost_spawn = ghosts_spawn_poses_[ghost_index];
+                        double chance_pacman_or_ghost_killed = ghost_new_pose_map[y][x] * pacman_pose_map_[y][x];
+
+                        ghost_new_pose_map[y][x] -= chance_pacman_or_ghost_killed;
+                        ghost_new_pose_map[ghost_spawn.position.y][ghost_spawn.position.x] += \
+                                        chance_pacman_or_ghost_killed;
+
+                        total_chance_pacman_or_ghost_killed += chance_pacman_or_ghost_killed;
+                    }
                 }
             }
         }
+    }
+
+    for(std::vector< std::vector<float> >::reverse_iterator it = probability_ghosts_white_.rbegin(); it != probability_ghosts_white_.rend(); ++it)
+    {
+        (*it)[ghost_index] *= (1 - total_chance_pacman_or_ghost_killed);
     }
 
     ghosts_poses_map_[ghost_index].clear();
@@ -420,6 +474,13 @@ float BayesianGameState::getProbabilityOfAGhostNStepsAway(int n)
 {
     double probability = 0;
 
+    std::vector<float> ghost_not_white_prob (num_ghosts_, 1.0);
+    for(std::vector< std::vector<float> >::reverse_iterator it = probability_ghosts_white_.rbegin(); it != probability_ghosts_white_.rend(); ++it)
+    {
+        for(int ghost_index = 0; ghost_index < num_ghosts_ ; ++ghost_index)
+            ghost_not_white_prob[ghost_index] -= (*it)[ghost_index];
+    }
+
     for (int i = 0 ; i < width_ ; i++)
     {
         for (int j = 0 ; j < height_ ; j++)
@@ -442,7 +503,7 @@ float BayesianGameState::getProbabilityOfAGhostNStepsAway(int n)
                         {
                             for (int ghost_index = 0 ; ghost_index < num_ghosts_ ; ghost_index++)
                             {
-                                probability += probability_of_being_in_this_place * ghosts_poses_map_[ghost_index][ghost_j][ghost_i];
+                                probability += probability_of_being_in_this_place * ghosts_poses_map_[ghost_index][ghost_j][ghost_i] * ghost_not_white_prob[ghost_index];
                             }
                         }
                     }
@@ -452,6 +513,18 @@ float BayesianGameState::getProbabilityOfAGhostNStepsAway(int n)
     }
 
     return probability;
+}
+
+float BayesianGameState::getProbableTimeWhiteGhosts()
+{
+    float probable_time = 0;
+    /*for(std::vector<float>::reverse_iterator it = probable_time_ghosts_white_.rbegin(); it != probable_time_ghosts_white_.rend(); ++it)
+    {
+        if( *it > probable_time )
+            probable_time = *it;
+    }*/
+
+    return probable_time;   
 }
 
 std::map< std::pair<int, int>, int > BayesianGameState::calculateDistances(int x, int y)

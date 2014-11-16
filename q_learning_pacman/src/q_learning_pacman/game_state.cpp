@@ -39,8 +39,10 @@ GameState::GameState()
         for (int i = 0 ; i < height_ ; i++) {
             std::vector<MapElements> map_line;
             std::vector<float> foods_map_line;
+            std::vector<float> big_foods_map_line;
             for (int j = 0 ; j < width_ ; j++) {
                     float has_food = 0.0;
+                    float has_big_food = 0.0;
 
                     if (map_msg[i * width_ + j] == map_layout.EMPTY)
                         map_line.push_back(EMPTY);
@@ -50,7 +52,10 @@ GameState::GameState()
                         has_food = 1.0;
                     }
                     else if (map_msg[i * width_ + j] == map_layout.BIG_FOOD)
+                    {
                         map_line.push_back(BIG_FOOD);
+                        has_big_food = 1.0;
+                    }
                     else if (map_msg[i * width_ + j] == map_layout.WALL)
                         map_line.push_back(WALL);
                     else if (map_msg[i * width_ + j] == map_layout.GHOST)
@@ -63,6 +68,7 @@ GameState::GameState()
                             new_pose.position.x = j;
                             new_pose.position.y = i;
                             ghosts_poses_.push_back(new_pose);
+                            ghosts_spawn_poses_.push_back(new_pose);
                             // probabilistic variable
                             ghosts_poses_map_[num_initialized_ghost][i][j] = 1.0;
 
@@ -88,15 +94,20 @@ GameState::GameState()
                     }
 
                     foods_map_line.push_back(has_food);
+                    big_foods_map_line.push_back(has_big_food);
             }
             map_.push_back(map_line);
             foods_map_.push_back(foods_map_line);
+            big_foods_map_.push_back(big_foods_map_line);
         }
 
         if (num_ghosts_ > num_initialized_ghost) {
             ghosts_poses_map_.erase(ghosts_poses_map_.begin() + num_initialized_ghost, ghosts_poses_map_.begin() + num_ghosts_);
             num_ghosts_ = num_initialized_ghost;
         }
+        
+        std::vector<float> probability_ghosts_white_line (num_ghosts_, 0);
+        probability_ghosts_white_ = std::vector< std::vector<float> > (40, probability_ghosts_white_line);
 
         ROS_DEBUG_STREAM("Map width " << width_ << " height " << height_ << " num ghosts " << num_ghosts_);
     }
@@ -137,6 +148,11 @@ GameState::~GameState()
             it->clear();
         }
         foods_map_.clear();
+
+        for(std::vector< std::vector<float> >::reverse_iterator it = big_foods_map_.rbegin(); it != big_foods_map_.rend(); ++it) {
+            it->clear();
+        }
+        big_foods_map_.clear();
 
         ROS_DEBUG_STREAM("Game state destroyed");
 }
@@ -256,6 +272,66 @@ void GameState::printFoodsMap()
 
                 foo << "\033[0m" << ' ';
             }
+        }
+        ROS_INFO_STREAM(foo.str());
+    }
+}
+
+void GameState::printBigFoodsMap()
+{
+    for (int i = height_ -1 ; i > -1  ; i--) {
+        std::ostringstream foo;
+        foo << std::fixed;
+        foo << std::setprecision(0);
+        //foo << std::setw(5) << std::setfill('0');
+        for (int j = 1 ; j < width_ - 1 ; j++) {
+            if( getMapElement(j, i) == WALL)
+                foo << "###" << ' ';
+            else
+            {
+                int chance = big_foods_map_[i][j]*100;
+
+                if (chance >= 90)
+                    foo << "\033[48;5;46m";
+                else if (chance >= 50)
+                    foo << "\033[48;5;30m";
+                else if (chance >= 30)
+                    foo << "\033[48;5;22m";
+                else
+                    foo << "\033[48;5;12m";
+
+                foo << std::setw(3) << std::setfill('0') << chance;
+
+                foo << "\033[0m" << ' ';
+            }
+        }
+        ROS_INFO_STREAM(foo.str());
+    }
+}
+
+void GameState::printWhiteGhostsProbabilities()
+{
+    for(std::vector< std::vector<float> >::reverse_iterator it = probability_ghosts_white_.rbegin(); it != probability_ghosts_white_.rend(); ++it)
+    {
+        std::ostringstream foo;
+        foo << std::fixed;
+        foo << std::setprecision(0);
+
+        for(int ghost_index = 0; ghost_index < num_ghosts_ ; ++ghost_index)
+        {
+            int chance = (*it)[ghost_index] * 100;
+
+            if (chance >= 70)
+                foo << "\033[48;5;46m";
+            else if (chance >= 40)
+                foo << "\033[48;5;30m";
+            else if (chance >= 20)
+                foo << "\033[48;5;22m";
+            else
+                foo << "\033[48;5;12m";
+
+            foo << std::setw(3) << std::setfill('0') << chance;
+            foo << "\033[0m" << ' ';
         }
         ROS_INFO_STREAM(foo.str());
     }

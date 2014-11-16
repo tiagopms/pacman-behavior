@@ -14,6 +14,8 @@ class BayesianQLearning
     static int num_training_; // number of training episodes, i.e. no learning after these many episodes
     static int no_exploration_training_matches_; // number of training episodes with no exploration
 
+    std::clock_t begin_time_;
+
     std::vector<double> weights_;
     std::vector< std::vector<double> > behavioral_weights_;
     std::vector<double> features_;
@@ -24,12 +26,14 @@ class BayesianQLearning
     std::vector< std::vector<int> > saved_per_match_chosen_behaviors_;
     std::vector<int> saved_chosen_behaviors_;
     std::vector<double> saved_match_scores_;
+    std::vector<double> saved_time_diffs_;
     std::vector< std::vector< std::vector<double> > > saved_match_behavioral_weights_;
     std::vector< std::vector< std::vector<double> > > saved_behavioral_weights_;
     void logScores(time_t time_now);
     void logWeights(std::vector< std::vector< std::vector<double> > > logged_weights, time_t time_now, bool log_per_match);
     void logChosenBehaviors(time_t time_now);
     void logEndOfMatchBehaviors(time_t time_now);
+    void logTimes(time_t time_now);
 
     double old_q_value_;
     double new_q_value_;
@@ -50,6 +54,7 @@ class BayesianQLearning
     int getTrainingBehavior(BayesianGameState *game_state);
     int getBehavior(BayesianGameState *game_state);
 
+    void saveWeightsToBeLogged();
     void saveMatchScore(int score);
     void saveEndOfMatchWeights();
     void logWeights();
