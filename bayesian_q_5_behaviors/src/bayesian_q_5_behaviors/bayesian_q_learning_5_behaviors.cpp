@@ -6,13 +6,13 @@
 #include <fstream>
 #include <ctime>
 
-int BayesianQLearning::NUM_BEHAVIORS = 3;
-int BayesianQLearning::NUM_FEATURES = 3;
+int BayesianQLearning::NUM_BEHAVIORS = 5;
+int BayesianQLearning::NUM_FEATURES = 7;
 double BayesianQLearning::learning_rate_ = 0.002;
 double BayesianQLearning::discount_factor_ = 0.99;
 double BayesianQLearning::exploration_rate_ = 1;
-int BayesianQLearning::num_training_ = 2000;
-int BayesianQLearning::no_exploration_training_matches_ = 500;
+int BayesianQLearning::num_training_ = 2700;
+int BayesianQLearning::no_exploration_training_matches_ = 1200;
 
 BayesianQLearning::BayesianQLearning()
 {
@@ -47,14 +47,23 @@ std::vector<double> BayesianQLearning::getFeatures(BayesianGameState *game_state
 
     // get distances can't be manhattan
     //features.push_back( game_state->eatsFood(action) / 10.0 );
-    features.push_back( game_state->getClosestFoodDistance() / ( 1.0 * game_state->getHeight() * game_state->getWidth() ) );
-   // features.push_back( game_state->getClosestBigFoodDistance() / ( 1.0 * game_state->getHeight() * game_state->getWidth() ) );
+    //features.push_back( game_state->getClosestFoodDistance() / ( 1.0 * game_state->getHeight() * game_state->getWidth() ) );
+    //features.push_back( game_state->getClosestBigFoodDistance() / ( 1.0 * game_state->getHeight() * game_state->getWidth() ) );
+
+    int food_dist = game_state->getClosestFoodDistance();
+    int big_food_dist = game_state->getClosestBigFoodDistance();
+    food_dist = food_dist ? food_dist : 1.0;
+    big_food_dist = big_food_dist ? big_food_dist : 1.0;
+    features.push_back( 1.0 / food_dist );
+    features.push_back( 1.0 / big_food_dist );
+    features.push_back( game_state->getProbOfBigFood() );
+    features.push_back( game_state->getProbOfWhiteGhosts() );
     //features.push_back( game_state->getNumberOfGhostsOneStepAway(action) / 10.0 );
     //features.push_back( game_state->getNumberOfGhostsNStepsAway(3) );
     //features.push_back( 1.0 / game_state->getClosestGhostDistance() );
     std::pair< double, double > near_ghost_probabilities = game_state->getProbabilityOfAGhosWhiteOrNotNStepsAway(3);
     features.push_back( near_ghost_probabilities.first );   // normal ghost near
-  //  features.push_back( near_ghost_probabilities.second );  // white ghost near
+    features.push_back( near_ghost_probabilities.second );  // white ghost near
     //features.push_back( game_state->dies(action) );
 
     return features;
@@ -107,6 +116,7 @@ int BayesianQLearning::getBehavior(BayesianGameState *game_state)
     std::pair<int, double> behavior_q_value_pair = getMaxQValue(game_state);
     int behavior = behavior_q_value_pair.first;
     old_q_value_ = behavior_q_value_pair.second;
+    //ROS_INFO_STREAM("normal behavior " << behavior);
     return behavior;
 }
 
@@ -119,7 +129,7 @@ int BayesianQLearning::getTrainingBehavior(BayesianGameState *game_state)
         old_q_value_ = getQValue(game_state, behavior);
         saveTempFeatures(behavior);
 
-        //ROS_DEBUG_STREAM("random behavior " << behavior);
+        //ROS_INFO_STREAM("random behavior " << behavior);
 
         return behavior;
     }
@@ -185,7 +195,7 @@ void BayesianQLearning::updateWeights(BayesianGameState *new_game_state, int rew
 
 
     // TODO: remove after this
-    /*ROS_INFO_STREAM("Error " << error << " executed behavior " << old_behavior_);
+    ROS_INFO_STREAM("Error " << error << " executed behavior " << old_behavior_);
     weights = behavioral_weights_[0];
     weights_it = weights.begin();
     for(int i = 0; weights_it != weights.end() ; ++weights_it)
@@ -215,7 +225,7 @@ void BayesianQLearning::updateWeights(BayesianGameState *new_game_state, int rew
     for(int i = 0; weights_it != weights.end() ; ++weights_it)
     {
         ROS_WARN_STREAM(" - 4 weight " << *weights_it);
-    }*/
+    }
 
     saveWeights();
 

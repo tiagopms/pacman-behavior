@@ -443,6 +443,29 @@ bool BayesianGameState::dies(pacman_msgs::PacmanAction action)
     return false;
 }
 
+double BayesianGameState::getProbOfBigFood()
+{
+    return getMaxBigFoodProbability();
+}
+
+double BayesianGameState::getProbOfWhiteGhosts()
+{
+    double probability_white_ghost = 0;
+
+    std::vector<double> ghost_white_prob (num_ghosts_, 0.0);
+    for(std::vector< std::vector<float> >::reverse_iterator it = probability_ghosts_white_.rbegin(); it != probability_ghosts_white_.rend(); ++it)
+    {
+        for(int ghost_index = 0; ghost_index < num_ghosts_ ; ++ghost_index)
+            ghost_white_prob[ghost_index] += (*it)[ghost_index];
+    }
+
+    for(int ghost_index = 0; ghost_index < num_ghosts_ ; ++ghost_index)
+        if ( probability_white_ghost < ghost_white_prob[ghost_index] )
+            probability_white_ghost = ghost_white_prob[ghost_index];
+
+    return probability_white_ghost;
+}
+
 int BayesianGameState::getNumberOfGhostsOneStepAway(pacman_msgs::PacmanAction action)
 {
     geometry_msgs::Pose new_pose = getPacmanPose();

@@ -459,7 +459,7 @@ Ou seja, a atuação tem uma chance $ \nu_{atuacao} = \textit{FATOR\_DE\_ACERTO}
 A recompensa $ r $ é, por sua vez, enviada da plataforma de simulação para o sistema de aprendizagem. Nela não inserimos qualquer forma de erro e ela representa a diferença de pontuação entre a etapa atual e a anterior no jogo, ou seja, a pontuação recebida pela última ação executada.
 
 
-\section{Testes realizados}
+\section{Testes realizados} \label{section:TestesRealizados}
 
 Nessa seção explicaremos como foi realizado cada teste presente na análise de dados e quais parâmetros foram utilizados.
 
@@ -532,7 +532,7 @@ Os comportamentos utilizados foram: parar, comer e fugir. Ou seja, $$ b \in B = 
         \right.
 \end{equation}
 
-A baixo é dada uma descrição mais detalhada de como cada modelo é feito.
+Abaixo é dada uma descrição mais detalhada de como cada modelo é feito.
 
 \subsubsection*{Parar}
 
@@ -624,7 +624,7 @@ Essa é uma característica que sempre está presente nesse vetor. Ela tem um va
 
 $$ f_1 = 1.0 $$
 
-\subsubsection*{Distância para Provável Comida mais Próxima}
+\subsubsection*{Distância para Provável Comida mais Próxima} \label{subsubsection:DistProvavelComida}
 
 Essa característica indica qual a distância até a posição mais próxima em que é provável existir uma comida. Ela pode ser obtida a partir do algoritmo a seguir:
 
@@ -654,15 +654,185 @@ Essa característica indica qual a distância até a posição mais próxima em 
 
 Tendo um conjunto de probabilidades $ a \in A $ para os estados:
 
-$$ f_2 = ObterCaracterísticaDistanciaComida \left( a \right) $$
+$$ f_2 = ObterCaracteristicaDistanciaComida \left( a \right) $$
 
-\subsubsection*{Probabilidade de um Fantasma a 3 Movimentos}
+\subsubsection*{Soma das Probabilidades de Fantasmas a menos de 4 Movimentos}
 
-Essa característica é obtida a partir da soma das probabilidades dos fantasmas a 3 movimentos, podendo então ir de $ \left[ 0, num\_fantasmas*100\% \right] $
+Essa característica é obtida a partir da soma das probabilidades de haver fantasmas a 3 movimentos de distância, ou menos, podendo então ir de $ \left[ 0, num\_fantasmas \cdot 100\% \right] $.
+
+\begin{algorithm}[H]
+	\caption{Obter Característica Probabilidades Fantasmas} \label{algorithm:ObterCaracteristicaProbabilidadesFantasmas}
+	\begin{algorithmic}[1]
+		\Procedure{ObterCaracterísticaProbFantasmas}{\textit{probabilidades\_estados}}
+			\State $\textit{total} \gets 0.0 $
+			\For{Posição $ in $ Posições}
+				\For{Posição2 $ in $ Posições}
+					\If{ $ \text{dist} \left( \textit{Posição} , \textit{Posição2} \right) < 4 $ }
+						\State $\textit{prob\_pacman} \gets \text{probabilidade pacman } \left( \textit{Posição} \right) $
+						\For{Fantasma $ in $ Fantasmas}
+							\State $\textit{prob\_fantasma} \gets \text{probabilidade Fantasma } \left( \textit{Posição2} \right) $
+							\State $\textit{prob\_fantasma\_normal} \gets \text{probabilidade normal } \left( \textit{Fantasma} \right) $
+							\State $\textit{total} \gets \textit{total} + \textit{prob\_pacman}  \cdot \textit{prob\_fantasma} \cdot \textit{prob\_fantasma\_normal} $
+						\EndFor
+					\EndIf
+				\EndFor
+			\EndFor
+			\State \Return $ \textit{total} $
+		\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
+$$ f_3 = ObterCaracteristicaProbFantasmas \left( a \right) $$
 
 
 \subsection{3 Comportamentos no mapa original (Teste 2)}
 
 \subsection{5 Comportamentos no mapa pequeno (Teste 3)}
+
+Esse teste foi feito no mapa pequeno, mostrado na figura \ref{}, e nele foram utilizados apenas cinco comportamentos:
+
+\begin{itemize}
+	\item Parar
+	\item Comer
+	\item Fugir
+	\item Comer Cápsula
+	\item Caçar
+\end{itemize}
+
+\subsubsection{Parâmetros Utilizados}
+
+\subsubsection{Comportamentos Utilizados}
+
+
+Os comportamentos utilizados foram: parar, comer, fugir, comer cápsula e caçar. Ou seja:
+
+$$ b \in B = \left\{ Ficar\_Parado, Comer, Fugir, Comer\_Capsula, \textit{Caçar} \right\} $$
+
+$$ s_b \in S_b = 
+        \left\{
+            \begin{array}{l}
+                Estado\_Parar, \\
+                Estado\_Comer, \\
+                Estado\_Fugir, \\
+                Estado\_Comer\_Capsula, \\
+                \textit{Estado\_Caçar}
+            \end{array}
+        \right\}
+         $$
+
+Como explicado no tópico \ref{subsection:BayesComSelecaoDeComportamento}, e analogamente ao visto para três comportamentos, agora podemos ter cinco modelos de seleção de ação: 
+
+\begin{equation}
+    P \left( M^t \mid S^t S_b^t M^{t-1} \pi_f \right) = 
+        \left\{
+            \begin{array}{l}
+                P \left( M^t \mid S^t \left[ S_b^t=Estado\_Parar \right] M^{t-1} \pi \right) \\
+                P \left( M^t \mid S^t \left[ S_b^t=Estado\_Comer \right] M^{t-1} \pi \right) \\
+                P \left( M^t \mid S^t \left[ S_b^t=Estado\_Fugir \right] M^{t-1} \pi \right) \\
+                P \left( M^t \mid S^t \left[ S_b^t=Estado\_Comer\_Capsula \right] M^{t-1} \pi \right) \\
+                P \left( M^t \mid S^t \left[ S_b^t=\textit{Estado\_Caçar} \right] M^{t-1} \pi \right)
+            \end{array}
+        \right.
+\end{equation}
+
+Abaixo é dada uma descrição mais detalhada de como cada modelo é feito.
+
+\subsubsection*{Parar}
+
+\subsubsection*{Comer}
+
+\subsubsection*{Fugir}
+
+\subsubsection*{Comer Cápsula}
+
+\subsubsection*{Caçar}
+
+\subsubsection{Vetor de Características Utilizado}
+
+\subsubsection*{Bias}
+
+Já descrito.
+
+Essa é uma característica que sempre está presente nesse vetor. Ela tem um valor igual a $ 1.0 $ e seu peso $ \omega $ indica quão bom esse comportamento é, independente da situação atual.
+
+$$ f_1 = 1.0 $$
+
+\subsubsection*{Distância para Provável Comida mais Próxima}
+
+Já descrito.
+
+$$ f_2 = ObterCaracteristicaDistanciaComida \left( a \right) $$
+
+\subsubsection*{Soma das Probabilidades de Fantasmas a menos de 4 Movimentos}
+
+Já descrito.
+
+$$ f_3 = ObterCaracteristicaProbFantasmas \left( a \right) $$
+
+\subsubsection*{Soma das Probabilidades de Fantasmas Brancos a menos de 4 Movimentos}
+
+Essa característica é obtida a partir da soma das probabilidades de haver fantasmas a 3 movimentos de distância, ou menos, podendo então ir de $ \left[ 0, num\_fantasmas \cdot 100\% \right] $.
+
+\begin{algorithm}[H]
+	\caption{Obter Característica Probabilidades Fantasmas Brancos} \label{algorithm:ObterCaracteristicaProbabilidadesFantasmasBrancos}
+	\begin{algorithmic}[1]
+		\Procedure{ObterCaracterísticaProbFantasmasBrancos}{\textit{probabilidades\_estados}}
+			\State $\textit{total} \gets 0.0 $
+			\For{Posição $ in $ Posições}
+				\For{Posição2 $ in $ Posições}
+					\If{ $ \text{dist} \left( \textit{Posição} , \textit{Posição2} \right) < 4 $ }
+						\State $\textit{prob\_pacman} \gets \text{probabilidade pacman } \left( \textit{Posição} \right) $
+						\For{Fantasma $ in $ Fantasmas}
+							\State $\textit{prob\_fantasma} \gets \text{probabilidade Fantasma } \left( \textit{Posição2} \right) $
+							\State $\textit{prob\_fantasma\_branco} \gets \text{probabilidade branco } \left( \textit{Fantasma} \right) $
+							\State $\textit{total} \gets \textit{total} + \textit{prob\_pacman}  \cdot \textit{prob\_fantasma} \cdot \textit{prob\_fantasma\_branco} $
+						\EndFor
+					\EndIf
+				\EndFor
+			\EndFor
+			\State \Return $ \textit{total} $
+		\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
+$$ f_4 = ObterCaracteristicaProbFantasmasBrancos \left( a \right) $$
+
+\subsubsection*{Probabilidade de Existir Fantasma Branco}
+
+Essa característica é obtida a partir da probabilidade de existir um fantasma branco no ambiente.
+
+$$ f_5 = P \left( fantasma\_branco \mid a \right) $$
+
+\subsubsection*{Distância para Provável Capsula mais Próxima} \label{oi}
+
+Essa característica indica qual a distância até a posição mais próxima em que é provável existir uma capsula. Ela pode ser obtida a partir do algoritmo a seguir, que é análogo ao algoritmo \ref{algorithm:ObterCaracteristicaDistanciaComida} do tópico \ref{subsubsection:DistProvavelComida}:
+
+\begin{algorithm}[H]
+	\caption{Obter Característica Distancia Capsula} \label{algorithm:ObterCaracteristicaDistanciaCapsula}
+	\begin{algorithmic}[1]
+		\Procedure{ObterCaracterísticaDistanciaCapsula}{\textit{probabilidades\_estados}}
+			\State $\textit{max\_prob} \gets 0.0 $
+			\For{Posição $ in $ Posições}
+				\State $\textit{prob\_capsula} \gets \text{probabilidade de capsula } \left( \textit{Posição} \right) $
+				\If{ $ \textit{prob\_capsula} > \textit{max\_prob} $ }
+					\State $\textit{max\_prob} \gets \textit{prob\_capsula} $
+				\EndIf 
+			\EndFor
+			\For{Posição $ in $ Posições}
+				\State $\textit{prob\_capsula} \gets \text{probabilidade de capsula } \left( \textit{Posição} \right) $
+				\If{ $ \textit{prob\_capsula} > \frac{\textit{max\_prob} }{2} $ }
+					\State $ \text{Prob\_Posições } append \text{ Posição} $
+				\EndIf 
+			\EndFor
+			\State $\textit{pos\_capsula} \gets \text{mais proxima }\textit{posição} \in \text{Prob\_Posições} $
+			\State $\textit{pos\_pacman} \gets \text{posição }\textit{pacman} $
+			\State \Return $ \text{dist} \left( \textit{pos\_capsula}, \textit{pos\_pacman} \right) $
+		\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
+Tendo um conjunto de probabilidades $ a \in A $ para os estados:
+
+$$ f_2 = ObterCaracteristicaDistanciaCapsula \left( a \right) $$
 
 \subsection{5 Comportamentos no mapa original (Teste 4)}

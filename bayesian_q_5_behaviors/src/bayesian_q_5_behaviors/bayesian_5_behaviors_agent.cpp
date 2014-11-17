@@ -23,7 +23,7 @@ pacman_msgs::PacmanAction BayesianBehaviorAgent::getAction(BayesianGameState *ga
             break;
         case EAT_BIG_FOOD:
             action = getEatBigFoodAction(game_state);
-            ROS_ERROR_STREAM("Eat big food behavior");
+            //ROS_DEBUG_STREAM("Eat big food behavior");
             break;
         case RUN:
             action = getRunAction(game_state);
@@ -31,7 +31,7 @@ pacman_msgs::PacmanAction BayesianBehaviorAgent::getAction(BayesianGameState *ga
             break;
         case HUNT:
             action = getHuntAction(game_state);
-            ROS_ERROR_STREAM("Hunt behavior");
+            //ROS_DEBUG_STREAM("Hunt behavior");
             break;
         default:
             action.action = action.STOP;
