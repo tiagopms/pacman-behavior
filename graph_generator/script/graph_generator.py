@@ -15,7 +15,7 @@ matplotlib.rcParams['lines.markersize'] = .5*matplotlib.rcParams['lines.markersi
 def get_path_to_package():
     rospack = rospkg.RosPack()
     path = rospack.get_path('graph_generator')
-    return path + '/logs/log_4/'
+    return path + '/logs/log_11/'
 
 def get_log_files(path):
     log_files = [ f for f in listdir(path) if isfile(join(path,f)) ]
@@ -36,21 +36,9 @@ def gen_polinomial_function(polinomial_args):
         return return_list
     return polinomy
 
-func = gen_polinomial_function([1, 2])
-print func([1,5,9])
-
-func = gen_polinomial_function([1, 2, 3])
-print func([1,5,9])
-
-func = gen_polinomial_function([ -1.19655315e-02,  2.51955487e+01])
-print func(range(5))
-print func([170, 1573])
-
-#exit()
-
 def plot_graph(path, file_name):
     my_file = open ( path + file_name , 'r')
-    if file_name.startswith( 'match_scores' ) or file_name.startswith( 'chosen' ):
+    if file_name.startswith( 'match_scores' ) or file_name.startswith( 'chosen' ) or file_name.startswith( 'match_time' ):
         data = [ map(float, line.split(' ')) for line in my_file ]
     else:
         data = [ map(float, line[:-2].split(' ')) for line in my_file ]
@@ -69,7 +57,21 @@ def plot_graph(path, file_name):
 
     fig2 = plt.figure(figsize=(8.0, 5.0))
     ax = fig2.add_subplot(111)
-    ax.plot(data, '.')
+    if file_name.startswith( 'behavior' ) or file_name.startswith( 'per_match_behavior' ):
+        plots = []
+
+        for i in range(len(data[0])):
+            data_column = [row[i] for row in data]
+
+            # ax.plot(range(len(data_column)), data_column, '.', range(len(data_column)), fit_fn(data_column), '--')
+            p, = ax.plot(range(len(data_column)), data_column, '.')
+            plots.append(p)
+            #plt.show()
+
+        ax.legend(plots, ['Bias', 'Dist Comida', 'Dist Capsula', 'Prob Fantasma', ' Prob Branco Fant'])
+    else:
+        ax.plot(data, '.')
+
     save_file_name = path + 'image__' + file_name[:-4] + '.png'
     fig2.savefig(save_file_name, dpi=200)
 
@@ -124,7 +126,7 @@ def plot_graph(path, file_name):
                 plots.append(p)
                 #plt.show()
 
-            ax.legend(plots, ['Parar', 'Comer', 'Fugir'])
+            ax.legend(plots, ['Parar', 'Comer', 'Fugir', 'Comer Capsula', 'Cacar'])
             #save_file_name = path + 'image__extra____pol' + str(polinomy_counter) + '__' + file_name[:-4] + '.png'
             save_file_name = path + 'image__extra__' + file_name[:-4] +  '____pol' + str(polinomy_counter) + '.png'
             fig3.savefig(save_file_name, dpi=400)
@@ -134,6 +136,7 @@ def plot_graph(path, file_name):
         matplotlib.rcParams['lines.markersize'] = 8*matplotlib.rcParams['lines.markersize']
 
 def generate_graphs():
+    print 'Generating Graphs'
     path = get_path_to_package()
     log_files = get_log_files(path)
     for log_file in log_files:

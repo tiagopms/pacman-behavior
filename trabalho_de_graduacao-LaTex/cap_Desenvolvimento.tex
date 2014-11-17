@@ -361,9 +361,9 @@ A partir dos sensores presentes no robô e do valor $ b \in B $, obtido com o al
 \subsubsection{Escolha de ação motora}
 
 Por último se faz a seleção de uma ação a ser executada pelo robô. Para isso, calcula-se as probabilidade de se executar cada ação e se escolhe a com maior valor.
-		
+
 \begin{equation}
-    P \left( M^t \mid z^{0: t} b^{0: t} m^{0: t-1} \pi_f \right) \propto \sum\limits_{S_i^{t-1} B^{t-1}}
+    P \left( M^t \mid z^{0: t} b^{0: t} m^{0: t-1} \pi_f \right) \propto \sum\limits_{S_i^t S_b^t}
         \left(
             \begin{array}{l}
                 P \left( M^t \mid S^t S_b^t m^{t-1} \pi_f \right)\\
@@ -387,7 +387,7 @@ $$
 
 
 
-\section{Ambiente de testes e simulação}
+\section{Ambiente de testes e simulação} \label{section:AmbienteDeTestes}
 
 Para poder testar as teorias aqui descritas foi utilizado uma plataforma de Pacman [referência http://ai.berkeley.edu/project\_overview.html], criada em Berkeley para suas aulas de inteligência artificial.
 
@@ -437,10 +437,10 @@ Analogamente a distância ``vista'' dos fantasmas ficou:
 	\left( d_x, d_y \right) = \left( \delta\left( d_x^*, \sigma_{dist\_fant} \right), \delta\left( d_y^*, \sigma_{dist\_fant} \right) \right)
 \end{equation}
 
-A atuação, como é um valor discreto e não numérico, não possui um erro gaussiano. Ela é recebida pela plataforma de simulação e um erro é inserido nela de acordo com a função a seguir:
+A atuação tem um conjunto de valores possível tal que $ u \in U = \left\{ Norte, Sul, Leste, Oeste, Parar \right\} $. Como ela possui um valor discreto e não numérico, não inserimos um erro gaussiano gaussiano nela. Ela é recebida pela plataforma de simulação e um erro é inserido nela de acordo com a função a seguir:
 
 \begin{algorithm}[H]
-	\caption{Erro na Atuação} \label{euclid}
+	\caption{Erro na Atuação} \label{algorithm:ErroAtuacao}
 	\begin{algorithmic}[1]
 		\Procedure{ExecutarAção}{\textit{ação\_escolhida}}
 			\State $\textit{numero\_randomico} \gets \text{random }\textit{numero}$
@@ -454,6 +454,215 @@ A atuação, como é um valor discreto e não numérico, não possui um erro gau
 	\end{algorithmic}
 \end{algorithm}
 
-Ou seja, a atuação tem uma chance $ \sigma_{atuacao} = \textit{FATOR\_DE\_ACERTO} $ de ser executada como experado. Ela tem também uma proabilidade $ 1 - \sigma_{atuacao} $ de ser selecionada uma ação randômica diferente da escolhida.
+Ou seja, a atuação tem uma chance $ \nu_{atuacao} = \textit{FATOR\_DE\_ACERTO} $ de ser executada como experado. Ela tem também uma proabilidade $ 1 - \nu_{atuacao} $ de ser selecionada uma ação randômica diferente da escolhida.
 
 A recompensa $ r $ é, por sua vez, enviada da plataforma de simulação para o sistema de aprendizagem. Nela não inserimos qualquer forma de erro e ela representa a diferença de pontuação entre a etapa atual e a anterior no jogo, ou seja, a pontuação recebida pela última ação executada.
+
+
+\section{Testes realizados}
+
+Nessa seção explicaremos como foi realizado cada teste presente na análise de dados e quais parâmetros foram utilizados.
+
+\subsection{3 Comportamentos no mapa pequeno (Teste 1)}
+
+Nesse primeiro teste foi feito no mapa pequeno, mostrado na figura \ref{}, e foram utilizados apenas três comportamentos:
+
+\begin{itemize}
+	\item Parar
+	\item Comer
+	\item Fugir
+\end{itemize}
+
+\subsubsection{Parâmetros Utilizados}
+
+\begin{multicols}{2}
+
+Num. partidas%
+\footnote{Número de partidas executadas%
+} = 2300
+
+Num. treinos%
+\footnote{Número de partidas usadas para treinamento%
+} = 2000
+
+Num. Greedy%
+\footnote{Número de partidas em que foi utilizada exploração gulosa. Como explicado no tópico \ref{subsection:EscolhaDeAçõesExploraçãoGulosa}%
+} = 500
+
+$ \beta%
+\footnote{Fator de exploração gulosa utilizado.%
+} = 1 - \left( \frac{n}{Num. Greedy} \right) $
+
+$ \alpha%
+\footnote{Fator de Aprendizagem%
+} = 0.002 $
+
+$ \gamma%
+\footnote{Fator de Desconto%
+} = 0.99 $
+
+$ \sigma_{pacman}%
+\footnote{Desvio padrão do erro gaussiano da posição recebida do Pacman%
+} = 0.5 $
+
+$ \sigma_{dist\_fant}%
+\footnote{Desvio padrão do erro gaussiano da distância recebida para os Fantasmas%
+} = 0.5 $
+
+$ \nu_{atuação}%
+\footnote{Fator de Acerto na movimentação do Pacman. Descrito no algorítmo \ref{algorithm:ErroAtuacao} na seção \ref{section:AmbienteDeTestes}%
+} = 0.9 $
+
+\end{multicols}
+
+Sendo $ n $ o número da partida sendo jogada.
+
+\subsubsection{Comportamentos Utilizados}
+
+Os comportamentos utilizados foram: parar, comer e fugir. Ou seja, $$ b \in B = \left\{ Ficar\_Parado, Comer, Fugir \right\} $$ $$ s_b \in S_b = \left\{ Estado\_Parar, Estado\_Comer, Estado\_Fugir \right\} $$. Como explicado no tópico \ref{subsection:BayesComSelecaoDeComportamento} agora podemos ter três modelos de seleção de ação: 
+
+\begin{equation}
+    P \left( M^t \mid S^t S_b^t M^{t-1} \pi_f \right) = 
+        \left\{
+            \begin{array}{l}
+                P \left( M^t \mid S^t \left[ S_b^t=Estado\_Parar \right] M^{t-1} \pi \right) \\
+                P \left( M^t \mid S^t \left[ S_b^t=Estado\_Comer \right] M^{t-1} \pi \right) \\
+                P \left( M^t \mid S^t \left[ S_b^t=Estado\_Fugir \right] M^{t-1} \pi \right)
+            \end{array}
+        \right.
+\end{equation}
+
+A baixo é dada uma descrição mais detalhada de como cada modelo é feito.
+
+\subsubsection*{Parar}
+
+Esse é comportamento o comportamento mais simples, tendo como modelo de seleção de ação:
+
+\begin{equation}
+    P \left( m^t \mid S^t \left[ S_b^t = Estado\_Parar \right] M^{t-1} \pi_f \right) = 
+        \left\{
+            \begin{array}{l l}
+                0.99 & \text{se }m^t = Parar \\
+                0.0025 & \text{senão}
+            \end{array}
+        \right.
+\end{equation}
+
+\subsubsection*{Comer}
+
+Para esse comportamento foi utilizado um modelo mais complexo em que, para um dado estado de $ S^t $ se calculava uma ação com o seguinte algoritmo:
+
+\begin{algorithm}[H]
+	\caption{Escolher Ação Comer} \label{algorithm:SelecaoDeAcaoComer}
+	\begin{algorithmic}[1]
+		\Procedure{EscolherAçãoComer}{\textit{estado}}
+			\State $\textit{pos\_comida} \gets \text{posição }\textit{comida\_mais\_proxima} $
+			\State $\textit{pos\_pacman} \gets \text{posição }\textit{pacman} $
+			\State $\textit{dist\_atual} \gets \text{dist} \left( \textit{pos\_comida}, \textit{pos\_pacman} \right) $
+			\For{Ação $ in $ Ações}
+				\State $\textit{nova\_pos\_pacman} \gets \text{executa} \left( \textit{pos\_pacman}, \textit{Ação} \right) $
+				\If{$ \text{dist} \left( \textit{pos\_comida}, \textit{nova\_pos\_pacman} \right) < \textit{dist\_atual} $ }
+					\State \Return $ \textit{Ação} $
+				\EndIf 
+			\EndFor
+			\State \Return $ \textit{Erro} $
+		\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
+Depois de calculado essa ação para um estado $ s^t \in S^t $, utilizamos um modelo parecido com o para o comportamento parado.
+
+\begin{equation}
+    P \left( m^t \mid s^t \left[ S_b^t = Estado\_Comer \right] M^{t-1} \pi_f \right) = 
+        \left\{
+            \begin{array}{l l}
+                0.99 & \text{se }m^t = \textit{Ação} \\
+                0.0025 & \text{senão}
+            \end{array}
+        \right.
+\end{equation}
+
+\subsubsection*{Fugir}
+
+Para esse comportamento foi utilizado um formato parecido com o de comer, mas com um modelo diferente. Para um dado estado de $ S^t $ se calculava uma ação com o seguinte algoritmo:
+
+\begin{algorithm}[H]
+	\caption{Escolher Ação Fugir} \label{algorithm:SelecaoDeAcaoFugir}
+	\begin{algorithmic}[1]
+		\Procedure{EscolherAçãoFugir}{\textit{estado}}
+			\State $\textit{pos\_fantasma} \gets \text{posição }\textit{fantasma\_mais\_proximo} $
+			\State $\textit{pos\_pacman} \gets \text{posição }\textit{pacman} $
+			\State $\textit{dist\_atual} \gets \text{dist} \left( \textit{pos\_fantasma}, \textit{pos\_pacman} \right) $
+			\For{Ação $ in $ Ações}
+				\State $\textit{nova\_pos\_pacman} \gets \text{executa} \left( \textit{pos\_pacman}, \textit{Ação} \right) $
+				\If{$ \text{dist} \left( \textit{pos\_fantasma}, \textit{nova\_pos\_pacman} \right) < \textit{dist\_atual} $ }
+					\State \Return $ \textit{Ação} $
+				\EndIf 
+			\EndFor
+			\State \Return $ \textit{Erro} $
+		\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
+Depois de calculado essa ação para um estado $ s^t \in S^t $, assim como para o comportamento anterior, utilizamos um modelo parecido com o para o comportamento parado.
+
+\begin{equation}
+    P \left( m^t \mid s^t \left[ S_b^t = Estado\_Fugir \right] M^{t-1} \pi_f \right) = 
+        \left\{
+            \begin{array}{l l}
+                0.99 & \text{se }m^t = \textit{Ação} \\
+                0.0025 & \text{senão}
+            \end{array}
+        \right.
+\end{equation}
+
+\subsubsection{Vetor de Características Utilizado}
+
+\subsubsection*{Bias}
+
+Essa é uma característica que sempre está presente nesse vetor. Ela tem um valor igual a $ 1.0 $ e seu peso $ \omega $ indica quão bom esse comportamento é, independente da situação atual.
+
+$$ f_1 = 1.0 $$
+
+\subsubsection*{Distância para Provável Comida mais Próxima}
+
+Essa característica indica qual a distância até a posição mais próxima em que é provável existir uma comida. Ela pode ser obtida a partir do algoritmo a seguir:
+
+\begin{algorithm}[H]
+	\caption{Obter Característica Distancia Comida} \label{algorithm:ObterCaracteristicaDistanciaComida}
+	\begin{algorithmic}[1]
+		\Procedure{ObterCaracterísticaDistanciaComida}{\textit{probabilidades\_estados}}
+			\State $\textit{max\_prob} \gets 0.0 $
+			\For{Posição $ in $ Posições}
+				\State $\textit{prob\_comida} \gets \text{probabilidade de comida } \left( \textit{Posição} \right) $
+				\If{ $ \textit{prob\_comida} > \textit{max\_prob} $ }
+					\State $\textit{max\_prob} \gets \textit{prob\_comida} $
+				\EndIf 
+			\EndFor
+			\For{Posição $ in $ Posições}
+				\State $\textit{prob\_comida} \gets \text{probabilidade de comida } \left( \textit{Posição} \right) $
+				\If{ $ \textit{prob\_comida} > \frac{\textit{max\_prob} }{2} $ }
+					\State $ \text{Prob\_Posições } append \text{ Posição} $
+				\EndIf 
+			\EndFor
+			\State $\textit{pos\_comida} \gets \text{mais proxima }\textit{posição} \in \text{Prob\_Posições} $
+			\State $\textit{pos\_pacman} \gets \text{posição }\textit{pacman} $
+			\State \Return $ \text{dist} \left( \textit{pos\_comida}, \textit{pos\_pacman} \right) $
+		\EndProcedure
+	\end{algorithmic}
+\end{algorithm}
+
+Tendo um conjunto de probabilidades $ a \in A $ para os estados:
+
+$$ f_2 = ObterCaracterísticaDistanciaComida \left( a \right) $$
+
+\subsubsection*{Probabilidade de um Fantasma a 3 Movimentos}
+
+Essa característica é obtida a partir da soma das probabilidades dos fantasmas a 3 movimentos, podendo então ir de $ \left[ 0, num\_fantasmas*100\% \right] $
+
+
+\subsection{3 Comportamentos no mapa original (Teste 2)}
+
+\subsection{5 Comportamentos no mapa pequeno (Teste 3)}
+
+\subsection{5 Comportamentos no mapa original (Teste 4)}

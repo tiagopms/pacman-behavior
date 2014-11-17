@@ -39,16 +39,19 @@ class BayesianGameState : public GameState
     // helper functions
     bool isFinished();
     float getClosestFoodDistance();
+    float getClosestBigFoodDistance();
     bool eatsFood(pacman_msgs::PacmanAction action);
     int getClosestGhostDistance();
     int getNumberOfGhostsOneStepAway(pacman_msgs::PacmanAction action);
     int getNumberOfGhostsNStepsAway(int n);
     bool hasGhostNStepsAway(int n);
-    float getProbabilityOfAGhostNStepsAway(int n);
-    float getProbableTimeWhiteGhosts();
+    std::pair< double, double > getProbabilityOfAGhosWhiteOrNotNStepsAway(int n);
+    double getProbabilityOfAGhostNStepsAway(int n);
+    double getProbabilityOfAWhiteGhostNStepsAway(int n);
     bool dies(pacman_msgs::PacmanAction action);
 
     float getMaxFoodProbability();
+    float getMaxBigFoodProbability();
     geometry_msgs::Pose getMostProbablePacmanPose();
     geometry_msgs::Pose getMostProbableGhostPose(int ghost_index);
     std::vector< geometry_msgs::Pose > getMostProbableGhostsPoses();

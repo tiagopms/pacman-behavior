@@ -11,8 +11,8 @@ int BayesianQLearning::NUM_FEATURES = 3;
 double BayesianQLearning::learning_rate_ = 0.002;
 double BayesianQLearning::discount_factor_ = 0.99;
 double BayesianQLearning::exploration_rate_ = 1;
-int BayesianQLearning::num_training_ = 500;
-int BayesianQLearning::no_exploration_training_matches_ = 200;
+int BayesianQLearning::num_training_ = 2000;
+int BayesianQLearning::no_exploration_training_matches_ = 500;
 
 BayesianQLearning::BayesianQLearning()
 {
@@ -48,13 +48,14 @@ std::vector<double> BayesianQLearning::getFeatures(BayesianGameState *game_state
     // get distances can't be manhattan
     //features.push_back( game_state->eatsFood(action) / 10.0 );
     features.push_back( game_state->getClosestFoodDistance() / ( 1.0 * game_state->getHeight() * game_state->getWidth() ) );
+   // features.push_back( game_state->getClosestBigFoodDistance() / ( 1.0 * game_state->getHeight() * game_state->getWidth() ) );
     //features.push_back( game_state->getNumberOfGhostsOneStepAway(action) / 10.0 );
     //features.push_back( game_state->getNumberOfGhostsNStepsAway(3) );
     //features.push_back( 1.0 / game_state->getClosestGhostDistance() );
-    features.push_back( game_state->getProbabilityOfAGhostNStepsAway(3) );
+    std::pair< double, double > near_ghost_probabilities = game_state->getProbabilityOfAGhosWhiteOrNotNStepsAway(3);
+    features.push_back( near_ghost_probabilities.first );   // normal ghost near
+  //  features.push_back( near_ghost_probabilities.second );  // white ghost near
     //features.push_back( game_state->dies(action) );
-
-    
 
     return features;
 }
@@ -96,7 +97,7 @@ std::pair<int, double> BayesianQLearning::getMaxQValue(BayesianGameState *game_s
         }
     }
 
-    ROS_DEBUG_STREAM("max q behavior " << behavior << " with value " << max_q_value);
+    //ROS_DEBUG_STREAM("max q behavior " << behavior << " with value " << max_q_value);
 
     return std::make_pair(behavior, max_q_value);
 }
@@ -118,7 +119,7 @@ int BayesianQLearning::getTrainingBehavior(BayesianGameState *game_state)
         old_q_value_ = getQValue(game_state, behavior);
         saveTempFeatures(behavior);
 
-        ROS_DEBUG_STREAM("random behavior " << behavior);
+        //ROS_DEBUG_STREAM("random behavior " << behavior);
 
         return behavior;
     }
@@ -184,7 +185,7 @@ void BayesianQLearning::updateWeights(BayesianGameState *new_game_state, int rew
 
 
     // TODO: remove after this
-    ROS_INFO_STREAM("Error " << error << " executed behavior " << old_behavior_);
+    /*ROS_INFO_STREAM("Error " << error << " executed behavior " << old_behavior_);
     weights = behavioral_weights_[0];
     weights_it = weights.begin();
     for(int i = 0; weights_it != weights.end() ; ++weights_it)
@@ -203,8 +204,20 @@ void BayesianQLearning::updateWeights(BayesianGameState *new_game_state, int rew
     {
         ROS_WARN_STREAM(" - 2 weight " << *weights_it);
     }
+    weights = behavioral_weights_[3];
+    weights_it = weights.begin();
+    for(int i = 0; weights_it != weights.end() ; ++weights_it)
+    {
+        ROS_ERROR_STREAM(" - 3 weight " << *weights_it);
+    }
+    weights = behavioral_weights_[4];
+    weights_it = weights.begin();
+    for(int i = 0; weights_it != weights.end() ; ++weights_it)
+    {
+        ROS_WARN_STREAM(" - 4 weight " << *weights_it);
+    }*/
 
-    saveWeightsToBeLogged();
+    saveWeights();
 
     /*if(old_behavior_ == 1)
     {
@@ -218,14 +231,21 @@ void BayesianQLearning::updateWeights(BayesianGameState *new_game_state, int rew
 
 void BayesianQLearning::saveWeightsToBeLogged()
 {
+    old_behavior_ = behavior_;
+    saveWeights();
+}
+
+void BayesianQLearning::saveWeights()
+{
     saved_behavioral_weights_.push_back(behavioral_weights_);
     saved_chosen_behaviors_.push_back(old_behavior_);
     temp_per_match_chosen_behaviors_[old_behavior_]++;
-    saved_time_diffs_.push_back( (double) clock () - begin_time_ );
+    saved_time_diffs_.push_back( double(clock () - begin_time_) / CLOCKS_PER_SEC );
 }
 
 void BayesianQLearning::saveMatchScore(int score)
 {
+    saved_match_time_diffs_.push_back( double(clock () - begin_time_) / CLOCKS_PER_SEC );
     saved_match_scores_.push_back(score);
 }
 
@@ -397,10 +417,12 @@ void BayesianQLearning::logTimes(time_t time_now)
     // output file
 
     char file_name_buffer [50];
-    sprintf(file_name_buffer, "/home/tiago/pacman_ws/log/match_times__%s.txt", time_buf);
+    sprintf(file_name_buffer, "/home/tiago/pacman_ws/log/step_times__%s.txt", time_buf);
     std::ofstream output_file (file_name_buffer);
+    sprintf(file_name_buffer, "/home/tiago/pacman_ws/log/match_times__%s.txt", time_buf);
+    std::ofstream output_file2 (file_name_buffer);
 
-    if(! output_file.is_open())
+    if( !output_file.is_open() || !output_file2.is_open() )
     {
         std::cout << "Unable to open file";
         return;
@@ -413,8 +435,16 @@ void BayesianQLearning::logTimes(time_t time_now)
         output_file << *it << "\n";
     }
 
-    // close output file
+    // log weights to files
+    for(std::vector<double>::iterator it = saved_match_time_diffs_.begin(); 
+                        it != saved_match_time_diffs_.end(); ++it)
+    {
+        output_file2 << *it << "\n";
+    }
+
+    // close output files
     output_file.close();
+    output_file2.close();
 }
 
 void BayesianQLearning::logWeights()

@@ -12,9 +12,9 @@
 
 #include <mcheck.h>
 
-int NUMBER_OF_GAMES_WITH_NO_GUI = 700;
-int NUMBER_OF_GAMES = 1500;
-int NUMBER_OF_TRAININGS = 500;
+int NUMBER_OF_GAMES_WITH_NO_GUI = 3000;
+int NUMBER_OF_GAMES = 4000;
+int NUMBER_OF_TRAININGS = 2700;
 bool is_training = true;
 
 bool endGame(pacman_msgs::EndGame::Request &req, pacman_msgs::EndGame::Response &res, 
@@ -54,7 +54,7 @@ bool endGame(pacman_msgs::EndGame::Request &req, pacman_msgs::EndGame::Response 
                 *game_state = new BayesianGameState;
                 res.game_restarted = true;
 
-                ROS_INFO("New game started");
+                //ROS_INFO("New game started");
                 return true;
             }
             else
@@ -76,7 +76,7 @@ bool getAction(pacman_msgs::PacmanGetAction::Request &req, pacman_msgs::PacmanGe
 {
     int behavior;
 
-    ROS_DEBUG_STREAM("Sending action");
+    //ROS_DEBUG_STREAM("Sending action");
 
     // predict next game state
     if (is_training) {
@@ -98,7 +98,7 @@ bool receiveReward(pacman_msgs::RewardService::Request &req, pacman_msgs::Reward
                     BayesianGameState **game_state, BayesianQLearning *q_learning)
 {
     int reward = (int) req.reward;
-    ROS_DEBUG_STREAM("Received reward " << reward);
+    //ROS_DEBUG_STREAM("Received reward " << reward);
 
     if (is_training) {
         q_learning->updateWeights(*game_state, reward);
@@ -144,7 +144,7 @@ int main(int argc, char **argv)
     {
         if(start_game.response.started)
         {
-            ROS_INFO("Game started");
+            //ROS_INFO("Game started");
         }
         else
         {
@@ -159,7 +159,7 @@ int main(int argc, char **argv)
     // spin to answer services
     ros::spin();
 
-    //q_learning->logWeights();
+    q_learning->logWeights();
 
     // shutdown ros node
     ros::shutdown();

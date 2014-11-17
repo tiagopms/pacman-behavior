@@ -26,6 +26,7 @@ class BayesianQLearning
     std::vector< std::vector<int> > saved_per_match_chosen_behaviors_;
     std::vector<int> saved_chosen_behaviors_;
     std::vector<double> saved_match_scores_;
+    std::vector<double> saved_match_time_diffs_;
     std::vector<double> saved_time_diffs_;
     std::vector< std::vector< std::vector<double> > > saved_match_behavioral_weights_;
     std::vector< std::vector< std::vector<double> > > saved_behavioral_weights_;
@@ -34,6 +35,7 @@ class BayesianQLearning
     void logChosenBehaviors(time_t time_now);
     void logEndOfMatchBehaviors(time_t time_now);
     void logTimes(time_t time_now);
+    void saveWeights();
 
     double old_q_value_;
     double new_q_value_;

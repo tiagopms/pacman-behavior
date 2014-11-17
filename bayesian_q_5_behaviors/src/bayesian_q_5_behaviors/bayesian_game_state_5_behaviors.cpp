@@ -12,7 +12,7 @@ BayesianGameState::BayesianGameState()
                                 ("/pacman/ghost_distance/error", boost::bind(&BayesianGameState::observeAgent, this, _1, _2));
 
     precalculateAllDistances();
-    ROS_DEBUG_STREAM("Bayesian game state initialized");
+    //ROS_DEBUG_STREAM("Bayesian game state initialized");
 }
 
 BayesianGameState::~BayesianGameState()
@@ -22,7 +22,7 @@ BayesianGameState::~BayesianGameState()
 
     precalculated_distances_.clear();
 
-    ROS_INFO_STREAM("Bayesian game state destroyed");
+    //ROS_INFO_STREAM("Bayesian game state destroyed");
 }
 
 void BayesianGameState::observePacman(double measurement_x, double measurement_y)
@@ -152,13 +152,13 @@ bool BayesianGameState::observeAgent(pacman_msgs::AgentPoseService::Request &req
 
     if(agent == pacman_msgs::AgentPoseService::Request::PACMAN)
     {
-        ROS_DEBUG_STREAM("Observe pacman");
+        //ROS_DEBUG_STREAM("Observe pacman");
         observePacman(measurement_x, measurement_y);
     }
     else
     {
         int ghost_index = agent - 1;
-        ROS_DEBUG_STREAM("Observe ghost " << ghost_index);
+        //ROS_DEBUG_STREAM("Observe ghost " << ghost_index);
         observeGhost(measurement_x, measurement_y, ghost_index);
     }
 
@@ -168,7 +168,7 @@ bool BayesianGameState::observeAgent(pacman_msgs::AgentPoseService::Request &req
 
 void BayesianGameState::predictPacmanMove(pacman_msgs::PacmanAction action)
 {
-    ROS_DEBUG_STREAM("Predict pacman");
+    //ROS_DEBUG_STREAM("Predict pacman");
 
     std::vector<float> map_line (width_, 0);
     std::vector< std::vector<float> > pacman_new_pose_map (height_, map_line);
@@ -259,7 +259,7 @@ void BayesianGameState::predictPacmanMove(pacman_msgs::PacmanAction action)
 
 void BayesianGameState::predictGhostMove(int ghost_index)
 {
-    ROS_DEBUG_STREAM("Predict ghost " << ghost_index);
+    //ROS_DEBUG_STREAM("Predict ghost " << ghost_index);
 
     double STOP_PROBABILITY = 0.2;
 
@@ -337,7 +337,6 @@ bool BayesianGameState::isFinished()
     return is_finished_;
 }
 
-// TODO: dividing by map width*height
 float BayesianGameState::getClosestFoodDistance()
 {
     geometry_msgs::Pose new_pose = getMostProbablePacmanPose();
@@ -362,6 +361,32 @@ float BayesianGameState::getClosestFoodDistance()
     }
 
     return min_dist;// / ( (float) height_ * width_);
+}
+
+float BayesianGameState::getClosestBigFoodDistance()
+{
+    geometry_msgs::Pose new_pose = getMostProbablePacmanPose();
+    int new_x = new_pose.position.x;
+    int new_y = new_pose.position.y;
+
+    float food_probability_threshold = getMaxBigFoodProbability()/2.0;
+
+    std::map< std::pair<int, int>, int > distances = getDistances(new_x, new_y);
+
+    int min_dist = util::INFINITE;
+
+    for (int i = 0 ; i < height_ ; i++) {
+        for (int j = 0 ; j < width_ ; j++) {
+            if(big_foods_map_[i][j] >= food_probability_threshold) {
+                int dist = distances[std::make_pair(j, i)];
+                if (dist < min_dist) {
+                    min_dist = dist;
+                }
+            }
+        }
+    }
+
+    return min_dist;
 }
 
 bool BayesianGameState::eatsFood(pacman_msgs::PacmanAction action)
@@ -470,24 +495,30 @@ bool BayesianGameState::hasGhostNStepsAway(int n)
     return has_ghost;
 }
 
-float BayesianGameState::getProbabilityOfAGhostNStepsAway(int n)
+std::pair< double, double > BayesianGameState::getProbabilityOfAGhosWhiteOrNotNStepsAway(int n)
 {
-    double probability = 0;
+    double probability_normal_ghost = 0;
+    double probability_white_ghost = 0;
 
-    std::vector<float> ghost_not_white_prob (num_ghosts_, 1.0);
+    std::vector<float> ghost_normal_prob (num_ghosts_, 0.0);
+    std::vector<float> ghost_white_prob (num_ghosts_, 0.0);
     for(std::vector< std::vector<float> >::reverse_iterator it = probability_ghosts_white_.rbegin(); it != probability_ghosts_white_.rend(); ++it)
     {
         for(int ghost_index = 0; ghost_index < num_ghosts_ ; ++ghost_index)
-            ghost_not_white_prob[ghost_index] -= (*it)[ghost_index];
+            ghost_white_prob[ghost_index] += (*it)[ghost_index];
     }
+
+    for(int ghost_index = 0; ghost_index < num_ghosts_ ; ++ghost_index)
+        ghost_normal_prob[ghost_index] = 1 - ghost_white_prob[ghost_index];
 
     for (int i = 0 ; i < width_ ; i++)
     {
         for (int j = 0 ; j < height_ ; j++)
         {
-            if( map_[j][i] != WALL)
+            float probability_of_being_in_this_place = pacman_pose_map_[j][i];
+
+            if( map_[j][i] != WALL && probability_of_being_in_this_place > 0)
             {
-                float probability_of_being_in_this_place = pacman_pose_map_[j][i];
                 std::map< std::pair<int, int>, int > distances = getDistances(i, j);
 
                 int min_i = (i - n > 0) ? (i - n) : 0;
@@ -503,7 +534,8 @@ float BayesianGameState::getProbabilityOfAGhostNStepsAway(int n)
                         {
                             for (int ghost_index = 0 ; ghost_index < num_ghosts_ ; ghost_index++)
                             {
-                                probability += probability_of_being_in_this_place * ghosts_poses_map_[ghost_index][ghost_j][ghost_i] * ghost_not_white_prob[ghost_index];
+                                probability_normal_ghost += probability_of_being_in_this_place * ghosts_poses_map_[ghost_index][ghost_j][ghost_i] * ghost_normal_prob[ghost_index];
+                                probability_white_ghost += probability_of_being_in_this_place * ghosts_poses_map_[ghost_index][ghost_j][ghost_i] * ghost_white_prob[ghost_index];
                             }
                         }
                     }
@@ -512,19 +544,19 @@ float BayesianGameState::getProbabilityOfAGhostNStepsAway(int n)
         }
     }
 
-    return probability;
+    return std::make_pair(probability_normal_ghost, probability_white_ghost);
 }
 
-float BayesianGameState::getProbableTimeWhiteGhosts()
+double BayesianGameState::getProbabilityOfAGhostNStepsAway(int n)
 {
-    float probable_time = 0;
-    /*for(std::vector<float>::reverse_iterator it = probable_time_ghosts_white_.rbegin(); it != probable_time_ghosts_white_.rend(); ++it)
-    {
-        if( *it > probable_time )
-            probable_time = *it;
-    }*/
+    std::pair< double, double > probabilities = getProbabilityOfAGhosWhiteOrNotNStepsAway(n);
+    return probabilities.first;
+}
 
-    return probable_time;   
+double BayesianGameState::getProbabilityOfAWhiteGhostNStepsAway(int n)
+{
+    std::pair< double, double > probabilities = getProbabilityOfAGhosWhiteOrNotNStepsAway(n);
+    return probabilities.second;
 }
 
 std::map< std::pair<int, int>, int > BayesianGameState::calculateDistances(int x, int y)
@@ -565,7 +597,7 @@ std::map< std::pair<int, int>, int > BayesianGameState::calculateDistances(int x
 
 void BayesianGameState::precalculateAllDistances()
 {
-    ROS_DEBUG_STREAM("Pre-calculating all distances");
+    //ROS_DEBUG_STREAM("Pre-calculating all distances");
 
     for (int i = 0 ; i < width_ ; i++)
     {
@@ -578,7 +610,7 @@ void BayesianGameState::precalculateAllDistances()
         }
     }
 
-    ROS_DEBUG_STREAM("Pre-calculated all distances");
+    //ROS_DEBUG_STREAM("Pre-calculated all distances");
 }
 
 std::map< std::pair<int, int>, int > BayesianGameState::getDistances(int x, int y)
@@ -597,6 +629,25 @@ float BayesianGameState::getMaxFoodProbability()
         for (int j = 0 ; j < height_ ; j++)
         {
             double probability = this->foods_map_[j][i];
+            if (probability > max_probability)
+            {
+                max_probability = probability;
+            }
+        }
+    }
+
+    return max_probability;
+}
+
+float BayesianGameState::getMaxBigFoodProbability()
+{
+    double max_probability = -util::INFINITE;
+
+    for (int i = 0 ; i < width_ ; i++)
+    {
+        for (int j = 0 ; j < height_ ; j++)
+        {
+            double probability = this->big_foods_map_[j][i];
             if (probability > max_probability)
             {
                 max_probability = probability;
