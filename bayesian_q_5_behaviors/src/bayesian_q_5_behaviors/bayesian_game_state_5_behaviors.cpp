@@ -150,6 +150,8 @@ bool BayesianGameState::observeAgent(pacman_msgs::AgentPoseService::Request &req
 
     is_finished_ = (bool) req.is_finished;
 
+    //ROS_INFO_STREAM("Observe agent");
+        
     if(agent == pacman_msgs::AgentPoseService::Request::PACMAN)
     {
         //ROS_DEBUG_STREAM("Observe pacman");

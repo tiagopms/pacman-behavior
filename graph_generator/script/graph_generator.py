@@ -12,10 +12,10 @@ from os.path import isfile, join
 
 matplotlib.rcParams['lines.markersize'] = .5*matplotlib.rcParams['lines.markersize']
 
-def get_path_to_package():
+def get_path_to_package(folder='log_20_3_behaviors_4_features_5/'):
     rospack = rospkg.RosPack()
     path = rospack.get_path('graph_generator')
-    return path + '/logs/log_11/'
+    return path + '/logs/' + folder
 
 def get_log_files(path):
     log_files = [ f for f in listdir(path) if isfile(join(path,f)) ]
@@ -93,11 +93,12 @@ def plot_graph(path, file_name):
             fit_fn = gen_polinomial_function(fit) # pylab.poly1d(fit)
 
             # ax.plot(range(len(data_column)), data_column, '.', range(len(data_column)), fit_fn(data_column), '--')
+            #p, = ax.plot(data, '.')
             p, = ax.plot(range(len(data_column)), fit_fn(range(len(data_column))), '--')
-            plots.append(p)
+            #plots.append(p)
             #plt.show()
 
-            ax.legend(plots, ['Pontuacao da Partida'])
+            # ax.legend(plots, ['Pontuacao da Partida'])
             save_file_name = path + 'image__extra__' + file_name[:-4] +  '____pol' + str(polinomy_counter) + '.png'
             fig3.savefig(save_file_name, dpi=400)
 
@@ -116,7 +117,7 @@ def plot_graph(path, file_name):
             plots = []
 
             for i in range(len(data[0])):
-                data_column = [row[i] for row in data[:2000]]
+                data_column = [row[i] for row in data]
 
                 fit = pylab.polyfit(range(len(data_column)), data_column, polinomy_counter)
                 fit_fn = gen_polinomial_function(fit) # pylab.poly1d(fit)

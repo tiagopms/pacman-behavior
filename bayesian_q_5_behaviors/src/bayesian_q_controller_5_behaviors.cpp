@@ -12,9 +12,9 @@
 
 #include <mcheck.h>
 
-int NUMBER_OF_GAMES_WITH_NO_GUI = 3000;
+int NUMBER_OF_GAMES_WITH_NO_GUI = 1000;
 int NUMBER_OF_GAMES = 4000;
-int NUMBER_OF_TRAININGS = 2700;
+int NUMBER_OF_TRAININGS = 700;
 bool is_training = true;
 
 bool endGame(pacman_msgs::EndGame::Request &req, pacman_msgs::EndGame::Response &res, 
@@ -76,7 +76,7 @@ bool getAction(pacman_msgs::PacmanGetAction::Request &req, pacman_msgs::PacmanGe
 {
     int behavior;
 
-    //ROS_DEBUG_STREAM("Sending action");
+    //ROS_INFO_STREAM("Sending action");
 
     // predict next game state
     if (is_training) {
@@ -98,7 +98,7 @@ bool receiveReward(pacman_msgs::RewardService::Request &req, pacman_msgs::Reward
                     BayesianGameState **game_state, BayesianQLearning *q_learning)
 {
     int reward = (int) req.reward;
-    //ROS_DEBUG_STREAM("Received reward " << reward);
+    //ROS_INFO_STREAM("Received reward " << reward);
 
     if (is_training) {
         q_learning->updateWeights(*game_state, reward);
