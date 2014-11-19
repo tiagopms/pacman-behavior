@@ -6,8 +6,8 @@
 #include <fstream>
 #include <ctime>
 
-int BayesianQLearning::NUM_BEHAVIORS = 3;
-int BayesianQLearning::NUM_FEATURES = 3;
+int BayesianQLearning::NUM_BEHAVIORS = 5;
+int BayesianQLearning::NUM_FEATURES = 7;
 double BayesianQLearning::learning_rate_ = 0.001;
 double BayesianQLearning::discount_factor_ = 0.99;
 double BayesianQLearning::exploration_rate_ = 1;
@@ -54,14 +54,16 @@ std::vector<double> BayesianQLearning::getFeatures(BayesianGameState *game_state
     big_food_dist = big_food_dist ? big_food_dist : 1.0;
     features.push_back( 1.0 / food_dist );
     //features.push_back( game_state->getProbOfBigFood() * 1.0 / big_food_dist );
+    features.push_back( 1.0 / big_food_dist );
+    features.push_back( game_state->getProbOfBigFood() );
     
-    //features.push_back( game_state->getProbOfWhiteGhosts() );
+    features.push_back( game_state->getProbOfWhiteGhosts() );
     //features.push_back( game_state->getNumberOfGhostsOneStepAway(action) / 10.0 );
     //features.push_back( game_state->getNumberOfGhostsNStepsAway(3) );
     //features.push_back( 1.0 / game_state->getClosestGhostDistance() );
     std::pair< double, double > near_ghost_probabilities = game_state->getProbabilityOfAGhosWhiteOrNotNStepsAway(3);
     features.push_back( near_ghost_probabilities.first );   // normal ghost near
-    //features.push_back( near_ghost_probabilities.second );  // white ghost near
+    features.push_back( near_ghost_probabilities.second );  // white ghost near
     //features.push_back( game_state->dies(action) );
 
     return features;

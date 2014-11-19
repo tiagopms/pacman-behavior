@@ -14,16 +14,9 @@ import matplotlib.pyplot as plt
 
 import os
 
-
-def get_mean(path, file_name):
-    my_file = open ( path + file_name , 'r')
-    data = [ map(float, line[:-2].split(' ')) for line in my_file ]
-
-    for i in range(len(data[0])):
-        data_column = [row[i] for row in data]
-        print numpy.mean(data_column[2700:])
-
-        fit = pylab.polyfit(range(len(data_column)), data_column, 2)
+num_partidas = 3000
+original_map = False
+behaviors_3 = False
         
 
 
@@ -33,7 +26,7 @@ def get_score_mean(path, file_name):
 
     for i in range(len(data[0])):
         data_column = [row[i] for row in data]
-        print 'score ', numpy.mean(data_column[2700:])
+        #print 'score ', numpy.mean(data_column[2700:])
 
         fit = pylab.polyfit(range(len(data_column)), data_column, 2)
         print fit
@@ -51,14 +44,14 @@ def create_score_graph(save_path, path, file_name):
     matplotlib.rcParams['lines.linewidth'] = 2*matplotlib.rcParams['lines.linewidth']
 
     for i in range(len(data[0])):
-        data_column = [row[i] for row in data[:3000]]
+        data_column = [row[i] for row in data[:num_partidas]]
         fit = pylab.polyfit(range(len(data_column)), data_column, 4)
         
 
         fit_fn = graph_generator.gen_polinomial_function(fit) # pylab.poly1d(fit)
 
         # ax.plot(range(len(data_column)), data_column, '.', range(len(data_column)), fit_fn(data_column), '--')
-        p, = ax.plot(data[:3000], 'b.')
+        p, = ax.plot(data[:num_partidas], 'b.')
         p, = ax.plot(range(len(data_column)), fit_fn(range(len(data_column))), 'r--')
         #plots.append(p)
         #plt.show()
@@ -86,11 +79,21 @@ def create_chosen_behaviors_graph(save_path, path, file_name):
 
     matplotlib.rcParams['lines.markersize'] = 0.25*matplotlib.rcParams['lines.markersize']
 
-    ax.axis([0, 3000, 0, 550])
+    if original_map and behaviors_3:
+        ax.axis([0, num_partidas, 0, 800])
+        pass
+    elif ( not original_map ) and behaviors_3:
+        ax.axis([0, num_partidas, 0, 550])
+    elif original_map and ( not behaviors_3 ):
+        #ax.axis([0, num_partidas, 0, 550])
+        pass
+    elif ( not original_map ) and ( not behaviors_3 ):
+        ax.axis([0, num_partidas, 0, 310])
+        
     ax.legend(['Ficar parado', 'Comer', 'Fugir'])
     figure.suptitle(u'Comportamentos escolhidos')
     ax.set_xlabel('Partida')
-    ax.set_ylabel(u"Número de vezes esolhido")
+    ax.set_ylabel(u"Número de vezes escolhido")
     save_file_name = save_path + 'chosen_behaviors.eps'
     figure.savefig(save_file_name, dpi=400)
 
@@ -112,19 +115,29 @@ def create_chosen_behaviors_pol_graph(save_path, path, file_name):
 
     for i in range(len(data[0])):
         data_column = [row[i] for row in data]
-        fit = pylab.polyfit(range(len(data_column)), data_column, 3)
+        fit = pylab.polyfit(range(len(data_column)), data_column, 4)
         fit_fn = graph_generator.gen_polinomial_function(fit)
 
         p, = ax.plot(range(len(data_column)), fit_fn(range(len(data_column))), '-')
         plots.append(p)
         #plt.show()
 
-    ax.axis([0, 3000, -10, 100])
+    if original_map and behaviors_3:
+        ax.axis([0, num_partidas, -20, 250])
+        pass
+    elif ( not original_map ) and behaviors_3:
+        ax.axis([0, num_partidas, -10, 100])
+    elif original_map and ( not behaviors_3 ):
+        #ax.axis([0, num_partidas, 0, 550])
+        pass
+    elif ( not original_map ) and ( not behaviors_3 ):
+        ax.axis([0, num_partidas, -10, 90])
+    
     ax.legend(plots, ['Ficar parado', 'Comer', 'Fugir'])
     figure.suptitle(u'Comportamentos escolhidos')
     ax.set_xlabel('Partida')
-    ax.set_ylabel(u"Número de vezes esolhido")
-    save_file_name = save_path + 'chosen_behaviors____pol.eps'
+    ax.set_ylabel(u"Número de vezes escolhido")
+    save_file_name = save_path + 'chosen_behaviors_pol.eps'
     figure.savefig(save_file_name, dpi=400)
 
     plt.close(figure)
@@ -149,17 +162,26 @@ def create_chosen_behaviors_pol_graph2(save_path, path, file_name):
         ax = figure.add_subplot(111)
 
         data_column = [row[i] for row in data]
-        fit = pylab.polyfit(range(len(data_column)), data_column, 3)
+        fit = pylab.polyfit(range(len(data_column)), data_column, 4)
         fit_fn = graph_generator.gen_polinomial_function(fit)
 
         ax.plot(data_column, 'b.')
         p, = ax.plot(range(len(data_column)), fit_fn(range(len(data_column))), 'r-')
 
-        ax.axis([0, 3000, -10, 600])
+        if original_map and behaviors_3:
+            ax.set_xlim([0,num_partidas])
+        elif ( not original_map ) and behaviors_3:
+            ax.axis([0, num_partidas, -10, 600])
+        elif original_map and ( not behaviors_3 ):
+            #ax.axis([0, num_partidas, 0, 550])
+            pass
+        elif ( not original_map ) and ( not behaviors_3 ):
+            ax.set_xlim([0,num_partidas])
+    
         ax.legend(['Amostras', u'Polinômio'])
         figure.suptitle(u'Comportamento ' + behaviors[i])
         ax.set_xlabel('Partida')
-        ax.set_ylabel(u"Número de vezes esolhido")
+        ax.set_ylabel(u"Número de vezes escolhido")
         save_file_name = save_path + 'chosen_behaviors____pol__' + str(i) + '.eps'
         figure.savefig(save_file_name, dpi=400)
 
@@ -192,7 +214,16 @@ def create_per_match_weights_graph(save_path, path, file_name):
 
     matplotlib.rcParams['lines.markersize'] = 0.25*matplotlib.rcParams['lines.markersize']
 
-    ax.axis([0, 3000, -250, 150])
+    if original_map and behaviors_3:
+        ax.set_xlim([0,num_partidas])
+    elif ( not original_map ) and behaviors_3:
+        ax.axis([0, num_partidas, -250, 150])
+    elif original_map and ( not behaviors_3 ):
+        #ax.axis([0, num_partidas, 0, 550])
+        pass
+    elif ( not original_map ) and ( not behaviors_3 ):
+        ax.set_xlim([0, num_partidas])
+    
     ax.legend(weights)
     figure.suptitle(u'Pesos ' + behavior)
     ax.set_xlabel('Partida')
@@ -210,12 +241,18 @@ def create_per_match_weights_graph(save_path, path, file_name):
 
 def create_weights_graph(save_path, weights_data):
 
-    if len(weights_data[0]) == 3:
+    print 'num behaviors ', len(weights_data)
+
+    if len(weights_data) == 3:
         behaviors = ['Ficar parado', 'Comer', 'Fugir']
         weights = ['Bias', 'Dist. Comida', 'Prob. Fantasma']
+        weights_file = ['Bias', 'DistComida', 'ProbFantasma']
     else:
         behaviors = ['Ficar parado', 'Comer', 'Fugir', 'Comer Capsula', u'Caçar']
-        weights = ['Bias', 'Dist. Comida', 'Dist. Capsula', 'Prob. Existir Capsula', 'Prob. Existir Fant. Branco', 'Prob. Fantasma Perto', 'Prob. Fantasma Branco Perto']
+        weights = ['Bias', 'Dist. Comida', 'Dist. Capsula', 'Prob. Existir Capsula', 'Prob. Existir Fant. Branco', 
+                                                            'Prob. Fantasma Perto', 'Prob. Fantasma Branco Perto']
+        weights_file = ['Bias', 'DistComida', 'DistCapsula', 'ProbExistirCapsula', 'ProbExistirFantBranco', 
+                                                            'ProbFantasmaPerto', 'ProbFantasmaBrancoPerto']
         
 
     matplotlib.rcParams['lines.markersize'] = 0.25*matplotlib.rcParams['lines.markersize']
@@ -227,20 +264,44 @@ def create_weights_graph(save_path, weights_data):
         single_weight_column = []
 
         for behavior_data in weights_data:
-            behavior_weight_data = [row[i] for row in behavior_data]
+            behavior_weight_data = [row[i] for row in behavior_data[:num_partidas]]
             single_weight_column.append(behavior_weight_data)
 
         single_weight_column = map(list, zip(*single_weight_column))
 
         ax.plot(single_weight_column, '-')
 
-        if i == 1 and len(behaviors) == 3:
-            ax.axis([0, 3000, -13, 5])
-        ax.legend(behaviors)
-        figure.suptitle(u'Comportamento ' + weights[i])
+        if original_map and behaviors_3:
+            if i == 0:
+                ax.axis([0, num_partidas, -20, 250])
+            if i == 1:
+                ax.axis([0, num_partidas, -10, 110])
+        elif ( not original_map ) and behaviors_3:
+            if i == 1 and len(behaviors) == 3:
+                ax.axis([0, num_partidas, -13, 5])
+        elif original_map and ( not behaviors_3 ):
+            #ax.axis([0, num_partidas, 0, 550])
+            pass
+        elif ( not original_map ) and ( not behaviors_3 ):
+            if i == 0:
+                ax.axis([0, num_partidas, -20, 70])
+            if i == 1:
+                ax.axis([0, num_partidas, -10, 80])
+            if i == 2:
+                ax.axis([0, num_partidas, -15, 105])
+            if i == 3:
+                ax.axis([0, num_partidas, -15, 50])
+    
+
+        if ( not original_map ) and ( not behaviors_3 ) and i != 3 and i != 5:
+            ax.legend(behaviors, loc=2)
+        else:
+            ax.legend(behaviors)
+
+        figure.suptitle(weights[i])
         ax.set_xlabel('Partida')
-        ax.set_ylabel(u"Valor")
-        save_file_name = save_path + 'weights____pol__' + str(weights[i]) + '.eps'
+        ax.set_ylabel("Valor de $\omega_" + str(i+1) + "$")
+        save_file_name = save_path + 'weights____pol__' + str(weights_file[i]) + '.eps'
         figure.savefig(save_file_name, dpi=400)
 
     matplotlib.rcParams['lines.markersize'] = 4*matplotlib.rcParams['lines.markersize']
@@ -262,7 +323,6 @@ def get_data():
     for log_file in log_files:
         if log_file.endswith('.txt'):
             if log_file.startswith('match_behaviors_'):
-                get_mean(path, log_file)
                 create_chosen_behaviors_graph(save_path, path, log_file)
                 create_chosen_behaviors_pol_graph(save_path, path, log_file)
                 create_chosen_behaviors_pol_graph2(save_path, path, log_file)
