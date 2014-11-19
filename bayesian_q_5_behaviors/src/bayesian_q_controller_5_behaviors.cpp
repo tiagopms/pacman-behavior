@@ -12,9 +12,9 @@
 
 #include <mcheck.h>
 
-int NUMBER_OF_GAMES_WITH_NO_GUI = 1000;
+int NUMBER_OF_GAMES_WITH_NO_GUI = 1500;
 int NUMBER_OF_GAMES = 4000;
-int NUMBER_OF_TRAININGS = 700;
+int NUMBER_OF_TRAININGS = 1200;
 bool is_training = true;
 
 bool endGame(pacman_msgs::EndGame::Request &req, pacman_msgs::EndGame::Response &res, 

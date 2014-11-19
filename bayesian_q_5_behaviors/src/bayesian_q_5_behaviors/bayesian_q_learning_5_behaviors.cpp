@@ -11,8 +11,8 @@ int BayesianQLearning::NUM_FEATURES = 7;
 double BayesianQLearning::learning_rate_ = 0.001;
 double BayesianQLearning::discount_factor_ = 0.99;
 double BayesianQLearning::exploration_rate_ = 1;
-int BayesianQLearning::num_training_ = 700;
-int BayesianQLearning::no_exploration_training_matches_ = 200;
+int BayesianQLearning::num_training_ = 1200;
+int BayesianQLearning::no_exploration_training_matches_ = 300;
 
 BayesianQLearning::BayesianQLearning()
 {
