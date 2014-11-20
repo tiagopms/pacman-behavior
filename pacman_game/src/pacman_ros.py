@@ -31,8 +31,8 @@ class PacmanGame():
 
         self.args['send_pose_as_service'] = True
         self.args['send_pose_with_error'] = True
-        self.args['ghost_distance_error'] = 0.5
-        self.args['pacman_pose_error'] = 0.5
+        self.args['ghost_distance_error'] = 0.01
+        self.args['pacman_pose_error'] = 0.01
 
         # service and variables to start new game and end it
         self.start_game_srv = rospy.Service('/pacman/start_game', StartGame, self.start_game_service)

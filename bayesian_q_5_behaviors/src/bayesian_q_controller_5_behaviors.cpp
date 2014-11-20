@@ -12,9 +12,9 @@
 
 #include <mcheck.h>
 
-int NUMBER_OF_GAMES_WITH_NO_GUI = 1500;
+int NUMBER_OF_GAMES_WITH_NO_GUI = 3000;
 int NUMBER_OF_GAMES = 4000;
-int NUMBER_OF_TRAININGS = 1200;
+int NUMBER_OF_TRAININGS = 2700;
 bool is_training = true;
 
 bool endGame(pacman_msgs::EndGame::Request &req, pacman_msgs::EndGame::Response &res, 
@@ -84,12 +84,16 @@ bool getAction(pacman_msgs::PacmanGetAction::Request &req, pacman_msgs::PacmanGe
     } else {
         behavior = q_learning->getBehavior(*game_state);
     }
+    //ROS_INFO_STREAM("Getting action");
+
 
     pacman_msgs::PacmanAction action = pacman.getAction(*game_state, behavior);
+    //ROS_INFO_STREAM("Predicting movement");
     (*game_state)->predictAgentsMoves(action);
 
-    // game not restarted
     res.action = action.action;
+
+    //ROS_INFO_STREAM("Done sending agent");
 
     return true;
 }

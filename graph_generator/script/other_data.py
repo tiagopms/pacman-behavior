@@ -13,7 +13,7 @@ def get_mean(path, file_name):
 
     for i in range(len(data[0])):
         data_column = [row[i] for row in data]
-        print numpy.mean(data_column[700:])
+        print numpy.mean(data_column[700:1000])
 
         fit = pylab.polyfit(range(len(data_column)), data_column, 2)
         print fit
@@ -25,14 +25,14 @@ def get_score_mean(path, file_name):
 
     for i in range(len(data[0])):
         data_column = [row[i] for row in data]
-        print 'score ', numpy.mean(data_column[700:])
+        print 'score ', numpy.mean(data_column[700:1000])
 
         fit = pylab.polyfit(range(len(data_column)), data_column, 2)
         print fit
 
 
 def get_data():
-    path = graph_generator.get_path_to_package('log_40_5_behaviors_7_features_8/')
+    path = graph_generator.get_path_to_package('log_42_5_behaviors_6_features_original_10/')
     log_files = graph_generator.get_log_files(path)
     for log_file in log_files:
         if log_file.endswith('.txt'):

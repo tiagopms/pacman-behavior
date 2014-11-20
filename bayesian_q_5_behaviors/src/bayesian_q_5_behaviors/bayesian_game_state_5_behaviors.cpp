@@ -27,7 +27,7 @@ BayesianGameState::~BayesianGameState()
 
 void BayesianGameState::observePacman(double measurement_x, double measurement_y)
 {
-    float SD_PACMAN_MEASUREMENT = 0.5;
+    float SD_PACMAN_MEASUREMENT = 0.01;
 
     std::vector<float> pacman_pose_map_line (width_, 0);
     std::vector< std::vector<float> > pacman_new_pose_map (height_, pacman_pose_map_line);
@@ -87,7 +87,7 @@ void BayesianGameState::observePacman(double measurement_x, double measurement_y
 
 void BayesianGameState::observeGhost(double measurement_x_dist, double measurement_y_dist, int ghost_index)
 {
-    double SD_GHOST_DIST_MEASUREMENT = 0.5;
+    double SD_GHOST_DIST_MEASUREMENT = 0.01;
 
     std::vector< std::vector<float> > ghost_pose_map = ghosts_poses_map_[ghost_index];
 
@@ -120,6 +120,18 @@ void BayesianGameState::observeGhost(double measurement_x_dist, double measureme
 
     if(sum_probabilities == 0)
     {
+        /*ROS_INFO_STREAM("measurement_x_dist " << measurement_x_dist << " y_dist " << measurement_y_dist);
+        std::vector<float> ghost_white_prob (num_ghosts_, 0.0);
+        for(std::vector< std::vector<float> >::reverse_iterator it = probability_ghosts_white_.rbegin(); it != probability_ghosts_white_.rend(); ++it)
+        {
+            ghost_white_prob[ghost_index] += (*it)[ghost_index];
+        }
+
+        // TODO: check this
+        ROS_INFO_STREAM("white prob " << ghost_white_prob[ghost_index]/2.0);
+        printPacmanOrGhostPose(false, ghost_index);
+        printPacmanOrGhostPose(true, ghost_index);*/
+
         ROS_WARN_STREAM("Probability 0 for ghost " << ghost_index << ", redistributing");
     }
 
@@ -154,15 +166,17 @@ bool BayesianGameState::observeAgent(pacman_msgs::AgentPoseService::Request &req
         
     if(agent == pacman_msgs::AgentPoseService::Request::PACMAN)
     {
-        //ROS_DEBUG_STREAM("Observe pacman");
+        //ROS_INFO_STREAM("Observe pacman");
         observePacman(measurement_x, measurement_y);
     }
     else
     {
         int ghost_index = agent - 1;
-        //ROS_DEBUG_STREAM("Observe ghost " << ghost_index);
+        //ROS_INFO_STREAM("Observe ghost " << ghost_index);
         observeGhost(measurement_x, measurement_y, ghost_index);
     }
+
+    //ROS_INFO_STREAM("Done observing agent");
 
     res.observed = true;
     return true;
@@ -170,7 +184,7 @@ bool BayesianGameState::observeAgent(pacman_msgs::AgentPoseService::Request &req
 
 void BayesianGameState::predictPacmanMove(pacman_msgs::PacmanAction action)
 {
-    //ROS_DEBUG_STREAM("Predict pacman");
+    //ROS_INFO_STREAM("Predict pacman");
 
     std::vector<float> map_line (width_, 0);
     std::vector< std::vector<float> > pacman_new_pose_map (height_, map_line);
@@ -261,9 +275,16 @@ void BayesianGameState::predictPacmanMove(pacman_msgs::PacmanAction action)
 
 void BayesianGameState::predictGhostMove(int ghost_index)
 {
-    //ROS_DEBUG_STREAM("Predict ghost " << ghost_index);
+    //ROS_INFO_STREAM("Predict ghost " << ghost_index);
 
-    double STOP_PROBABILITY = 0.2;
+    std::vector<float> ghost_white_prob (num_ghosts_, 0.0);
+    for(std::vector< std::vector<float> >::reverse_iterator it = probability_ghosts_white_.rbegin(); it != probability_ghosts_white_.rend(); ++it)
+    {
+        ghost_white_prob[ghost_index] += (*it)[ghost_index];
+    }
+
+    // TODO: check this
+    double STOP_PROBABILITY = ghost_white_prob[ghost_index]/2.0;
 
     std::vector<float> ghost_pose_map_line (width_, 0);
     std::vector< std::vector<float> > ghost_new_pose_map (height_, ghost_pose_map_line);

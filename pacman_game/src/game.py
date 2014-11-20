@@ -758,6 +758,14 @@ class Game:
                 ghostPosition = self.state.getGhostPositions()[agentIndex - 1]
                 pacmanPosition = self.state.getPacmanPosition()
 
+                for position in ghostPosition:
+                    if position - int(position) != 0:
+                        if self.lastState:
+                            ghostPosition = self.lastState.getGhostPositions()[agentIndex - 1]
+                            break
+
+                self.lastState = self.state
+
                 ghost_distance = AgentPose()
                 ghost_distance.agent = agentIndex
                 ghost_distance.pose.position.x = ( ghostPosition[0] - pacmanPosition[0] )

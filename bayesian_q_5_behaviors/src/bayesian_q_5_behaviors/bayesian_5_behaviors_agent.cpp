@@ -14,28 +14,28 @@ pacman_msgs::PacmanAction BayesianBehaviorAgent::getAction(BayesianGameState *ga
     switch (behavior)
     {
         case STOP:
+            //ROS_INFO_STREAM("Stop behavior");
             action = getStopAction();
-            //ROS_DEBUG_STREAM("Stop behavior");
             break;
         case EAT:
+            //ROS_INFO_STREAM("Eat behavior");
             action = getEatAction(game_state);
-            //ROS_DEBUG_STREAM("Eat behavior");
             break;
         case EAT_BIG_FOOD:
+            //ROS_INFO_STREAM("Eat big food behavior");
             action = getEatBigFoodAction(game_state);
-            //ROS_DEBUG_STREAM("Eat big food behavior");
             break;
         case RUN:
+            //ROS_INFO_STREAM("Run behavior");
             action = getRunAction(game_state);
-            //ROS_DEBUG_STREAM("Run behavior");
             break;
         case HUNT:
+            //ROS_INFO_STREAM("Hunt behavior");
             action = getHuntAction(game_state);
-            //ROS_DEBUG_STREAM("Hunt behavior");
             break;
         default:
-            action.action = action.STOP;
             ROS_ERROR_STREAM("Unknown default behavior");
+            action.action = action.STOP;
             break;
     }
 
@@ -55,6 +55,7 @@ pacman_msgs::PacmanAction BayesianBehaviorAgent::getHuntAction(BayesianGameState
 
     std::vector< geometry_msgs::Pose > ghosts_poses = game_state->getMostProbableGhostsPoses();
     std::vector< geometry_msgs::Pose >::reverse_iterator closest_ghost;
+    bool found_ghost = false;
     for(std::vector< geometry_msgs::Pose >::reverse_iterator it = ghosts_poses.rbegin(); it != ghosts_poses.rend(); ++it) {
         /* std::cout << *it; ... */
         int distance = distances[std::make_pair(it->position.x, it->position.y)];
@@ -62,11 +63,12 @@ pacman_msgs::PacmanAction BayesianBehaviorAgent::getHuntAction(BayesianGameState
         {
             closest_ghost = it;
             min_distance = distance;
+            found_ghost = true;
         }
     }
 
-    //game_state->printMap();
-    //ROS_INFO_STREAM("x: " << closest_ghost->position.x << " y: " << closest_ghost->position.y );
+    if(!found_ghost)
+        closest_ghost = ghosts_poses.rbegin();
 
     distances = game_state->getDistances(closest_ghost->position.x, closest_ghost->position.y);
     std::vector< pacman_msgs::PacmanAction > actions = game_state->getLegalActions(pacman_pose.position.x, pacman_pose.position.y);
@@ -75,7 +77,6 @@ pacman_msgs::PacmanAction BayesianBehaviorAgent::getHuntAction(BayesianGameState
     int action_iterator = 0;
     for(int i = next_positions.size() - 1; i != -1; i--)
     {
-        //ROS_INFO_STREAM("- distance " << (short) actions[i].action << " : " << distances[ next_positions[i] ] );
         if ( distances[ next_positions[i] ] < min_distance )
         {
             action_iterator = i;
@@ -96,6 +97,7 @@ pacman_msgs::PacmanAction BayesianBehaviorAgent::getRunAction(BayesianGameState 
 
     std::vector< geometry_msgs::Pose > ghosts_poses = game_state->getMostProbableGhostsPoses();
     std::vector< geometry_msgs::Pose >::reverse_iterator closest_ghost;
+    bool found_ghost = false;
     for(std::vector< geometry_msgs::Pose >::reverse_iterator it = ghosts_poses.rbegin(); it != ghosts_poses.rend(); ++it) {
         /* std::cout << *it; ... */
         int distance = distances[std::make_pair(it->position.x, it->position.y)];
@@ -103,11 +105,12 @@ pacman_msgs::PacmanAction BayesianBehaviorAgent::getRunAction(BayesianGameState 
         {
             closest_ghost = it;
             min_distance = distance;
+            found_ghost = true;
         }
     }
 
-    //game_state->printMap();
-    //ROS_INFO_STREAM("x: " << closest_ghost->position.x << " y: " << closest_ghost->position.y );
+    if(!found_ghost)
+        closest_ghost = ghosts_poses.rbegin();
 
     distances = game_state->getDistances(closest_ghost->position.x, closest_ghost->position.y);
     std::vector< pacman_msgs::PacmanAction > actions = game_state->getLegalActions(pacman_pose.position.x, pacman_pose.position.y);
@@ -116,7 +119,6 @@ pacman_msgs::PacmanAction BayesianBehaviorAgent::getRunAction(BayesianGameState 
     int action_iterator = 0;
     for(int i = next_positions.size() - 1; i != -1; i--)
     {
-        //ROS_INFO_STREAM("- distance " << (short) actions[i].action << " : " << distances[ next_positions[i] ] );
         if ( distances[ next_positions[i] ] > min_distance )
         {
             action_iterator = i;

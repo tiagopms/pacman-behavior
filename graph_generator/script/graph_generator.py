@@ -12,7 +12,7 @@ from os.path import isfile, join
 
 matplotlib.rcParams['lines.markersize'] = .5*matplotlib.rcParams['lines.markersize']
 
-def get_path_to_package(folder='log_40_5_behaviors_7_features_8/'):
+def get_path_to_package(folder='log_50_5_behaviors_6_features_no_errors_11/'):
     rospack = rospkg.RosPack()
     path = rospack.get_path('graph_generator')
     return path + '/logs/' + folder

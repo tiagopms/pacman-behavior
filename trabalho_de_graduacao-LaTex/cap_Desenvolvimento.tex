@@ -9,7 +9,7 @@
 
 \section{Introdução}
 
-Este capítulo irá apresentar as soluções adotadas para os problemas de planejamento de tarefas e de tomada de decisões, junto com sua modelagem matemática. Aqui também serão descritos os ambientes de teste em simulação e a modelagem utilizada para descrever o agente móvel.
+Este capítulo irá apresentar as soluções adotadas para os problemas de planejamento de tarefas e de tomada de decisões, junto com sua modelagem matemática. Aqui também serão descritos os ambientes de teste em simulação e a modelagem utilizada para descrever o agente móvel. Por último, ainda neste capítulo, apresentaremos uma descrição dos testes realizados.
 
 \section{Modelagem Matemática}
 
@@ -401,7 +401,7 @@ A plataforma provê um sistema com informação completa%
 \footnote{Todas as propriedades do jogo são conhecidas a todo momento, como por exemplo: posição do Pacman, posição dos fantasmas e localizações com ou se comida.%
 } e sem erros na movimentação%
 \footnote{Uma ação executada em um dado estado do sistema terá sempre o mesmo resultado.%
-}. Essa plataforma foi programada em python e a integramos com ROS [refs ROS] para criar um sistema de forma mais generalizada. Utilizando ROS nós conectamos essa plataforma com um programa em C++, no qual foi programado o modelo de aprendizagem e seleção de comportamento proposto nesse trabalho.
+}. Essa plataforma foi programada em python e a integramos com ROS [refs ROS] para criar um sistema mais geral, que possa ser aplicado em outros contextos. Utilizando o ROS nós conectamos essa plataforma com um programa em C++, no qual foi programado o modelo de aprendizagem e seleção de comportamento proposto nesse trabalho.
 
 A comunicação entre a plataforma em Python e o programa em C++ se deu a partir de quatro mensagens diferentes, as quais simulavam os sensores, atuadores e recompensas do sistema.
 

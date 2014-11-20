@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 import os
 
-num_partidas = 1000
+num_partidas = 3000
 original_map = True
 behaviors_3 = False
         
@@ -313,7 +313,7 @@ def create_graphs_directory(path):
     return directory
 
 def get_data():
-    path = graph_generator.get_path_to_package('log_40_5_behaviors_7_features_8/')
+    path = graph_generator.get_path_to_package('log_50_5_behaviors_6_features_no_errors_11/')
     save_path = create_graphs_directory(path)
     log_files = graph_generator.get_log_files(path)
     log_files.sort()
