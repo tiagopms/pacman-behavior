@@ -32,7 +32,7 @@ def get_score_mean(path, file_name):
 
 
 def get_data():
-    path = graph_generator.get_path_to_package('log_42_5_behaviors_6_features_original_10/')
+    path = graph_generator.get_path_to_package('log_30_3_behaviors_3_features_original_7/')
     log_files = graph_generator.get_log_files(path)
     for log_file in log_files:
         if log_file.endswith('.txt'):

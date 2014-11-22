@@ -5,7 +5,7 @@
 \chapter{Desenvolvimento} \label{chap:Desenvolvimento}
 
 % Resumo opcional. Comentar se não usar.
-\resumodocapitulo{``Só sei que nada sei'' -- Plato}
+\resumodocapitulo{``Só sei que nada sei'' -- Sócrates}
 
 \section{Introdução}
 
@@ -412,7 +412,7 @@ A comunicação entre a plataforma em Python e o programa em C++ se deu a partir
 	\item Recompensa recebida do ambiente --- $ r \in \mathbb{R} $
 \end{itemize}
 
-Para simular erros de sensoriamento, comuns em aplicação de robótica móvel, antes de enviar essas informações são inseridos erros Gaussianos tanto na posição do agente (Pacman), quanto nas distâncias pros fantasmas. Para simular erros de atuação, foi inserido um erro na forma de atuação a ser executada também.
+Para simular erros de sensoriamento, comuns em aplicações de robótica móvel, antes de enviar essas informações são inseridos erros Gaussianos tanto na posição do agente (Pacman), quanto nas distâncias pros fantasmas.
 
 $$
 	\left( x, y \right) = \left( x^*, y^* \right) + \left( \delta\left( 0, \sigma_{pacman} \right), \delta\left( 0, \sigma_{pacman} \right) \right)
@@ -431,13 +431,13 @@ sigma $;
 	\item $ \left( x^*, y^* \right) $ a posição exata do agente.
 \end{itemize}
 
-Analogamente a distância ``vista'' dos fantasmas ficou:
+Analogamente a distância para os fantasmas recebida é:
 
 \begin{equation}
 	\left( d_x, d_y \right) = \left( \delta\left( d_x^*, \sigma_{dist\_fant} \right), \delta\left( d_y^*, \sigma_{dist\_fant} \right) \right)
 \end{equation}
 
-A atuação tem um conjunto de valores possível tal que $ u \in U = \left\{ Norte, Sul, Leste, Oeste, Parar \right\} $. Como ela possui um valor discreto e não numérico, não inserimos um erro gaussiano gaussiano nela. Ela é recebida pela plataforma de simulação e um erro é inserido nela de acordo com a função a seguir:
+A atuação tem um conjunto de valores possível tal que $ u \in U = \left\{ Norte, Sul, Leste, Oeste, Parar \right\} $. Como ela possui um valor discreto e não numérico, não inserimos um erro gaussiano gaussiano nela. Para simular erros de atuação, quando uma ação é recebida pela plataforma de simulação ela é executada de acordo com a função prensente no algorítmo \ref{algorithm:ErroAtuacao}.
 
 \begin{algorithm}[H]
 	\caption{Erro na Atuação} \label{algorithm:ErroAtuacao}
@@ -454,7 +454,7 @@ A atuação tem um conjunto de valores possível tal que $ u \in U = \left\{ Nor
 	\end{algorithmic}
 \end{algorithm}
 
-Ou seja, a atuação tem uma chance $ \nu_{atuacao} = \textit{FATOR\_DE\_ACERTO} $ de ser executada como experado. Ela tem também uma proabilidade $ 1 - \nu_{atuacao} $ de ser selecionada uma ação randômica diferente da escolhida.
+Ou seja, a atuação tem uma chance $ \nu_{atuacao} = \textit{FATOR\_DE\_ACERTO} $ de ser executada como experado. Existe também uma proabilidade $ 1 - \nu_{atuacao} $ de ser selecionada uma ação randômica diferente da escolhida.
 
 A recompensa $ r $ é, por sua vez, enviada da plataforma de simulação para o sistema de aprendizagem. Nela não inserimos qualquer forma de erro e ela representa a diferença de pontuação entre a etapa atual e a anterior no jogo, ou seja, a pontuação recebida pela última ação executada.
 
@@ -567,9 +567,11 @@ Para esse comportamento foi utilizado um modelo mais complexo em que, para um da
 				\State $\textit{nova\_pos\_pacman} \gets \text{executa} \left( \textit{pos\_pacman}, \textit{Ação} \right) $
 				\If{$ \text{dist} \left( \textit{pos\_comida}, \textit{nova\_pos\_pacman} \right) < \textit{dist\_atual} $ }
 					\State \Return $ \textit{Ação} $
+					\Comment{Retorna ação escolhida}
 				\EndIf 
 			\EndFor
-			\State \Return $ \textit{Erro} $
+			\State \Return $ \textit{Ação} $
+			\Comment{Nenhuma ação boa, mas precisa retornar uma}
 		\EndProcedure
 	\end{algorithmic}
 \end{algorithm}
@@ -599,11 +601,13 @@ Para esse comportamento foi utilizado um formato parecido com o de comer, mas co
 			\State $\textit{dist\_atual} \gets \text{dist} \left( \textit{pos\_fantasma}, \textit{pos\_pacman} \right) $
 			\For{Ação $ in $ Ações}
 				\State $\textit{nova\_pos\_pacman} \gets \text{executa} \left( \textit{pos\_pacman}, \textit{Ação} \right) $
-				\If{$ \text{dist} \left( \textit{pos\_fantasma}, \textit{nova\_pos\_pacman} \right) < \textit{dist\_atual} $ }
+				\If{$ \text{dist} \left( \textit{pos\_fantasma}, \textit{nova\_pos\_pacman} \right) > \textit{dist\_atual} $ }
 					\State \Return $ \textit{Ação} $
+					\Comment{Retorna ação escolhida}
 				\EndIf 
 			\EndFor
-			\State \Return $ \textit{Erro} $
+			\State \Return $ \textit{Ação} $
+			\Comment{Nenhuma ação boa, mas precisa retornar uma}
 		\EndProcedure
 	\end{algorithmic}
 \end{algorithm}
@@ -620,7 +624,7 @@ Depois de calculado essa ação para um estado $ s^t \in S^t $, assim como para 
         \right.
 \end{equation}
 
-\subsubsection{Vetor de Características Utilizado}
+\subsubsection{Vetor de Características Utilizado} \label{subsubsection:3ComportamentosVetorCaracterísticas}
 
 \subsubsection*{Bias}
 
@@ -675,8 +679,9 @@ Essa característica é obtida a partir da soma das probabilidades de haver fant
 						\State $\textit{prob\_pacman} \gets \text{probabilidade pacman } \left( \textit{Posição} \right) $
 						\For{Fantasma $ in $ Fantasmas}
 							\State $\textit{prob\_fantasma} \gets \text{probabilidade Fantasma } \left( \textit{Posição2} \right) $
-							\State $\textit{prob\_fantasma\_normal} \gets \text{probabilidade normal } \left( \textit{Fantasma} \right) $
-							\State $\textit{total} \gets \textit{total} + \textit{prob\_pacman}  \cdot \textit{prob\_fantasma} \cdot \textit{prob\_fantasma\_normal} $
+							\State $\textit{prob\_normal} \gets \text{probabilidade estar normal } \left( \textit{Fantasma} \right) $
+							\Comment{Não branco}
+							\State $\textit{total} \gets \textit{total} + \textit{prob\_pacman}  \cdot \textit{prob\_fantasma} \cdot \textit{prob\_normal} $
 						\EndFor
 					\EndIf
 				\EndFor
@@ -739,7 +744,7 @@ $$ f_1 = 1.0 $$
 
 \subsubsection*{Proximidade para Provável Comida mais Próxima}
 
-Essa foi a única característica alterada do teste anterior para esse, foi utilizada essa proximidade, no lugar da distância, por ter um valor mais alto quando recompensas são recebidas e mais baixo no caso contrário, o que facilita a aprendizagem. Isso pode ser observado na equação \ref{equation:UpdateOmegaQPartiallyObservable}, com um valor $ f_i \left( a, b \right) $ maior, para um mesmo $ erro $, tem-se uma variação maior de $ \omega_i $.
+Essa foi a única característica alterada do teste anterior para esse. Foi utilizada essa proximidade, no lugar da distância, por ter um valor mais alto quando recompensas são recebidas e mais baixo no caso contrário, o que facilita a aprendizagem. Isso pode ser observado na equação \ref{equation:UpdateOmegaQPartiallyObservable}, com um valor $ f_i \left( a, b \right) $ maior, para um mesmo $ erro $, tem-se uma variação maior de $ \omega_i $ ($ \uparrow f_i \rightarrow \uparrow \Delta \omega_i $).
 
 $$ f_2 = \frac{1}{ObterCaracteristicaDistanciaComida \left( a \right) } $$
 
@@ -820,12 +825,12 @@ Os modelos para os estados $ Estado\_Parar $, $ Estado\_Comer $ e $ Estado\_Fugi
 
 \subsubsection*{Comer Cápsula}
 
-O modelo para o estado $ Estado\_Comer\_Cápsula $ é análogo ao do estado $ Estado\_Comer $. Para um dado estado $ s^t \in S^t $ se calculava uma ação com o seguinte algoritmo:
+O modelo para o estado $ Estado\_Comer\_Capsula $ é análogo ao do estado $ Estado\_Comer $. Para um dado estado $ s^t \in S^t $ se calculava uma ação com o seguinte algoritmo:
 
 \begin{algorithm}[H]
 	\caption{Escolher Ação Comer Cápsula} \label{algorithm:SelecaoDeAcaoComer}
 	\begin{algorithmic}[1]
-		\Procedure{EscolherAçãoCápsula}{\textit{estado}}
+		\Procedure{EscolherAçãoComerCápsula}{\textit{estado}}
 			\State $\textit{pos\_capsula} \gets \text{posição }\textit{capsula\_mais\_proxima} $
 			\State $\textit{pos\_pacman} \gets \text{posição }\textit{pacman} $
 			\State $\textit{dist\_atual} \gets \text{dist} \left( \textit{pos\_comida}, \textit{pos\_pacman} \right) $
@@ -833,9 +838,11 @@ O modelo para o estado $ Estado\_Comer\_Cápsula $ é análogo ao do estado $ Es
 				\State $\textit{nova\_pos\_pacman} \gets \text{executa} \left( \textit{pos\_pacman}, \textit{Ação} \right) $
 				\If{$ \text{dist} \left( \textit{pos\_capsula}, \textit{nova\_pos\_pacman} \right) < \textit{dist\_atual} $ }
 					\State \Return $ \textit{Ação} $
+					\Comment{Retorna ação escolhida}
 				\EndIf 
 			\EndFor
-			\State \Return $ \textit{Erro} $
+			\State \Return $ \textit{Ação} $
+			\Comment{Nenhuma ação boa, mas precisa retornar uma}
 		\EndProcedure
 	\end{algorithmic}
 \end{algorithm}
@@ -843,7 +850,7 @@ O modelo para o estado $ Estado\_Comer\_Cápsula $ é análogo ao do estado $ Es
 Depois de calculada essa ação para um estado $ s^t \in S^t $, utilizamos o seguinte modelo probabilístico.
 
 \begin{equation}
-    P \left( m^t \mid s^t \left[ S_b^t = Estado\_Comer\_Cápsula \right] M^{t-1} \pi_f \right) = 
+    P \left( m^t \mid s^t \left[ S_b^t = Estado\_Comer\_Capsula \right] M^{t-1} \pi_f \right) = 
         \left\{
             \begin{array}{l l}
                 0.99 & \text{se }m^t = \textit{Ação} \\
@@ -855,7 +862,7 @@ Depois de calculada essa ação para um estado $ s^t \in S^t $, utilizamos o seg
 
 \subsubsection*{Caçar}
 
-O modelo para o estado $ \textit{Estado\_Caçar} $ é análogo ao do estado $ Estado\_Fugir $, só que indo em direção ao fantasma. Para um dado estado $ s^t \in S^t $ se calculava uma ação com o seguinte algoritmo:
+O modelo para o estado $ \textit{Estado\_Caçar} $ é análogo ao do estado $ Estado\_Fugir $, só que indo em direção ao fantasma. Para um dado estado $ s^t \in S^t $ se calcula uma ação com o seguinte algoritmo:
 
 \begin{algorithm}[H]
 	\caption{Escolher Ação Caçar} \label{algorithm:SelecaoDeAcaoFugir}
@@ -866,11 +873,13 @@ O modelo para o estado $ \textit{Estado\_Caçar} $ é análogo ao do estado $ Es
 			\State $\textit{dist\_atual} \gets \text{dist} \left( \textit{pos\_fantasma}, \textit{pos\_pacman} \right) $
 			\For{Ação $ in $ Ações}
 				\State $\textit{nova\_pos\_pacman} \gets \text{executa} \left( \textit{pos\_pacman}, \textit{Ação} \right) $
-				\If{$ \text{dist} \left( \textit{pos\_fantasma}, \textit{nova\_pos\_pacman} \right) > \textit{dist\_atual} $ }
+				\If{$ \text{dist} \left( \textit{pos\_fantasma}, \textit{nova\_pos\_pacman} \right) < \textit{dist\_atual} $ }
 					\State \Return $ \textit{Ação} $
+					\Comment{Retorna ação escolhida}
 				\EndIf 
 			\EndFor
-			\State \Return $ \textit{Erro} $
+			\State \Return $ \textit{Ação} $
+			\Comment{Nenhuma ação boa, mas precisa retornar uma}
 		\EndProcedure
 	\end{algorithmic}
 \end{algorithm}
@@ -889,7 +898,16 @@ Depois de calculada essa ação para um estado $ s^t \in S^t $, utilizamos o seg
 
 \subsubsection{Vetor de Características Utilizado} \label{subsubsection:5ComportamentosVetorCaracterísticas}
 
-O vetor de características $ f $ para esse experimento teve sete parâmetros, sendo 3 deles os usados no experimento anterior (\ref{subsection:3ComportamentosMapaOriginal}) $ Bias $, $ \textit{Proximidade para Provável Comida mais Próxima} $ e $ \textit{Soma das Probabilidades de Fantasmas a menos de 4 Movimentos} $. Os outros quatro são $ \textit{Proximidade para Provável Cápsula mais Próxima} $ e $ \textit{Probabilidade de ainda Existir uma Cápsula} $, $ \textit{Probabilidade de Existir Fantasma Branco} $ e $ \textit{Soma das Probabilidades de Fantasmas Brancos a menos de 4 Movimentos} $ e estão descritos a seguir.
+O vetor de características $ f $ para esse experimento teve sete parâmetros, sendo 3 deles os usados no experimento anterior (\ref{subsection:3ComportamentosMapaOriginal}) $ Bias $, \textit{Proximidade para Provável Comida mais Próxima} e \textit{Soma das Probabilidades de Fantasmas a menos de 4 Movimentos}. Os outros quatro são:
+
+\begin{itemize}
+	\item \textit{Proximidade para Provável Cápsula mais Próxima};
+	\item \textit{Probabilidade de ainda Existir uma Cápsula};
+	\item \textit{Probabilidade de Existir Fantasma Branco};
+	\item \textit{Soma das Probabilidades de Fantasmas Brancos a menos de 4 Movimentos}.
+\end{itemize}
+
+Cada um desses experimentos está descrito a seguir.
 
 \subsubsection*{Bias}
 $$ f_1 = 1.0 $$
@@ -899,12 +917,12 @@ $$ f_2 = \frac{1}{ObterCaracteristicaDistanciaComida \left( a \right)} $$
 
 \subsubsection*{Proximidade para Provável Cápsula mais Próxima}
 
-Essa característica indica qual a distância até a posição mais próxima em que é provável existir uma capsula. Ela pode ser obtida a partir do algoritmo a seguir, que é análogo ao algoritmo \ref{algorithm:ObterCaracteristicaDistanciaComida} do tópico \ref{subsubsection:DistProvavelComida}:
+Essa característica indica qual a distância até a posição mais próxima em que é provável existir uma cápsula. Ela pode ser obtida a partir do algoritmo a seguir, que é análogo ao algoritmo \ref{algorithm:ObterCaracteristicaDistanciaComida} do tópico \ref{subsubsection:DistProvavelComida}:
 
 \begin{algorithm}[H]
-	\caption{Obter Característica Distancia Capsula} \label{algorithm:ObterCaracteristicaDistanciaCapsula}
+	\caption{Obter Característica Distancia Cápsula} \label{algorithm:ObterCaracteristicaDistanciaCapsula}
 	\begin{algorithmic}[1]
-		\Procedure{ObterCaracterísticaDistanciaCapsula}{\textit{probabilidades\_estados}}
+		\Procedure{ObterCaracterísticaDistanciaCápsula}{\textit{probabilidades\_estados}}
 			\State $\textit{max\_prob} \gets 0.0 $
 			\For{Posição $ in $ Posições}
 				\State $\textit{prob\_capsula} \gets \text{probabilidade de capsula } \left( \textit{Posição} \right) $
@@ -931,7 +949,7 @@ $$ f_3 = \frac{1}{ObterCaracteristicaDistanciaCapsula \left( a \right)} $$
 
 \subsubsection*{Probabilidade de ainda Existir uma Cápsula}
 
-Essa característica é obtida a partir da probabilidade de existir um fantasma branco no ambiente.
+Essa característica é obtida a partir da probabilidade de ainda existir uma cápsula no mapa.
 
 $$ f_4 = P \left( capsula \mid a \right) $$
 
@@ -960,8 +978,8 @@ Essa característica é obtida a partir da soma das probabilidades de haver fant
 						\State $\textit{prob\_pacman} \gets \text{probabilidade pacman } \left( \textit{Posição} \right) $
 						\For{Fantasma $ in $ Fantasmas}
 							\State $\textit{prob\_fantasma} \gets \text{probabilidade Fantasma } \left( \textit{Posição2} \right) $
-							\State $\textit{prob\_fantasma\_branco} \gets \text{probabilidade branco } \left( \textit{Fantasma} \right) $
-							\State $\textit{total} \gets \textit{total} + \textit{prob\_pacman}  \cdot \textit{prob\_fantasma} \cdot \textit{prob\_fantasma\_branco} $
+							\State $\textit{prob\_branco} \gets \text{probabilidade estar branco } \left( \textit{Fantasma} \right) $
+							\State $\textit{total} \gets \textit{total} + \textit{prob\_pacman}  \cdot \textit{prob\_fantasma} \cdot \textit{prob\_branco} $
 						\EndFor
 					\EndIf
 				\EndFor
@@ -1018,7 +1036,9 @@ Os comportamentos utilizados são os mesmos utilizados no experimento anterior (
 
 \subsubsection{Vetor de Características Utilizado}
 
-O vetor de características $ f $ usado nesse experimento, assim como os comportamentos, é igual ao utilizado no experimento anterior e estão melhor descritos no tópico \ref{subsubsection:5ComportamentosVetorCaracterísticas} e contem as seguintes características.
+O vetor de características $ f $ usado nesse experimento possui seis características, sendo cinco delas iguais às utilizadas no experimento anterior%
+\footnote{Essas características estão melhor descritos no tópico \ref{subsubsection:5ComportamentosVetorCaracterísticas}.%
+}. A última é uma combinação das duas restantes \textit{Proximidade para Provável Capsula mais Próxima} e \textit{Probabilidade de ainda Existir uma Capsula} em uma.  O vetor ficou, então, com as seguintes características.
 
 \subsubsection*{Bias}
 $$ f_1 = 1.0 $$
@@ -1026,20 +1046,19 @@ $$ f_1 = 1.0 $$
 \subsubsection*{Proximidade para Provável Comida mais Próxima}
 $$ f_2 = \frac{1}{ObterCaracteristicaDistanciaComida \left( a \right)} $$
 
-\subsubsection*{Proximidade para Provável Cápsula mais Próxima}
-$$ f_3 = \frac{1}{ObterCaracteristicaDistanciaCapsula \left( a \right)} $$
+\subsubsection*{Probabilidade e Proximidade para Provável Cápsula mais Próxima }
 
-\subsubsection*{Probabilidade de ainda Existir uma Cápsula}
-$$ f_4 = P \left( capsula \mid a \right) $$
+Essa é a característica nova inserida para esse experimento e simplifica as duas características anteriores \textit{Proximidade para Provável Capsula mais Próxima} e \textit{Probabilidade de ainda Existir uma Capsula} em uma, sendo o produto das duas.
+$$ f_3 = \frac{P \left( capsula \mid a \right)}{ObterCaracteristicaDistanciaCapsula \left( a \right)} $$
 
 \subsubsection*{Probabilidade de Existir Fantasma Branco}
-$$ f_5 = P \left( fantasma\_branco \mid a \right) $$
+$$ f_4 = P \left( fantasma\_branco \mid a \right) $$
 
 \subsubsection*{Soma das Probabilidades de Fantasmas a menos de 4 Movimentos}
-$$ f_6 = ObterCaracteristicaProbFantasmas \left( a \right) $$
+$$ f_5 = ObterCaracteristicaProbFantasmas \left( a \right) $$
 
 \subsubsection*{Soma das Probabilidades de Fantasmas Brancos a menos de 4 Movimentos}
-$$ f_7 = ObterCaracteristicaProbFantasmasBrancos \left( a \right) $$
+$$ f_6 = ObterCaracteristicaProbFantasmasBrancos \left( a \right) $$
 
 
 

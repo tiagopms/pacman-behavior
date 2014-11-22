@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 
 import os
 
-num_partidas = 3000
+num_partidas = 1000
 original_map = True
 behaviors_3 = False
         
@@ -73,6 +73,11 @@ def create_chosen_behaviors_graph(save_path, path, file_name):
     my_file = open ( path + file_name , 'r')
     data = [ map(float, line[:-2].split(' ')) for line in my_file ]
 
+    if behaviors_3:
+        behaviors = ['Ficar parado', 'Comer', 'Fugir']
+    else:
+        behaviors = ['Ficar parado', 'Comer', 'Fugir', u'Comer Capsula', u'Caçar']
+
     figure = plt.figure(figsize=(8.0, 5.0))
     ax = figure.add_subplot(111)
     ax.plot(data, '.')
@@ -85,12 +90,15 @@ def create_chosen_behaviors_graph(save_path, path, file_name):
     elif ( not original_map ) and behaviors_3:
         ax.axis([0, num_partidas, 0, 550])
     elif original_map and ( not behaviors_3 ):
-        #ax.axis([0, num_partidas, 0, 550])
-        pass
+        ax.axis([0, num_partidas, 0, 800])
     elif ( not original_map ) and ( not behaviors_3 ):
-        ax.axis([0, num_partidas, 0, 310])
+        ax.axis([0, num_partidas, 0, 330])
         
-    ax.legend(['Ficar parado', 'Comer', 'Fugir'])
+    if not behaviors_3:
+        ax.legend(behaviors, loc=2)
+    else:
+        ax.legend(behaviors)
+
     figure.suptitle(u'Comportamentos escolhidos')
     ax.set_xlabel('Partida')
     ax.set_ylabel(u"Número de vezes escolhido")
@@ -105,6 +113,11 @@ def create_chosen_behaviors_graph(save_path, path, file_name):
 def create_chosen_behaviors_pol_graph(save_path, path, file_name):
     my_file = open ( path + file_name , 'r')
     data = [ map(float, line[:-2].split(' ')) for line in my_file ]
+
+    if behaviors_3:
+        behaviors = ['Ficar parado', 'Comer', 'Fugir']
+    else:
+        behaviors = ['Ficar parado', 'Comer', 'Fugir', u'Comer Capsula', u'Caçar']
 
     figure = plt.figure(figsize=(8.0, 5.0))
     ax = figure.add_subplot(111)
@@ -128,12 +141,15 @@ def create_chosen_behaviors_pol_graph(save_path, path, file_name):
     elif ( not original_map ) and behaviors_3:
         ax.axis([0, num_partidas, -10, 100])
     elif original_map and ( not behaviors_3 ):
-        #ax.axis([0, num_partidas, 0, 550])
-        pass
+        ax.axis([0, num_partidas, -20, 200])
     elif ( not original_map ) and ( not behaviors_3 ):
-        ax.axis([0, num_partidas, -10, 90])
+        ax.axis([0, num_partidas, -10, 80])
+        
+    if not behaviors_3:
+        ax.legend(behaviors, loc=2)
+    else:
+        ax.legend(behaviors)
     
-    ax.legend(plots, ['Ficar parado', 'Comer', 'Fugir'])
     figure.suptitle(u'Comportamentos escolhidos')
     ax.set_xlabel('Partida')
     ax.set_ylabel(u"Número de vezes escolhido")
@@ -245,14 +261,23 @@ def create_weights_graph(save_path, weights_data):
 
     if len(weights_data) == 3:
         behaviors = ['Ficar parado', 'Comer', 'Fugir']
-        weights = ['Bias', 'Dist. Comida', 'Prob. Fantasma']
         weights_file = ['Bias', 'DistComida', 'ProbFantasma']
+        if original_map:
+            weights = ['Bias', 'Prox. Comida', 'Prob. Fantasma']
+        else:
+            weights = ['Bias', 'Dist. Comida', 'Prob. Fantasma']
     else:
         behaviors = ['Ficar parado', 'Comer', 'Fugir', 'Comer Capsula', u'Caçar']
-        weights = ['Bias', 'Dist. Comida', 'Dist. Capsula', 'Prob. Existir Capsula', 'Prob. Existir Fant. Branco', 
+        weights = ['Bias', 'Prox. Comida', 'Prox. Capsula', 'Prob. Existir Capsula', 'Prob. Existir Fant. Branco', 
                                                             'Prob. Fantasma Perto', 'Prob. Fantasma Branco Perto']
         weights_file = ['Bias', 'DistComida', 'DistCapsula', 'ProbExistirCapsula', 'ProbExistirFantBranco', 
                                                             'ProbFantasmaPerto', 'ProbFantasmaBrancoPerto']
+        if original_map:
+            weights = ['Bias', 'Prox. Comida', 'Prob. e Prox. Capsula', 'Prob. Existir Fant. Branco', 
+                                                            'Prob. Fantasma Perto', 'Prob. Fantasma Branco Perto']
+        else:
+            weights = ['Bias', 'Prox. Comida', 'Prox. Capsula', 'Prob. Existir Capsula', 'Prob. Existir Fant. Branco', 
+                                                            'Prob. Fantasma Perto', 'Prob. Fantasma Branco Perto']
         
 
     matplotlib.rcParams['lines.markersize'] = 0.25*matplotlib.rcParams['lines.markersize']
@@ -277,10 +302,19 @@ def create_weights_graph(save_path, weights_data):
             if i == 1:
                 ax.axis([0, num_partidas, -10, 110])
         elif ( not original_map ) and behaviors_3:
+            if i == 0 and len(behaviors) == 3:
+                ax.axis([0, num_partidas, -50, 30])
             if i == 1 and len(behaviors) == 3:
-                ax.axis([0, num_partidas, -13, 5])
+                ax.axis([0, num_partidas, -15, 5])
         elif original_map and ( not behaviors_3 ):
-            #ax.axis([0, num_partidas, 0, 550])
+            if i == 0:
+                ax.axis([0, num_partidas, -20, 210])
+            if i == 2:
+                ax.axis([0, num_partidas, -5, 40])
+            if i == 3:
+                ax.axis([0, num_partidas, -10, 100])
+            if i == 4:
+                ax.axis([0, num_partidas, -90, 30])
             pass
         elif ( not original_map ) and ( not behaviors_3 ):
             if i == 0:
@@ -296,7 +330,13 @@ def create_weights_graph(save_path, weights_data):
         if ( not original_map ) and ( not behaviors_3 ) and i != 3 and i != 5:
             ax.legend(behaviors, loc=2)
         else:
-            ax.legend(behaviors)
+            if ( not original_map ) and behaviors_3 and i == 0:
+                ax.legend(behaviors, loc=2)
+            else:
+                if original_map and ( not behaviors_3 ) and ( i == 0 or i == 1 or i == 2 or i == 3 or i == 5 ):
+                    ax.legend(behaviors, loc=2)
+                else:
+                    ax.legend(behaviors)
 
         figure.suptitle(weights[i])
         ax.set_xlabel('Partida')
@@ -313,7 +353,7 @@ def create_graphs_directory(path):
     return directory
 
 def get_data():
-    path = graph_generator.get_path_to_package('log_50_5_behaviors_6_features_no_errors_11/')
+    path = graph_generator.get_path_to_package('log_42_5_behaviors_6_features_original_10/')
     save_path = create_graphs_directory(path)
     log_files = graph_generator.get_log_files(path)
     log_files.sort()
