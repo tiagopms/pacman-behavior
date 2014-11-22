@@ -66,7 +66,7 @@ $$
 	\end{matrix} \right)
 $$
 
-Tendo posse dessa definição, utilizando como inspiração o algoritmo POMDP [refs POMDP], podemos substituir na equação \ref{equation:QValueFunctionQLearning} o estado $ s \in S $ por uma variável $ a \in A $ que represente essa distribuição de probabilidades nos possíveis estados $ S $.
+Tendo posse dessa definição, utilizando como inspiração o algoritmo POMDP \cite{Thrun:2005:PR:1121596}, podemos substituir na equação \ref{equation:QValueFunctionQLearning} o estado $ s \in S $ por uma variável $ a \in A $ que represente essa distribuição de probabilidades nos possíveis estados $ S $.
 
 \begin{equation} \label{equation:QValueFunctionPartiallyObservable}
     Q^t \left( a, b \right) = \int \! \left( r \left( a, b, a' \right) + \gamma \cdot V^{t-1} \left( a' \right) \right) \cdot P \left( a' \mid b, a \right) \, \mathrm{d}a'
@@ -389,7 +389,9 @@ $$
 
 \section{Ambiente de Testes e Simulação} \label{section:AmbienteDeTestes}
 
-Para poder testar as teorias aqui descritas foi utilizado uma plataforma de Pacman [referência http://ai.berkeley.edu/project\_overview.html], criada em Berkeley para suas aulas de inteligência artificial.
+Para poder testar as teorias aqui descritas foi utilizado uma plataforma de Pacman%
+\footnote{Essa plataforma pode ser encontrada em http://ai.berkeley.edu/project\_overview.html%
+}, criada em Berkeley para suas aulas de inteligência artificial.
 
 \begin{figure}[H]
     \centering
@@ -401,7 +403,7 @@ A plataforma provê um sistema com informação completa%
 \footnote{Todas as propriedades do jogo são conhecidas a todo momento, como por exemplo: posição do Pacman, posição dos fantasmas e localizações com ou se comida.%
 } e sem erros na movimentação%
 \footnote{Uma ação executada em um dado estado do sistema terá sempre o mesmo resultado.%
-}. Essa plataforma foi programada em python e a integramos com ROS [refs ROS] para criar um sistema mais geral, que possa ser aplicado em outros contextos. Utilizando o ROS nós conectamos essa plataforma com um programa em C++, no qual foi programado o modelo de aprendizagem e seleção de comportamento proposto nesse trabalho.
+}. Essa plataforma foi programada em python e a integramos com ROS \cite{ROS:1448} para criar um sistema mais geral, que possa ser aplicado em outros contextos. Utilizando o ROS nós conectamos essa plataforma com um programa em C++, no qual foi programado o modelo de aprendizagem e seleção de comportamento proposto nesse trabalho.
 
 A comunicação entre a plataforma em Python e o programa em C++ se deu a partir de quatro mensagens diferentes, as quais simulavam os sensores, atuadores e recompensas do sistema.
 

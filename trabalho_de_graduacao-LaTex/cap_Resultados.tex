@@ -38,7 +38,9 @@ Realizamos o treinamento ao longo de 2700 partidas, sendo que a exploração gul
 
 \subsection{Resultados e Análise}
 
-A evolução da aprendizagem se dá a partir da mudança dos pesos $ \omega_i $ ao longo do tempo, devido à sua relação com o comportamento selecionado via a equaçào \ref{equation:QLearningEscolhaComportamentoFinal}. Nas figuras \ref{img:3ComportamentosMapaPequeno:PesoBiasAndDistComida} e \ref{img:3ComportamentosMapaPequeno:PesoProbFantasma} temos os gráficos de como os valores desses pesos evoluem com o tempo, para cada um dos comportamentos.
+A evolução da aprendizagem se dá a partir da mudança dos pesos $ \omega_i $ ao longo do tempo, devido à sua relação com o comportamento selecionado via a equaçào \ref{equation:QLearningEscolhaComportamentoFinal}. Nas figuras \ref{img:3ComportamentosMapaPequeno:PesoBiasAndDistComida} e \ref{img:3ComportamentosMapaPequeno:PesoProbFantasma} temos os gráficos%
+\footnote{Todos os gráficos foram criados usando \cite{Hunter:2007}%
+} de como os valores desses pesos evoluem com o tempo, para cada um dos comportamentos.
 
 \begin{figure}[H]
 	\centering
@@ -507,4 +509,4 @@ O algoritmo, como esperado, teve comportamentos diferentes, para diferentes mapa
 
 Algumas coisas inesperadas foram observadas, por exemplo, nos terceiro e quarto casos de teste, mesmo só executando, ao final, dois comportamentos, $ Comer $ e $ Fugir $, os mesmo executados pelos dois primeiros experimentos, ele conseguiu uma média de pontos bastante superior. Isso se deve ao caso de uma característica, que parecia ter pouca relevância para esses dois comportamentos, ser mais importante que o esperado. Isso reforça a informação dada na Fundamentação Teórica, no tópico \ref{subsection:GeneralizaçãoParesEstadoAção}, que falava ``devemos escolher esses valores/características com cuidado para obter uma boa representação do nosso par estado-ação [...] ou podemos ter estados-ações com valores [...] parecidos, e, consequentemente, valores de $ Q \left( S, U \right) $ também parecidos, mas que são muito diferentes.''
 
-O modelo obteve bons resultados, conseguindo fazer escolhas satisfatórias mesmo num sistema com alto erro de atuação e sensoriamento e sem ter nenhuma informação previa de como os comportamentos influenciariam seu desenpenho ou atuação. Mesmo com algumas características inesperadas encontradas, o algoritmo se comportou como desejado. Nos experimentos com o mapa clássico, por exemplo, ele aprende e valoriza muito mais a ação de comer, enquanto nos mapas pequenos ele é muito mais cauteloso.
+O modelo obteve bons resultados, conseguindo fazer escolhas satisfatórias mesmo num sistema com alto erro de atuação e sensoriamento e sem ter nenhuma informação previa de como os comportamentos influenciariam seu desempenho ou atuação. Mesmo com algumas características inesperadas encontradas, o algoritmo se comportou como desejado. Nos experimentos com o mapa clássico, por exemplo, ele aprende e valoriza muito mais a ação de comer, enquanto nos mapas pequenos ele é muito mais cauteloso.

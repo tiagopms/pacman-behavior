@@ -3,11 +3,14 @@
 
 \chapter{Conclusões} \label{Chap:Conclusoes}
 
-Conclusões relevantes do trabalho. Os objetivos foram atingidos? O
-desenvolvimento conseguiu resolver o problema proposto, não conseguiu? 
+O algoritmo teve o desempenho desejado e conseguiu aprender como utilizar os diferentes parâmetros para fazer boas escolhas num sistema estocástico. Ele apresentou, ainda, curvas  de aprendizagem diferentes para mapas diferentes, como é esperado.
 
+Os testes mostram, também, que esse algoritmo consegue aprender características específicas dos mapas. Um exemplo é o fato de perceber que um ou outro comportamento, ao ser invocado em uma parte específica do mapa, consegue ganhos que não são inerentes a ele.
+
+O algoritmo, no entanto, possui algumas limitações, como, por exemplo, sua dificuldade para sair de um máximo local, para certas circunstâncias. Outra limitação é ter de se escolher os parâmetros manualmente, de forma que eles consigam descrever bem o sistema, tendo valores linearmente separáveis para diferentes comportamentos.
 
 \section{Perspectivas Futuras}
 
-Usando o trabalho que foi feito, o que pode ser feito no futuro pelo
-autor ou por outros grupos.
+Uma proposta que pode ser feita para melhorar esse trabalho é a utilização de uma rede neural no lugar da função de ganho atualmente utilizada. Com uma rede neural os parâmetros não teriam de ser escolhidos manualmente e relações mais complexas poderiam ser descobertas, a partir do espectro de probabilidades atual do sistema $ a \in A $.
+
+Outro trabalho que pode ser feito é a criação de uma plataforma física em que esse sistema poderia ser testado fora de simulação, dando suporte para os robôs não se danificarem durante o processo de aprendizagem.

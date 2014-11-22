@@ -17,26 +17,26 @@ Aqui iremos descrever diferentes abordagens encontradas na literatura para o pro
 
 Analisando a literatura, podemos ver a preferência crescente por algoritmos probabilísticos nessa área, no lugar dos determinísticos. Isso provem da incerteza presente no mundo real, que deve ser modelada pelo algoritmo adotado. Para uma modelagem verdadeira e precisa do mundo real, é preciso considerar as incertezas presentes nele.
 
-Muitos algoritmos de planejamento de tarefas são específicos para as tarefas que seus robôs irão desempenhar, alguns exemplos são na área de exploração, por exemplo, o uso de algoritmos de exploração de fronteiras [4, 5, 6] ou na área de braços robóticos para planejamento de manipulação de objetos para robôs com dois braços [7].
+Muitos algoritmos de planejamento de tarefas são específicos para as tarefas que seus robôs irão desempenhar, alguns exemplos são na área de exploração, por exemplo, o uso de algoritmos de exploração de fronteiras \cite{conf:icra:FredaO05,Yamauchi:1998:FEU,Yamauchi:1997:FAA} ou na área de braços robóticos para planejamento de manipulação de objetos para robôs com dois braços \cite{Berenson_2009_6465}.
 
-Para o nosso sistema queríamos um algoritmo que não fosse específico para um único tipo de aplicação. Analisando a literatura mais a fundo, vemos que muitos algoritmos nessa área são baseados na cadeia de Markov. Ela diz que o ambiente pode ser modelado por um número de variáveis de estado em que cada estado depende apenas do estado exatamente anterior ( $ P(S^t\mid S^{t-1}S^{t-2})=P(S^t\mid S^{t-1}) $ ), ou seja, o sistema não tem memória de longo prazo [8].
+Para o nosso sistema queríamos um algoritmo que não fosse específico para um único tipo de aplicação. Analisando a literatura mais a fundo, vemos que muitos algoritmos nessa área são baseados na cadeia de Markov. Ela diz que o ambiente pode ser modelado por um número de variáveis de estado em que cada estado depende apenas do estado exatamente anterior ( $ P(S^t\mid S^{t-1}S^{t-2})=P(S^t\mid S^{t-1}) $ ), ou seja, o sistema não tem memória de longo prazo \cite{books:daglib:0095301}.
 
-Um algoritmo baseado na cadeia de Markov que é muito utilizado é o Processos de Decisão de Markov (Markov Decision Processes, MDP) [3]. Um problema desse algoritmo é que, embora ele leve em conta que as ações executadas podem ter um comportamento imprevisível, ele não incorpora a incerteza provinda dos sensores. Em outras palavras ele considera que o estado do sistema pode ser completamente observado a todo instante, o que, em robótica, geralmente não é o caso.
+Um algoritmo baseado na cadeia de Markov que é muito utilizado é o Processos de Decisão de Markov (Markov Decision Processes, MDP) \cite{Thrun:2005:PR:1121596}. Um problema desse algoritmo é que, embora ele leve em conta que as ações executadas podem ter um comportamento imprevisível, ele não incorpora a incerteza provinda dos sensores. Em outras palavras ele considera que o estado do sistema pode ser completamente observado a todo instante, o que, em robótica, geralmente não é o caso.
 
-Um algoritmo que corrige esse problema é o Processos de Decisão de Markov Parcialmente Observável (Partially Observable Markov Decision Processes, POMDP) [3]. Esse algoritmo retorna para o caso geral completamente probabilístico em que ambos os sensores e os atuadores tem funcionamento imprevisível e com certa curva conhecida de probabilidade. O problema com esse algoritmo é a sua demanda computacional, mesmo podendo ser calculado off-line e salvo, ele muitas vezes não é computacionalmente possível.
+Um algoritmo que corrige esse problema é o Processos de Decisão de Markov Parcialmente Observável (Partially Observable Markov Decision Processes, POMDP) \cite{Thrun:2005:PR:1121596}. Esse algoritmo retorna para o caso geral completamente probabilístico em que ambos os sensores e os atuadores tem funcionamento imprevisível e com certa curva conhecida de probabilidade. O problema com esse algoritmo é a sua demanda computacional, mesmo podendo ser calculado off-line e salvo, ele muitas vezes não é computacionalmente possível.
 
-Em [9] Pineau e Thrun utilizam uma estratégia de vários POMDPs hierarquizados para reduzir o problema de requisição computacional que um único POMDP combinado iria precisar.
+Em \cite{Pineau01hierarchicalpomdp} Pineau e Thrun utilizam uma estratégia de vários POMDPs hierarquizados para reduzir o problema de requisição computacional que um único POMDP combinado iria precisar.
 
-Outra estratégia para o planejamento de tarefas é uma estratégia reativa baseada na seleção de comportamentos presente em [1, 10]. Essa é uma estratégia interessante, pois, computacionalmente ela é eficiente, ao se selecionar somente um comportamento e posteriormente se escolher uma ação para ele, consegue-se reduzir consideravelmente as opções a se tomar (existem menos comportamentos do que ações possíveis). Essa estratégia foi expandida posteriormente em [11] para se aprender a os modelos probabilísticos de seleção de comportamentos a partir de entradas humanas.
+Outra estratégia para o planejamento de tarefas é uma estratégia reativa baseada na seleção de comportamentos presente em \cite{Koike:2005,lidoris2008}. Essa é uma estratégia interessante, pois, computacionalmente ela é eficiente, ao se selecionar somente um comportamento e posteriormente se escolher uma ação para ele, consegue-se reduzir consideravelmente as opções a se tomar (existem menos comportamentos do que ações possíveis). Essa estratégia foi expandida posteriormente em \cite{lidoris2011state} para se aprender a os modelos probabilísticos de seleção de comportamentos a partir de entradas humanas.
 
-Na área de aprendizagem de modelos ou de políticas para execução de ações, existem vários algoritmos baseados no MDP citado acima. Alguns deles, que focam apenas na aprendizagem do modelo [refs Model learning] tem várias aplicações, sendo análise de mercados para economia uma delas [refs Model learning calvet]. Outro exemplo de algoritmo de aprendizagem é o de diferença temporal, que é utilizado para avaliar uma dada política%
+Na área de aprendizagem de modelos ou de políticas para execução de ações, existem vários algoritmos baseados no MDP citado acima. Alguns deles, que focam apenas na aprendizagem do modelo \cite{calvet:hal-00674226,Gutmann_noise-contrastiveestimation} tem várias aplicações, sendo análise de mercados para economia uma delas \cite{calvet:hal-00674226}. Outro exemplo de algoritmo de aprendizagem é o de diferença temporal, que é utilizado para avaliar uma dada política%
 \footnote{Uma política pode ser vista como uma função $ \pi \left( S \right) $, a qual, dado um estado, retorna uma ação possível de ser executada nele%
 }
-[refs temporal difference, q learning book].
+\cite{Sutton:1988:LPM,Andreas:2007,sutton1998reinforcement}.
 
-Outras estratégias de aprendizagem por reforço permitem aprender uma política ótima de comportamentos ou ações para um dado agente. Uma delas é o Q Learning [refs q learning book, q learning], que é um algoritmo simples, mas eficiente, que aprende valores de ganho para cada par ação-estado, e com isso consegue alcançar uma política ótima. Outro algoritmo importante é o ator crítico [refs reinforcement learning book, actor crictic], que aprende uma política ótima ao separar um ator, o qual escolhe essa política, e um crítico, que avalia a política e provê um feedback para o ator.
+Outras estratégias de aprendizagem por reforço permitem aprender uma política ótima de comportamentos ou ações para um dado agente. Uma delas é o Q Learning \cite{sutton1998reinforcement,KLMSurvey}, que é um algoritmo simples, mas eficiente, que aprende valores de ganho para cada par ação-estado, e com isso consegue alcançar uma política ótima. Outro algoritmo importante é o ator crítico \cite{sutton1998reinforcement,RicAbeYu07,conf:nips:BhatnagarSGL07,Konda01actor-criticalgorithms}, que aprende uma política ótima ao separar um ator, o qual escolhe essa política, e um crítico, que avalia a política e provê um feedback para o ator.
 
-Nesse trabalho nós criaremos uma nova abordagem, baseada em [1, 10], para fazer uma seleção de comportamento e ação para um agente móvel com sensores probabilísticos. Além disso, utilizaremos o algoritmo de aprendizagem por reforço q learning, presente em [ref reinforcement learning book], para aprender uma política ótima de escolha de comportamento.
+Nesse trabalho nós criaremos uma nova abordagem, baseada em \cite{Koike:2005,lidoris2008}, para fazer uma seleção de comportamento e ação para um agente móvel com sensores probabilísticos. Além disso, utilizaremos o algoritmo de aprendizagem por reforço q learning, presente em \cite{sutton1998reinforcement}, para aprender uma política ótima de escolha de comportamento.
 
 
 \section{Filtro Bayesiano} \label{section:FiltroBayesiano}
@@ -77,7 +77,7 @@ Essa equação explicita quatro itens:
 \begin{figure}[h]
     \centering
     \includegraphics[width=120mm]{images/modelo_bayesiano-carla}
-    \caption{\label{img:ModeloProbabilisticoCarla}Filtro Bayesiano Recursivo. Fonte: \cite{INCA2005} [Trocar por tese da Carla]}
+    \caption{\label{img:ModeloProbabilisticoCarla}Filtro Bayesiano Recursivo. Fonte: \cite{Koike:2005}}
 \end{figure}
 
 Com essas densidades probabilísticas podemos decidir por uma estratégia de ação em qualquer instante de tempo utilizando a ação $ M^t = m $ que maximize essa função. Podemos também descobrir o estado mais provável de o sistema se encontrar fazendo a mesma coisa para $ S^j $.
@@ -231,7 +231,7 @@ O problema com a diferença temporal é que ela apenas avalia uma política fixa
 
 \section{Q Learning} \label{section:QLearning}
 
-Q Learning é um dos mais conhecidos e mais utilizados algoritmos de aprendizagem por reforço, sendo utilizado para controle de robôs [adicionar ref], tratamento de problemas em processamento de imagens [adicionar ref] e criação de sistemas de troca financeiros [adicionar ref]. Esse é um algoritmo, diferentemente do TD, de aprendizagem ativa, ou seja, a escolha da política e das ações é feita juntamente com a aprendizagem e se consegue alcançar uma nova política ótima o utilizando.
+Q Learning é um dos mais conhecidos e mais utilizados algoritmos de aprendizagem por reforço, sendo utilizado para controle de robôs \cite{Gaskett:2002}, tratamento de problemas em processamento de imagens \cite{Alexandru-Learning} e criação de sistemas de troca financeiros \cite{RePEc:ven:wpaper:2014:15}. Esse é um algoritmo, diferentemente do TD, de aprendizagem ativa, ou seja, a escolha da política e das ações é feita juntamente com a aprendizagem e se consegue alcançar uma nova política ótima o utilizando.
 
 Ao invés de utilizar o valor de $ V \left( S \right) $ e se basear na equação \ref{equation:ValueFunctionMDP}, ele utiliza um valor $ Q \left( S, U \right) $, tal que:
 
@@ -265,7 +265,7 @@ Ao aprender o valor de $ Q^t \left( S, U \right) $, ao invés do de $ V^t \left(
 	Q^t \left( s, u \right) = \left( 1 - \alpha \right) \cdot Q^{t-1} \left( s, u \right) + \alpha \cdot amostra
 \end{equation}
 
-Com um número suficiente de iterações e com um decaimento apropriado do parâmetro de aprendizagem $ \alpha $, $ Q^t \left( S, U \right) $ tende a um valor ótimo  com uma probabilidade 1 [adicionar refs convergência de q] e uma política escolhida com base na função \ref{equation:PolicySelectionQLearning} também seria ótima.
+Com um número suficiente de iterações e com um decaimento apropriado do parâmetro de aprendizagem $ \alpha $, $ Q^t \left( S, U \right) $ tende a um valor ótimo  com uma probabilidade 1 \cite{journals:ml:Tsitsiklis94,Jaakkola94convergenceof,Watkins:1989} e uma política escolhida com base na função \ref{equation:PolicySelectionQLearning} também seria ótima.
 
 Alguns problemas com esse algoritmo são:
 
@@ -319,7 +319,7 @@ Dada pela diferença entre a recompensa recebida somada com o valor de ganho esp
 
 Assim, caso tenhamos um erro grande para um dado estado, iremos atualizar os valores de todos os estados com características similares àquele. É importante notar também que, caso esse estado tenha um valor maior para uma das características $ f_j $, o peso dela, $ \omega_j $, será mais modificado que os da outras características.
 
-Note que a função utilizada para calcular $ Q \left( S, U \right) $ é um perceptron e que esse tipo de função possuí limitações, sendo a principal a de ser capaz de aprender apenas problemas linearmente separáveis [ref perceptron limitations]. Por isso os parâmetros $ f_i \left( S, U \right) $ devem ser bem escolhidos, não só para caracterizar bem um estado e permitir uma boa diferenciação entre dois deles, mas também para permitir essa aprendizagem.
+Note que a função utilizada para calcular $ Q \left( S, U \right) $ é um perceptron e que esse tipo de função possuí limitações, sendo a principal a de ser capaz de aprender apenas problemas linearmente separáveis \cite{Haykin:1998:NNC:521706,priddy2005artificial}. Por isso os parâmetros $ f_i \left( S, U \right) $ devem ser bem escolhidos, não só para caracterizar bem um estado e permitir uma boa diferenciação entre dois deles, mas também para permitir essa aprendizagem.
 
 \subsection{Escolha de Ações e Exploração Gulosa} \label{subsection:EscolhaDeAçõesExploraçãoGulosa}
 
