@@ -8,53 +8,52 @@ ou citações que se achar relevantes.}
 
 \section{Introdução}
 
-Este capítulo irá apresentar algumas soluções para o problema de tomada de decisões em sistemas de robótica móvel encontradas em outros trabalhos anteriores nessa área. Será abordado, também, o problema de aprendizagem por reforço e algumas alternativas de como é executado na literatura. Por último, esse capítulo irá introduzir a teoria matemática por trás dos algoritmos utilizados nesse projeto.
+Este capítulo apresenta algumas soluções para o problema de tomada de decisões em sistemas de robótica móvel encontradas em outros trabalhos anteriores nessa área. Ele aborda, também, o problema de aprendizagem por reforço e algumas alternativas de como é executado na literatura. Por último, esse capítulo introduz a teoria matemática por trás dos algoritmos utilizados nesse projeto.
 
 
 \section{Revisão Bibliográfica} \label{section:RevisaoBibliografica}
 
-Aqui iremos descrever diferentes abordagens encontradas na literatura para o problema de tomada de decisões aplicado a sistemas de robótica móvel. A tomada de decisões é um problema de amplo espectro para o qual existem várias estratégias diferentes que tentam solucioná-lo.
+Aqui descrevemos diferentes abordagens encontradas na literatura para o problema de tomada de decisões aplicado a sistemas de robótica móvel. A tomada de decisões é um problema de amplo espectro para o qual existem várias estratégias diferentes que tentam solucioná-lo.
 
-Analisando a literatura, podemos ver a preferência crescente por algoritmos probabilísticos nessa área, no lugar dos determinísticos. Isso provem da incerteza presente no mundo real, que deve ser modelada pelo algoritmo adotado. Para uma modelagem verdadeira e precisa do mundo real, é preciso considerar as incertezas presentes nele.
+Analisando a literatura, podemos ver a preferência crescente por algoritmos probabilísticos nessa área, no lugar dos determinísticos. Isso provem da incerteza presente no mundo real, que deve ser modelada pelo algoritmo adotado. Para uma modelagem mais correta e precisa do mundo real, é preciso considerar as incertezas presentes nele.
 
-Muitos algoritmos de planejamento de tarefas são específicos para as tarefas que seus robôs irão desempenhar, alguns exemplos são na área de exploração, por exemplo, o uso de algoritmos de exploração de fronteiras \cite{conf:icra:FredaO05,Yamauchi:1998:FEU,Yamauchi:1997:FAA} ou na área de braços robóticos para planejamento de manipulação de objetos para robôs com dois braços \cite{Berenson_2009_6465}.
+Muitos algoritmos de planejamento de tarefas são específicos para as tarefas que seus robôs irão desempenhar, alguns exemplos são na área de exploração, por exemplo, o uso de algoritmos de exploração de fronteiras \cite{conf:icra:FredaO05,Yamauchi:1998:FEU,Yamauchi:1997:FAA}, ou na área de braços robóticos, para manipulação de objetos \cite{Berenson_2009_6465}.
 
-Para o nosso sistema queríamos um algoritmo que não fosse específico para um único tipo de aplicação. Analisando a literatura mais a fundo, vemos que muitos algoritmos nessa área são baseados na cadeia de Markov. Ela diz que o ambiente pode ser modelado por um número de variáveis de estado em que cada estado depende apenas do estado exatamente anterior ( $ P(S^t\mid S^{t-1}S^{t-2})=P(S^t\mid S^{t-1}) $ ), ou seja, o sistema não tem memória de longo prazo \cite{books:daglib:0095301}.
+Para esse sistema deseja-se um algoritmo que não seja específico para um único tipo de aplicação. Ao analisar a literatura mais a fundo, vê-se que muitos algoritmos nessa área são baseados na cadeia de Markov. Essa teoria afirma que um ambiente pode ser modelado por um número de variáveis de estado em que cada estado depende apenas do estado anterior ( $ P(S^t\mid S^{t-1}S^{t-2})=P(S^t\mid S^{t-1}) $ ), ou seja, o sistema não tem memória de longo prazo \cite{books:daglib:0095301}.
 
-Um algoritmo baseado na cadeia de Markov que é muito utilizado é o Processos de Decisão de Markov (Markov Decision Processes, MDP) \cite{Thrun:2005:PR:1121596}. Um problema desse algoritmo é que, embora ele leve em conta que as ações executadas podem ter um comportamento imprevisível, ele não incorpora a incerteza provinda dos sensores. Em outras palavras ele considera que o estado do sistema pode ser completamente observado a todo instante, o que, em robótica, geralmente não é o caso.
+Um algoritmo baseado na cadeia de Markov muito utilizado é o Processos de Decisão de Markov (Markov Decision Processes, MDP) \cite{Thrun:2005:PR:1121596}. Um problema desse algoritmo é que, embora ele leve em conta que as ações executadas podem ter um comportamento imprevisível, ele não incorpora a incerteza provinda dos sensores. Em outras palavras ele considera que o estado do sistema pode ser completamente observado a todo instante, o que, em robótica, geralmente não é o caso.
 
-Um algoritmo que corrige esse problema é o Processos de Decisão de Markov Parcialmente Observável (Partially Observable Markov Decision Processes, POMDP) \cite{Thrun:2005:PR:1121596}. Esse algoritmo retorna para o caso geral completamente probabilístico em que ambos os sensores e os atuadores tem funcionamento imprevisível e com certa curva conhecida de probabilidade. O problema com esse algoritmo é a sua demanda computacional, mesmo podendo ser calculado off-line e salvo, ele muitas vezes não é computacionalmente possível.
+Um algoritmo que corrige esse problema é o Processos de Decisão de Markov Parcialmente Observável (Partially Observable Markov Decision Processes, POMDP) \cite{Thrun:2005:PR:1121596}. Esse algoritmo retorna para o caso geral completamente probabilístico em que ambos os sensores e os atuadores tem funcionamento imprevisível e com certa curva conhecida de probabilidade. O problema com esse algoritmo é a sua demanda computacional, mesmo podendo ser calculado \textit{offline} e salvo, ele muitas vezes não é computacionalmente aceitável.
 
-Em \cite{Pineau01hierarchicalpomdp} Pineau e Thrun utilizam uma estratégia de vários POMDPs hierarquizados para reduzir o problema de requisição computacional que um único POMDP combinado iria precisar.
+Pineau e Thrun \cite{Pineau01hierarchicalpomdp} utilizam uma estratégia de vários POMDPs hierarquizados para reduzir o problema de requisição computacional que um único POMDP combinado iria precisar. Embora a demanda computacional seja reduzida com essa estratégia, dependendo do tamanho do espaço de estados, ela ainda não é tolerável.
 
-Outra estratégia para o planejamento de tarefas é uma estratégia reativa baseada na seleção de comportamentos presente em \cite{Koike:2005,lidoris2008}. Essa é uma estratégia interessante, pois, computacionalmente ela é eficiente, ao se selecionar somente um comportamento e posteriormente se escolher uma ação para ele, consegue-se reduzir consideravelmente as opções a se tomar (existem menos comportamentos do que ações possíveis). Essa estratégia foi expandida posteriormente em \cite{lidoris2011state} para se aprender a os modelos probabilísticos de seleção de comportamentos a partir de entradas humanas.
+Outra estratégia para o planejamento de tarefas é uma estratégia reativa baseada na seleção de comportamentos presente em \cite{Koike:2005,lidoris2008}. Essa é uma estratégia interessante, pois, computacionalmente ela é eficiente, ao se selecionar somente um comportamento e posteriormente se escolher uma ação para ele, consegue-se reduzir consideravelmente as opções a se tomar (existem menos comportamentos do que ações possíveis). Essa estratégia foi expandida posteriormente em \cite{lidoris2011state}, onde se aprendem os modelos probabilísticos de seleção de comportamentos a partir de entradas humanas.
 
-Na área de aprendizagem de modelos ou de políticas para execução de ações, existem vários algoritmos baseados no MDP citado acima. Alguns deles, que focam apenas na aprendizagem do modelo \cite{calvet:hal-00674226,Gutmann_noise-contrastiveestimation} tem várias aplicações, sendo análise de mercados para economia uma delas \cite{calvet:hal-00674226}. Outro exemplo de algoritmo de aprendizagem é o de diferença temporal, que é utilizado para avaliar uma dada política%
-\footnote{Uma política pode ser vista como uma função $ \pi \left( S \right) $, a qual, dado um estado, retorna uma ação possível de ser executada nele%
+Na área de aprendizagem de modelos ou de políticas para execução de ações, existem vários algoritmos baseados no MDP citado acima. Alguns deles, que focam apenas na aprendizagem do modelo \cite{calvet:hal-00674226,Gutmann_noise-contrastiveestimation}, tem várias aplicações, sendo análise de mercados uma delas \cite{calvet:hal-00674226}. Outro exemplo de algoritmo de aprendizagem é o de diferença temporal, que é utilizado para avaliar uma dada política%
+\footnote{Uma política pode ser vista como uma função $ \pi \left( S \right) $, a qual, dado um estado, retorna uma ação possível de ser executada nele.%
 }
 \cite{Sutton:1988:LPM,Andreas:2007,sutton1998reinforcement}.
 
-Outras estratégias de aprendizagem por reforço permitem aprender uma política ótima de comportamentos ou ações para um dado agente. Uma delas é o Q Learning \cite{sutton1998reinforcement,KLMSurvey}, que é um algoritmo simples, mas eficiente, que aprende valores de ganho para cada par ação-estado, e com isso consegue alcançar uma política ótima. Outro algoritmo importante é o ator crítico \cite{sutton1998reinforcement,RicAbeYu07,conf:nips:BhatnagarSGL07,Konda01actor-criticalgorithms}, que aprende uma política ótima ao separar um ator, o qual escolhe essa política, e um crítico, que avalia a política e provê um feedback para o ator.
+Outras estratégias de aprendizagem por reforço permitem aprender uma política ótima de comportamentos ou ações para um dado agente. Uma delas é o \textit{Q Learning} \cite{sutton1998reinforcement,KLMSurvey}, que é um algoritmo simples, mas eficiente, que aprende valores de ganho para cada par ação-estado, e com isso consegue alcançar uma política ótima. Outro algoritmo relevante é o ator crítico \cite{sutton1998reinforcement,RicAbeYu07,conf:nips:BhatnagarSGL07,Konda01actor-criticalgorithms}, que aprende uma política ótima ao separar um ator, o qual escolhe essa política, e um crítico, que avalia a política e provê um feedback para o ator.
 
-Nesse trabalho nós criaremos uma nova abordagem, baseada em \cite{Koike:2005,lidoris2008}, para fazer uma seleção de comportamento e ação para um agente móvel com sensores probabilísticos. Além disso, utilizaremos o algoritmo de aprendizagem por reforço q learning, presente em \cite{sutton1998reinforcement}, para aprender uma política ótima de escolha de comportamento.
+Nesse trabalho é proposta uma nova abordagem, baseada em \cite{Koike:2005,lidoris2008}, que faz uma seleção de comportamento e ação para um agente móvel com sensores probabilísticos. Além disso, utiliza-se o algoritmo de aprendizagem por reforço \textit{Q Learning}, presente em \cite{sutton1998reinforcement}, para aprender uma política ótima de escolha de comportamento.
 
 
 \section{Filtro Bayesiano} \label{section:FiltroBayesiano}
 
-Um filtro bayesiano é uma abordagem probabilística para estimar uma função de densidade de probabilidade desconhecida de forma recursiva no tempo, utilizando ações e observações, além de um modelo matemático do processo.
+Um filtro bayesiano é uma abordagem probabilística. Ele estima uma função de densidade de probabilidade desconhecida de forma recursiva no tempo, utilizando ações e observações, além de um modelo matemático do processo.
 
-No filtro bayesiano nós queremos obter a distribuição conjunta de probabilidade:
-
-\begin{equation}
-	P ( M^{0: t} S^{0: t} Z^{0: t} \mid \pi_f )
+No filtro bayesiano deseja-se obter a distribuição conjunta de probabilidade:
+\begin{equation} \label{equation:DistribuicaoConjuntaProbabilistica}
+	P ( M^{0: t} S^{0: t} Z^{0: t} \mid \pi_f ).
 \end{equation}
 
-Sendo $ M^i $ o conjunto de ações no tempo $ i $, $ S^i $ o estado do sistema nesse instante e $ Z^i $ os dados dos sensores, também nesse instante. Essa função de probabilidade representa a probabilidade de uma sequência de ações, observações e estados acontecerem dado o que se sabe sobre o mundo ($ \pi_f $). Para obter esse valor tiraremos proveito das propriedades desse sistema que é baseado numa cadeia de Markov%
+Sendo $ M^i $ o conjunto de ações no tempo $ i $, $ S^i $ o estado do sistema nesse instante, $ Z^i $ os dados dos sensores, também nesse instante, e $ t $ o instante de tempo para o qual se deseja obter o valor dessa distribuição. Essa função de probabilidade representa a probabilidade de uma sequência de ações, observações e estados acontecerem dado o que se sabe sobre o mundo ($ \pi_f $). Para obter esse valor aproveitam-se as propriedades desse sistema, que é baseado numa cadeia de Markov%
 \footnote{Como explicado na seção \ref{section:RevisaoBibliografica}, a probabilidade de se alcalnçar um estado $ s^t $ no instante de tempo $ t $, dado que se conhece o estado $ s^{t-1} $, independe de $ s^{t-2} $. $ P(S^t\mid S^{t-1}S^{t-2})=P(S^t\mid S^{t-1}) $%
 }%
 .
 
-\begin{equation}
+\begin{equation} \label{equation:FiltroBayesiano1}
         P ( M^{0: t} S^{0: t} Z^{0: t} \mid \pi_f ) = P ( M^0 S^0 Z^0 \mid \pi_f ) \cdot \prod\limits_{j =1}^{t} 
         \left(
             \begin{array}{l}
@@ -62,16 +61,16 @@ Sendo $ M^i $ o conjunto de ações no tempo $ i $, $ S^i $ o estado do sistema 
                 \times P( Z^j \mid S^j \pi_f ) \\
                 \times P( M^j \mid S^j M^{j -1} \pi_f )
             \end{array}
-        \right)
+        \right).
 \end{equation}
 
 Essa equação explicita quatro itens:
 
 \begin{itemize}
   \item $ P \left( M^0 S^0 Z^0 \mid \pi_f \right) $ : As probabilidades do estado inicial do sistema são necessárias para se obter seus futuros valores;
-  \item $ P \left( S^j \mid S^{j-1} M^{j-1} \pi_f \right) $ : Cada estado depende do estado anterior e de que ação foi tomada (termo de predição);
-  \item $ P \left( Z^j \mid S^j \pi_f \right) $ : É necessário um modelo de probabilidades do sensor. Esse termo representa a probabilidade de se ter recebido uma certa medida dos sensores, dado que o estado atual realmente seja $ S^j $ (termo de observação)
-  \item $ P \left( M^j \mid S^j M^{j-1} \pi_f \right) $ : A escolha da próxima ação depende de qual o estado do sistema e qual foi a ação anterior (termo de decisão de ação)
+  \item $ P \left( S^j \mid S^{j-1} M^{j-1} \pi_f \right) $ : Cada estado depende do estado anterior e da ação tomada no tempo anterior (termo de predição);
+  \item $ P \left( Z^j \mid S^j \pi_f \right) $ : É necessário um modelo probabilístico do sensor. Esse termo representa a probabilidade de se ter recebido uma certa medida dos sensores, dado que o estado atual realmente seja $ S^j $ (termo de observação);
+  \item $ P \left( M^j \mid S^j M^{j-1} \pi_f \right) $ : A escolha da próxima ação depende de qual o estado do sistema e qual foi a ação anterior (termo de decisão de ação).
 \end{itemize}
 
 \begin{figure}[h]
@@ -80,22 +79,22 @@ Essa equação explicita quatro itens:
     \caption{\label{img:ModeloProbabilisticoCarla}Filtro Bayesiano Recursivo. Fonte: \cite{Koike:2005}}
 \end{figure}
 
-Com essas densidades probabilísticas podemos decidir por uma estratégia de ação em qualquer instante de tempo utilizando a ação $ M^t = m $ que maximize essa função. Podemos também descobrir o estado mais provável de o sistema se encontrar fazendo a mesma coisa para $ S^j $.
+Com essas densidades probabilísticas pode-se decidir por uma estratégia de ação em qualquer instante de tempo utilizando a ação $ M^t = m $ que maximize a função \ref{equation:FiltroBayesiano1}. Pode-se também descobrir o estado mais provável do sistema maximizando $ S^j $ para essa mesma equação (\ref{equation:FiltroBayesiano1}).
 
-Esse modelo pode, ainda, ser discretizado para cada instante de tempo, ficando:
+Esse modelo pode, ainda, ser discretizado para cada instante de tempo, sendo descrito pela equação \ref{equation:FiltroBayesiano1Recursivo}.
 
-\begin{equation}
+\begin{equation} \label{equation:FiltroBayesiano1Recursivo}
         P ( M^{0: t} S^{0: t} Z^{0: t} \mid \pi_f ) = P ( M^{0: t-1} S^{0: t-1} Z^{0: t-1} \mid \pi_f ) \cdot 
         \left(
             \begin{array}{l}
-                P( S^j \mid S^{j -1} M^{j -1} \pi_f ) \\
-                \times P( Z^j \mid S^j \pi_f ) \\
-                \times P( M^j \mid S^j M^{j -1} \pi_f )
+                P( S^t \mid S^{t -1} M^{t -1} \pi_f ) \\
+                \times P( Z^t \mid S^t \pi_f ) \\
+                \times P( M^t \mid S^t M^{t -1} \pi_f )
             \end{array}
-        \right)
+        \right).
 \end{equation}
 
-Com isso temos um modelo recursivo que pode ser chamado a cada instante de tempo para atualizar o modelo de probabilidades. Essa atualização pode ainda ser dividida em três partes distintas:
+Com isso tem-se um modelo recursivo que pode ser chamado a cada instante de tempo para atualizar o modelo de probabilidades. Essa atualização pode ainda ser dividida em três partes distintas: predição, observação e escolha de ação motora.
 
 \subsection{Predição}
 
@@ -109,60 +108,58 @@ Nessa etapa, a partir da ação escolhida no período anterior de tempo, se faz 
                 \times P \left( m^{t-1} \mid S^{t-1} m^{t-2} \pi_f \right)\\
                 \times P \left( S^{t-1} \mid z^{0: t-1} m^{0: t-2} \pi_f \right)
             \end{array}
-        \right)
+        \right).
 \end{equation}
 
 
 \subsection{Observação}
 
-Tendo, agora, um dos comportamentos escolhido, se atualiza o belief state do agente a partir dos sensores presentes no robô.
+Tendo, agora, um dos comportamentos escolhido, se atualiza o estado probabilístico (\textit{belief state}) do agente a partir dos sensores presentes no robô.
 
 \begin{equation}
-    P \left( S^t \mid z^{0: t} m^{0: t-1} \pi_i \right) \propto 
+    P \left( S^t \mid z^{0: t} m^{0: t-1} \pi_f \right) \propto 
         \left(
             \begin{array}{l}
                 P \left( z^t \mid S^t \pi_f \right) \\
                 \times P \left( S^t \mid z^{0: t-1} m^{0: t-1} \pi_f \right)
             \end{array}
-        \right)
+        \right).
 \end{equation}
 
 
-\subsection{Escolha de ação motor}
+\subsection{Escolha de ação motora}
 
-Por último se faz a seleção de uma ação a ser executada pelo robô de forma análoga à seleção de comportamentos. Calcula-se as probabilidade de se executar cada ação  e se escolhe a com maior valor.
+Por último, se faz a seleção de uma ação a ser executada pelo robô. Calcula-se as probabilidade de executar cada ação $ m^t \in M^t $ e se escolhe a ação com maior valor.
 
 \begin{equation}
     P \left( M^t \mid z^{0: t} m^{0: t-1} \pi_f \right) \propto \sum\limits_{S_i^t}
         \left(
             \begin{array}{l}
-                \times P \left( M^t \mid S^t m^{t-1} \pi_f \right)\\
+                P \left( M^t \mid S^t m^{t-1} \pi_f \right)\\
                 \times P \left( S^t \mid z^{0: t} m^{0: t-1} \pi_f \right)
             \end{array}
-        \right)
+        \right).
 \end{equation}
 
 
 \section{MDP (Processo de Decisão de Markov)} \label{section:MDP}
 
-MDPs são utilizados em várias áreas, como economia, manufatura de processos e robótica. Ele foi nomeado a partir de Andrey Markov e provê uma base matemática para o modelamento de tomada de decisões. Eles são uma extensão de cadeias de Markov, tendo como diferença a adição de ações e recompensas (escolha e motivação).
+MDPs são utilizados em várias áreas, como: economia, manufatura de processos e robótica. Ele foi nomeado a partir de Andrey Markov e provê uma base matemática para o modelamento de tomada de decisões. Eles são uma extensão de cadeias de Markov, tendo como diferença a adição de ações e recompensas (escolha e motivação).
 
-MDP é, mais precisamente, um processo de controle estocástico de tempo discreto. O que isso significa é que ele é um processo de controle probabilístico, baseado em passos (time steps). Em cada passo o robô se encontra em um estado $ S $ perfeitamente conhecido em que pode-se executar qualquer ação $ u $ disponível para esse estado. O modelo de percepção do robô, $ p \left( Z \mid S \right) $ é uma equação determinística e bijetora, o robô só pode estar em um estado $ s \in S $ para uma percepção $ z \in Z $ do ambiente.
+MDP é, mais precisamente, um processo de controle estocástico de tempo discreto. Isso significa que ele é um processo de controle probabilístico, baseado em passos (\textit{time steps}). Em cada passo o robô se encontra em um estado $ S $ perfeitamente conhecido em que pode-se executar qualquer ação $ u $ disponível para esse estado. O modelo de percepção do robô, $ p \left( Z \mid S \right) $ é uma equação determinística e bijetora, o robô só pode estar em um estado $ s \in S $ para uma percepção $ z \in Z $ do ambiente.
 
-Após executada essa ação, o robô se encontrará em um novo estado $ s' \in S $ com probabilidade $ p \left( s' \mid u, s \right) $, essa equação é conhecida como modelo de atuação (action model). O modelo de atuação não é, em geral, determinístico, ou seja, uma ação pode ter várias consequências com diferentes probabilidades. Uma consequência disso é que planejar uma única sequência de ações não é o suficiente, o planejador de decidir por uma ação para cada um de uma gama de estados em que o robô pode se encontrar.
+Após executada essa ação, o robô se encontra em um novo estado $ s' \in S $ com probabilidade $ p \left( s' \mid u, s \right) $, essa equação é conhecida como modelo de atuação (\textit{action model}). O modelo de atuação não é, em geral, determinístico, ou seja, uma ação pode ter várias consequências com diferentes probabilidades. Uma consequência disso é que planejar uma única sequência de ações não é o suficiente, o planejador deve decidir por uma ação para cada estado $ s $, de um conjunto de estados $ S $, em que o robô pode se encontrar.
 
-Considere o sistema de figura a seguir em que para uma dada ação A ou B tem-se indicada as probabilidades $ p \left( s' \mid u, s \right) $ através da percentagem indicada nas setas saindo do estado $ s $ para $ s' $.
-
+No sistema da figura \ref{img:MapaDeProbabilidadesMarkov}, para uma ação A ou B, tem-se indicada as probabilidades $ p \left( s' \mid u, s \right) $ através da porcentagem indicada nas setas saindo do estado $ s $ para $ s' $. Pode-se, então, ver que, para esse sistema, $ P \left( s2 \mid a, s1 \right) = 0.2 $ e $ P \left( s4 \mid a, s1 \right) = 0.8 $. Caso o estado $ s6 $ seja o objetivo, não adianta se obter uma sequência de ações $ a \rightarrow a \rightarrow b$, por exemplo, pois é possível se encontrar em um conjunto de estados ao final dessa sequência: $ s4 $, $ s2 $ ou $ s6 $.
 
 \begin{figure}[h]
     \centering
     \includegraphics[width=120mm]{images/probabilidade-markov}
-    \caption{\label{img:MapaDeProbabilidadesMarkov}Mapa de Probabilidades}
+    \caption{Mapa de Probabilidades}
+    \label{img:MapaDeProbabilidadesMarkov}
 \end{figure}
 
-Podemos, por exemplo, ver que para esse sistema $ P \left( s2 \mid a, s1 \right) = 0.2 $ e $ P \left( s4 \mid a, s1 \right) = 0.8 $. Se nós tivermos o estado $ s6 $ como objetivo, note que não adianta se obter uma sequência de ações $ a \rightarrow a \rightarrow b$, por exemplo, pois nós podemos nos encontrar em uma gama de estados ao final dessa sequência. Poderíamos nos encontrar em $ s4 $, $ s2 $ ou $ s6 $.
-
-Temos então de mapear uma ação para cada estado possível em que pudermos nos encontrar, gerando o que é chamado de política de controle (control policy). Essa política de controle terá formato $ \pi: S_t \rightarrow U_t $, a política $ \pi $ recebe um estado e retorna a ação planejada para ele. Note então que, tendo essa política $ \pi \left( S \right) $, não temos problemas como no caso anterior, pois sempre teremos planejado que ação tomar em um dado instante, baseado no estado em que nos encontrarmos.
+Deve-se mapear uma ação para cada estado possível, gerando o que é chamado de política de controle (\textit{control policy}). Essa política de controle tem formato $ \pi: S^t \rightarrow U^t $, a política $ \pi $ recebe um estado $ s^t $ e retorna a ação $ u^t $ planejada para ele. Portanto, com a política $ \pi \left( S \right) $, não há mais o problema anterior, pois sempre tem-se uma ação planejada para ser executada em um dado instante, baseado no estado atual.
 
 Calcular essa política não é um problema trivial, devido, entre outros motivos, à existência de infinitos caminhos para se chegar de um estado $ s1 $ a $ s6 $. Um caminho seria $ s1 \rightarrow s2 \rightarrow s3 \rightarrow s6 $, por exemplo, e outro seria $ s1 \rightarrow s2 \rightarrow s5 \rightarrow s2 \rightarrow s3 \rightarrow s6 $, outro ainda seria $ s1 \rightarrow s2 \rightarrow s5 \rightarrow s2 \rightarrow s5 \rightarrow s2 \rightarrow s3 \rightarrow s6 $.
 
