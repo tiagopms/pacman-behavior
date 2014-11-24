@@ -161,177 +161,174 @@ No sistema da figura \ref{img:MapaDeProbabilidadesMarkov}, para uma ação A ou 
 
 Deve-se mapear uma ação para cada estado possível, gerando o que é chamado de política de controle (\textit{control policy}). Essa política de controle tem formato $ \pi: S^t \rightarrow U^t $, a política $ \pi $ recebe um estado $ s^t $ e retorna a ação $ u^t $ planejada para ele. Portanto, com a política $ \pi \left( S \right) $, não há mais o problema anterior, pois sempre tem-se uma ação planejada para ser executada em um dado instante, baseado no estado atual.
 
-Calcular essa política não é um problema trivial, devido, entre outros motivos, à existência de infinitos caminhos para se chegar de um estado $ s1 $ a $ s6 $. Um caminho seria $ s1 \rightarrow s2 \rightarrow s3 \rightarrow s6 $, por exemplo, e outro seria $ s1 \rightarrow s2 \rightarrow s5 \rightarrow s2 \rightarrow s3 \rightarrow s6 $, outro ainda seria $ s1 \rightarrow s2 \rightarrow s5 \rightarrow s2 \rightarrow s5 \rightarrow s2 \rightarrow s3 \rightarrow s6 $.
+Calcular essa política não é trivial, devido, principalmente, à existência de infinitos caminhos para se chegar de um estado $ s1 $ a $ s6 $. Um possível exemplo de caminho é $ s1 \rightarrow s2 \rightarrow s3 \rightarrow s6 $, outro caminho é $ s1 \rightarrow s2 \rightarrow s5 \rightarrow s2 \rightarrow s3 \rightarrow s6 $, e outro ainda $ s1 \rightarrow s2 \rightarrow s5 \rightarrow s2 \rightarrow s5 \rightarrow s2 \rightarrow s3 \rightarrow s6 $.
 
-Antes de poder obter um algoritmo definitivo, temos de modelar o que seria o objetivo de um problema. Para isso utilizaremos uma função de recompensa para o robô $ r \left( S, U, S' \right) $ que retorna um número real. Ela indica quão desejado é se chegar a uma estado $ s' $ a partir de $ s $ executando a ação $ u $. Para sistemas em que só se preocupe em chegar ao estado desejado pode-se simplifica-la para $ r \left( s' \right) $, por exemplo.
+Antes de obter um algoritmo definitivo, deve-se modelar o objetivo do problema. Para isso utiliza-se uma função de recompensa para o robô $ r \left( S, U, S' \right) $ que retorna um número real. Ela indica quão desejado é se chegar a uma estado $ s' \in S' $ a partir de $ s \in S $ executando a ação $ u \in U $. Para sistemas cujo único objetivo é chegar a estados desejados pode-se simplifica-la para $ r \left( s' \right) $, por exemplo.
 
-Sabendo que queremos achar uma política que maximize o ganho de recompensas podemos gerar um plano de políticas ótimo pensando-se apenas na próxima ação, maximizando uma recompensa imediata. Caso nossas recompensas fossem dadas apenas pela escolha de uma ação baseada no estado atual $ r \left( S, U \right) $ (sem considerar o estado alcançado) teríamos como escolha de política:
+Sabendo que se deseja achar uma política que maximize o ganho de recompensas, pode-se gerar um plano de políticas ótimo pensando-se apenas na próxima ação, maximizando uma recompensa imediata. Caso as recompensas sejam dadas apenas pela escolha de uma ação baseada no estado atual $ r \left( S, U \right) $ (sem considerar o estado alcançado) tem-se como escolha de política a equação \ref{equation:policySelectionMDP1Step}.
 
-\begin{equation}
-    \pi_1 \left( s \right) = \underset{u}{argmax} \left( r \left( s, u \right) \right)
+\begin{equation} \label{equation:policySelectionMDP1Step}
+    \pi_1 \left( s \right) = \underset{u}{argmax} \left( r \left( s, u \right) \right).
 \end{equation}
 
-Como nossa recompensa depende também do estado alcançado, devemos pesar cada recompensa $ r \left( S, U, S' \right) $ pela probabilidade de se alcançar o estado $ S' $.
+Como a recompensa depende também do estado alcançado, deve-se pesar cada recompensa $ r \left( S, U, S' \right) $ pela probabilidade de se alcançar o estado $ s' \in S' $.
 
 \begin{equation}
-    \pi_1 \left( s \right) = \underset{u}{argmax} \left( \int \! r \left( s, u, s' \right) \cdot P \left( s' \mid u, s \right) \, \mathrm{d}s'. \right)
+    \pi_1 \left( s \right) = \underset{u}{argmax} \left( \int \! r \left( s, u, s' \right) \cdot P \left( s' \mid u, s \right) \, \mathrm{d}s' \right).
 \end{equation}
 
-Podemos gerar para essa política um função de valor (value function) que represente a recompensa esperada para cada estado $ s $ seguindo a política $ \pi $.
+Gera-se para essa política uma função de valor (\textit{value function}) que representa a recompensa esperada para cada estado $ s $ seguindo a política $ \pi $.
 
 \begin{equation}
-    V_1 \left( s \right) = \underset{u}{max} \left( \int \! r \left( s, u, s' \right) \cdot P \left( s' \mid u, s \right) \, \mathrm{d}s'. \right)
+    V_1 \left( s \right) = \underset{u}{max} \left( \int \! r \left( s, u, s' \right) \cdot P \left( s' \mid u, s \right) \, \mathrm{d}s' \right).
 \end{equation}
 
-Pensando no passo seguinte, podemos utilizar esse novo valor $ V_1 \left( S \right) $ para calcular uma política planejando agora um passo à frente e depois generalizar para qualquer caso futuro.
+Ao pensar dois passos a frente, pode-se utilizar esse novo valor $ V_1 \left( S \right) $ para calcular a política, planejando agora um passo à frente de antes. Depois generaliza-se esse pensamento para qualquer caso futuro, pensando $ j $ passos a frente.
 
 \begin{equation}
-    \pi_t \left( s \right) = \underset{u}{argmax} \left( \int \! \left( r \left( s, u, s' \right) + \gamma \cdot V_{t-1} \left( s' \right) \right) \cdot P \left( s' \mid u, s \right) \, \mathrm{d}s'. \right)
+    \pi_j \left( s \right) = \underset{u}{argmax} \left( \int \! \left( r \left( s, u, s' \right) + \gamma \cdot V_{j-1} \left( s' \right) \right) \cdot P \left( s' \mid u, s \right) \, \mathrm{d}s' \right).
 \end{equation}
 
-Sendo $ \gamma $ uma constante de desconto, usada para incentivar o ganho de recompensas imediatas à tardias. Essa função indica que a política ótima é a que gera uma maior recompensa imediata, somada com a somatória de todas as recompensas futuras esperadas ponderadas pelas probabilidades de serem recebidas. Podemos novamente gerar uma função de valor para essa política:
+Sendo $ \gamma $ uma constante de desconto, usada para incentivar o ganho de recompensas imediatas à tardias. Essa função indica que a política ótima é a que gera uma maior recompensa imediata, somada com a somatória de todas as recompensas futuras esperadas, ponderadas pelas probabilidades de serem recebidas. Gera-se, novamente, uma função de valor para essa política, presente na equação \ref{equation:ValueFunctionTimeT}.
 
-\begin{equation}
-    V_t \left( s \right) = \underset{u}{max} \left( \int \! \left( r \left( s, u, s' \right) + \gamma \cdot V_{t-1} \left( s' \right) \right) \cdot P \left( s' \mid u, s \right) \, \mathrm{d}s'. \right)
+\begin{equation} \label{equation:ValueFunctionTimeT}
+    V_j \left( s \right) = \underset{u}{max} \left( \int \! \left( r \left( s, u, s' \right) + \gamma \cdot V_{j-1} \left( s' \right) \right) \cdot P \left( s' \mid u, s \right) \, \mathrm{d}s' \right).
 \end{equation}
 
 Para um tempo $ t = \infty $, a política geralmente converge e uma ótima para esse sistema é encontrada.
 
 \begin{equation}
-    \pi^* \left( s \right) = \pi_\infty \left( s \right) = \underset{u}{argmax} \left( \int \! \left( r \left( s, u, s' \right) + \gamma \cdot V_\infty \left( s' \right) \right) \cdot P \left( s' \mid u, s \right) \, \mathrm{d}s'. \right)
+    \pi^* \left( s \right) = \pi_\infty \left( s \right) = \underset{u}{argmax} \left( \int \! \left( r \left( s, u, s' \right) + \gamma \cdot V_\infty \left( s' \right) \right) \cdot P \left( s' \mid u, s \right) \, \mathrm{d}s' \right).
 \end{equation}
 
 \begin{equation} \label{equation:ValueFunctionMDP}
-    V^* \left( s \right) = V_\infty \left( s \right) = \underset{u}{max} \left( \int \! \left( r \left( s, u, s' \right) + \gamma \cdot V_\infty \left( s' \right) \right) \cdot P \left( s' \mid u, s \right) \, \mathrm{d}s'. \right)
+    V^* \left( s \right) = V_\infty \left( s \right) = \underset{u}{max} \left( \int \! \left( r \left( s, u, s' \right) + \gamma \cdot V_\infty \left( s' \right) \right) \cdot P \left( s' \mid u, s \right) \, \mathrm{d}s' \right).
 \end{equation}
 
 
 \section{TD (Diferença Temporal)} \label{section:TD}
 
-O que fazer se você não conhece os valores das recompensas $ r \left( S, U, S' \right) $ ou qual o resultado de uma ação $ P \left( s' \mid u, s \right) $? O algoritmo de diferença temporal visa, a partir de uma política fixa $ \pi \left( S \right) $, aprender os valores finais de $ V \left( S \right) $ através da execução de ações em diferentes estados, sem ter um conhecimento prévio das recompensas recebidas ou do modelo probabilístico do resultado de suas ações.
+Caso não se conheçam os valores das recompensas $ r \left( S, U, S' \right) $ ou qual o resultado de uma ação $ P \left( s' \mid u, s \right) $ pode-se utilizar, como solução, a aprendizagem de reforço. O algoritmo de diferença temporal visa, a partir de uma política fixa $ \pi \left( S \right) $, aprender os valores finais de $ V \left( S \right) $ através da execução de ações em diferentes estados, sem ter um conhecimento prévio das recompensas recebidas ou do modelo probabilístico do resultado de suas ações.
 
-Esse algoritmo se baseia na equação \ref{equation:ValueFunctionMDP} obtida no seção \ref{section:MDP} e parte da premissa de que se tem uma política $ \pi_{td} $ já escolhida e fixa. Utilizando isso ele atualiza o valor de $ V \left( S \right) $ cada vez que experiencia um $ \left( s, u, s', r \right) $ qualquer, ou seja, que alcança um estado $ s' \in S $ a partir do estado $ s \in S $, com uma ação $ u \in U $ e recebendo uma recompensa $ r \in \mathbb{R} $. A partir de cada dessas experiências, pode-se obter um valor amostra tal que:
+Esse algoritmo se baseia na equação \ref{equation:ValueFunctionMDP} obtida no seção \ref{section:MDP} e parte da premissa de que se tem uma política $ \pi_{td} $ já escolhida e fixa. Utilizando isso ele atualiza o valor de $ V \left( S \right) $ cada vez que experiencia um $ \left( s, u, s', r \right) $ qualquer, ou seja, que alcança um estado $ s' \in S $ a partir do estado $ s \in S $, com uma ação $ u \in U $ e recebendo uma recompensa $ r \in \mathbb{R} $. A partir de cada dessas experiências, pode-se obter um valor $ amostra $ tal que:
 
 \begin{equation} \label{equation:AmostraTD}
-	amostra = r \left( s, u, s' \right) + \gamma \cdot V_{\pi_{td}}^t \left( s' \right)
+	amostra = r \left( s, u, s' \right) + \gamma \cdot V_{\pi_{td}}^t \left( s' \right).
 \end{equation}
 
 Agora, escolhendo-se uma constante de aprendizagem $ \alpha $, pode-se atualizar o valor de $ V_{\pi_{td}} \left( s \right) $ tal que:
 
 \begin{equation} \label{equation:UpdateValueFunctionTD}
-	V_{\pi_{td}}^t \left( s \right) = \left( 1 - \alpha \right) \cdot V_{\pi_{td}}^{t-1} \left( s \right) + \alpha \cdot amostra
+	V_{\pi_{td}}^t \left( s \right) = \left( 1 - \alpha \right) \cdot V_{\pi_{td}}^{t-1} \left( s \right) + \alpha \cdot amostra.
 \end{equation}
 
-Note que, utilizando valores suficientemente pequenos de $ \alpha $, consegue-se valores de $ V_{\pi_{td}} \left( s \right) $ que convergem com o tempo e que, mais importante, convergem para os mesmos valores que o algoritmo MDP, considerando que a política $ \pi_{td} $ utilizada é ótima.
+Note que, utilizando valores suficientemente pequenos de $ \alpha $, consegue-se valores de $ V_{\pi_{td}} \left( s \right) $ que convergem com o tempo e que, principalmente, convergem para os mesmos valores que o algoritmo MDP, considerando que a política $ \pi_{td} $ utilizada é ótima.
 
-O problema com a diferença temporal é que ela apenas avalia uma política fixa e já existente. Caso queiramos mudar nossa política, ou gerar uma utilizando esse algorítmo, teríamos um problema, todos os valores de $ V \left( S \right) $ dependem somento do estado e não da ação executada. Caso se mudasse a política $ \pi_{td} $ executada, teríamos de recalcular todos os valores $ V \left( S \right) $.
+A fraqueza da diferença temporal é que ela apenas avalia uma política fixa e já existente. Caso deseje-se mudar a política, ou gerar uma utilizando este algorítmo, surge um problema, todos os valores de $ V \left( S \right) $ dependem somente do estado e não da ação executada. Caso se mude a política $ \pi_{td} $ executada, deve-se de recalcular todos os valores $ V \left( S \right) $.
 
 \section{Q Learning} \label{section:QLearning}
 
-Q Learning é um dos mais conhecidos e mais utilizados algoritmos de aprendizagem por reforço, sendo utilizado para controle de robôs \cite{Gaskett:2002}, tratamento de problemas em processamento de imagens \cite{Alexandru-Learning} e criação de sistemas de troca financeiros \cite{RePEc:ven:wpaper:2014:15}. Esse é um algoritmo, diferentemente do TD, de aprendizagem ativa, ou seja, a escolha da política e das ações é feita juntamente com a aprendizagem e se consegue alcançar uma nova política ótima o utilizando.
+\textit{Q Learning} é um dos mais conhecidos e mais utilizados algoritmos de aprendizagem por reforço, sendo utilizado para controle de robôs \cite{Gaskett:2002}, tratamento de problemas em processamento de imagens \cite{Alexandru-Learning} e criação de sistemas de troca financeiros \cite{RePEc:ven:wpaper:2014:15}. Esse é um algoritmo, diferentemente do TD, de aprendizagem ativa, ou seja, a escolha da política e das ações é feita juntamente com a aprendizagem e se consegue alcançar uma nova política ótima.
 
 Ao invés de utilizar o valor de $ V \left( S \right) $ e se basear na equação \ref{equation:ValueFunctionMDP}, ele utiliza um valor $ Q \left( S, U \right) $, tal que:
-
 \begin{equation} \label{equation:PolicySelectionQLearning}
-    \pi^t \left( s \right) = \underset{u}{argmax} \left( Q^t \left( s, u \right) \right)
+    \pi^t \left( s \right) = \underset{u}{argmax} \left( Q^t \left( s, u \right) \right).
 \end{equation}
 
 \begin{equation}
-    V^t \left( s \right) = \underset{u}{max} \left( Q^t \left( s, u \right) \right)
+    V^t \left( s \right) = \underset{u}{max} \left( Q^t \left( s, u \right) \right).
 \end{equation}
 
 Ou seja:
-
 \begin{equation} \label{equation:QValueFunctionQLearning}
-    Q^t \left( s, u \right) = \int \! \left( r \left( s, u, s' \right) + \gamma \cdot V^{t-1} \left( s' \right) \right) \cdot P \left( s' \mid u, s \right) \, \mathrm{d}s'
+    Q^t \left( s, u \right) = \int \! \left( r \left( s, u, s' \right) + \gamma \cdot V^{t-1} \left( s' \right) \right) \cdot P \left( s' \mid u, s \right) \, \mathrm{d}s'.
 \end{equation}
 
 Que pode ser reescrito como:
-
 \begin{equation} \label{equation:QValueFunctionQLearningFinal}
-    Q^t \left( s, u \right) = \int \! \left( r \left( s, u, s' \right) + \gamma \cdot \underset{u'}{max} \left( Q^{t-1} \left( s', u' \right) \right) \right) \cdot P \left( s' \mid u, s \right) \, \mathrm{d}s'
+    Q^t \left( s, u \right) = \int \! \left( r \left( s, u, s' \right) + \gamma \cdot \underset{u'}{max} \left( Q^{t-1} \left( s', u' \right) \right) \right) \cdot P \left( s' \mid u, s \right) \, \mathrm{d}s'.
 \end{equation}
 
-Ao aprender o valor de $ Q^t \left( S, U \right) $, ao invés do de $ V^t \left( S \right) $, você pode modificar sua política sem ter que reaprender todos os seus valores. Analogamente às equações \ref{equation:AmostraTD} e \ref{equation:UpdateValueFunctionTD} em TD, aprende-se através de amostras obtidas a partir de experiências $ \left( s, u, s', r \right) $.
+Ao aprender o valor de $ Q^t \left( S, U \right) $, ao invés do de $ V^t \left( S \right) $, modifica-se a política sem ter de reaprender todos os seus valores. Analogamente às equações \ref{equation:AmostraTD} e \ref{equation:UpdateValueFunctionTD} em TD, aprende-se através de amostras obtidas a partir de experiências $ \left( s, u, s', r \right) $.
 
 \begin{equation} \label{equation:AmostraQLearning}
-	amostra = r \left( s, u, s' \right) + \gamma \cdot \underset{u}{max} \left( Q^{t-1} \left( s', u' \right) \right)
+	amostra = r \left( s, u, s' \right) + \gamma \cdot \underset{u}{max} \left( Q^{t-1} \left( s', u' \right) \right).
 \end{equation}
 
 \begin{equation} \label{equation:QUpdateQLearning}
-	Q^t \left( s, u \right) = \left( 1 - \alpha \right) \cdot Q^{t-1} \left( s, u \right) + \alpha \cdot amostra
+	Q^t \left( s, u \right) = \left( 1 - \alpha \right) \cdot Q^{t-1} \left( s, u \right) + \alpha \cdot amostra.
 \end{equation}
 
-Com um número suficiente de iterações e com um decaimento apropriado do parâmetro de aprendizagem $ \alpha $, $ Q^t \left( S, U \right) $ tende a um valor ótimo  com uma probabilidade 1 \cite{journals:ml:Tsitsiklis94,Jaakkola94convergenceof,Watkins:1989} e uma política escolhida com base na função \ref{equation:PolicySelectionQLearning} também seria ótima.
+Com um número suficiente de iterações e com um decaimento apropriado do parâmetro de aprendizagem $ \alpha $, $ Q^t \left( S, U \right) $ tende a um valor ótimo  com uma probabilidade 1 \cite{journals:ml:Tsitsiklis94,Jaakkola94convergenceof,Watkins:1989} e a política escolhida com base na função \ref{equation:PolicySelectionQLearning} também é ótima.
 
-Alguns problemas com esse algoritmo são:
+Algumas limitações com esse algoritmo são:
 
 \begin{itemize}
 	\item Podem existir muitos estados para se visitar, para um espaço contínuo, por exemplo, seriam infinitos;
 	\item Podem existir muitas ações possíveis para cada estado, para o acionamento analógico de um motor, por exemplo, seriam infinitas;
-	\item Se houverem muitos pares ação-estado $ \left( S, U \right) $, mesmo que se consiga aprender por um tempo muito grande, tem que se conseguir armazenar o valor de $ Q_t \left( S, U \right) $ para cada ação que for possível de ser executada em cada estado;
-	\item O algoritmo não consegue aplicar o que aprendeu em um estado para outros com características parecidas.
+	\item Se houverem muitos pares ação-estado $ \left( S, U \right) $, mesmo que se consiga aprender por um tempo muito grande, tem que se conseguir armazenar o valor de $ Q^t \left( S, U \right) $ para cada ação que for possível de ser executada em cada estado;
+	\item O algoritmo não consegue aplicar o que aprendeu em um estado para outros estados com características similares.
 \end{itemize}
 
 \subsection{Generalização dos Pares Estado-Ação} \label{subsection:GeneralizaçãoParesEstadoAção}
 
-Uma solução para esse problema é generalizar a informação de um par estado-ação para outros similares. Para isso utilizaremos um vetor de características $ f $ para descrever o estado. Essas características podem ser coisas como:
+Uma solução para esse problema é generalizar a informação de um par estado-ação para outros similares. Para isso utiliza-se um vetor de características $ f $ para descrever o estado. Essas características podem ser:
 
 \begin{itemize}
 	\item Distância para uma posição que oferece uma recompensa positiva;
 	\item Distância para uma posição que oferece uma recompensa negativa;
 	\item Número de alvos a serem capturados;
-	\item Estado do robô (Com ou sem problema).
+	\item Estado do robô (Com ou sem defeito).
 \end{itemize}
 
 Elas também podem descrever a ação a ser executada, como:
 
 \begin{itemize}
-	\item Fica parado;
-	\item Move uma garra;
-	\item Economiza energia.
+	\item Ficar parado;
+	\item Mover uma garra;
+	\item Economizar energia.
 \end{itemize}
 
-Essas características podem até descrever um estado futuro $ s' $ (possivelmente utilizando alguma das características descritas acima) que tenha alta chance de ser alcançado por esse par estado-ação.
+Essas características podem até descrever um estado futuro $ s' $ (possivelmente utilizando alguma das características descritas acima) que tenha grande chance de ser alcançado por esse par estado-ação.
 
-Podemos utilizar esse vetor de características $ f_j \left( S, U \right) $ para obter um valor $ Q \left( S, U \right) $ tal que:
+Utiliza-se esse vetor $ f $ de características $ f_j \left( S, U \right) $ para obter um valor $ Q \left( S, U \right) $ tal como descrito na equação \ref{equation:QValueGeneralizado}.
 
 \begin{equation} \label{equation:QValueGeneralizado}
-	Q \left( S, U \right) = \omega_1 \cdot f_1 \left( S, U \right) + \omega_2 \cdot f_2 \left( S, U \right) + \cdots + \omega_n \cdot f_n \left( S, U \right)
+	Q \left( S, U \right) = \omega_1 \cdot f_1 \left( S, U \right) + \omega_2 \cdot f_2 \left( S, U \right) + \cdots + \omega_n \cdot f_n \left( S, U \right).
 \end{equation}
 
-Com essa equação conseguimos um valor parecido de $ Q \left( S, U \right) $ para estados distintos que possuam características $ f_j \left( S, U \right) $ com valores parecidos. A desvantagem é que devemos escolher esses valores/características com cuidado para obter uma boa representação do nosso par estado-ação a partir deles, ou podemos ter estados-ações com valores de $ f_j \left( S, U \right)$ parecidos, e, consequentemente, valores de $ Q \left( S, U \right) $ também parecidos, mas que são muito diferentes.
+Sendo $ \omega_j $ um peso, que é o que se quer aprender nesse algoritmo, utilizado para ponderar o valor de cada característica $ f_j $. Com essa equação se consegue um valor parecido de $ Q \left( S, U \right) $ para estados distintos, mas que possuam características $ f_j \left( S, U \right) $ com valores parecidos. A desvantagem é que deve-se escolher esses valores/características com cuidado para obter uma boa representação do par estado-ação a partir deles, ou pode-se obter estados-ações com valores de $ f_j \left( S, U \right)$ parecidos, e, consequentemente, valores de $ Q \left( S, U \right) $ também parecidos, mas que são muito diferentes.
 
-Com esse novo modelo, podemos aprender valores, a partir de cada experiência, utilizando o erro atual do modelo:
+Com esse novo modelo, aprende-se valores, a partir de cada experiência, utilizando o erro atual do modelo, descrito pela equação \ref{equation:ErrorFunctionQLearning1}.
 
-\begin{equation}
+\begin{equation} \label{equation:ErrorFunctionQLearning1}
 	erro = r \left( s, u, s' \right) + \gamma \cdot \underset{u}{max} \left( Q^{t-1} \left( s', u' \right) \right) - Q^{t-1} \left( s, u \right)
 \end{equation}
 
-Dada pela diferença entre a recompensa recebida somada com o valor de ganho esperado para o novo estado alcançado e o valor atual esperado para o par estado-ação executada. E o utilizando para atualizar cada um dos pesos usados para obter $ Q_t \left( S, U \right) $:
+Esse erro é dado pela diferença entre a recompensa recebida, somada com o valor de ganho esperado para o novo estado alcançado e o valor atual esperado para o par estado-ação executada. Utiliza-se esse erro para atualizar cada um dos pesos usados para obter $ Q_t \left( S, U \right) $, como explicitado na equação \ref{equation:OmegaUpdate1}.
 
-\begin{equation}
+\begin{equation} \label{equation:OmegaUpdate1}
 	\omega_i^t = \omega_i^{t-1} + \alpha \cdot erro \cdot f_i \left( s, u \right)
 \end{equation}
 
-Assim, caso tenhamos um erro grande para um dado estado, iremos atualizar os valores de todos os estados com características similares àquele. É importante notar também que, caso esse estado tenha um valor maior para uma das características $ f_j $, o peso dela, $ \omega_j $, será mais modificado que os da outras características.
+Assim, caso haja um erro grande para um dado estado, atualiza-se os valores de todos os estados com características similares àquele. É importante notar também que, caso esse estado tenha um valor maior para uma característica $ f_j $, o peso $ \omega_j $ dela terá maior alteração que os das outras características.
 
-Note que a função utilizada para calcular $ Q \left( S, U \right) $ é um perceptron e que esse tipo de função possuí limitações, sendo a principal a de ser capaz de aprender apenas problemas linearmente separáveis \cite{Haykin:1998:NNC:521706,priddy2005artificial}. Por isso os parâmetros $ f_i \left( S, U \right) $ devem ser bem escolhidos, não só para caracterizar bem um estado e permitir uma boa diferenciação entre dois deles, mas também para permitir essa aprendizagem.
+A função utilizada para calcular $ Q \left( S, U \right) $ é um perceptron e esse tipo de função possui limitações, sendo que a principal é ser apenas capaz de aprender problemas linearmente separáveis \cite{Haykin:1998:NNC:521706,priddy2005artificial}. Por isso os parâmetros $ f_i \left( S, U \right) $ devem ser bem escolhidos, não só para caracterizar bem um estado e permitir uma boa diferenciação entre dois deles, mas também para permitir essa aprendizagem.
 
 \subsection{Escolha de Ações e Exploração Gulosa} \label{subsection:EscolhaDeAçõesExploraçãoGulosa}
 
-Utilizando a equação \ref{equation:PolicySelectionQLearning}, em conjunto com \ref{equation:QValueGeneralizado}, podemos criar uma política $ \pi $ para escolha de ações. Essa política, caso o valor de $ Q \left( S, U \right) $ já tenha sido aprendido com sucesso, será ótima.
+Utilizando a equação \ref{equation:PolicySelectionQLearning}, em conjunto com \ref{equation:QValueGeneralizado}, pode-se criar uma política $ \pi $ para escolha de ações. Essa política, caso o valor de $ Q \left( S, U \right) $ já tenha sido aprendido com sucesso, será ótima.
 
 Mas, caso desde o começo do aprendizado se utilize apenas esse método para escolher a ação executada, pode se ficar preso em máximas locais%
 \footnote{Uma política de ação que é melhor do que outras com pequenas variações, mas, caso se mude mais os parâmetros, existem outras melhores.%
 }, sem explorar outras opções de ação. Um meio de evitar esse problema é utilizar outros métodos de exploração durante o treinamento, que podem ser desativados quando o treinamento acabar. 
 
-Um desses métodos é chamado de exploração gulosa (\textit{greedy exploration}). É um método bem simples em que antes de se selecionar uma ação se ``arremessa uma moeda'', dependendo do resultado você ou executa uma ação randômica ou seleciona uma ação baseado no valor de $ Q^t \left( S, U \right) $ atual.
+Um desses métodos é chamado de exploração gulosa (\textit{greedy exploration}). É um método em que, antes de se selecionar uma ação, se ``arremessa uma moeda'', dependendo do resultado ou se executa uma ação randômica ou se seleciona uma ação baseado nos valores de $ Q^t \left( S, U \right) $ atuais, escolhendo a ação que maximize esse valor.
 
 \begin{algorithm}[H]
 	\caption{Exploração Gulosa} \label{euclid}
 	\begin{algorithmic}[1]
-		\Procedure{PegarAcao}{}
+		\Procedure{Pegar\_Acao}{}
 			\State $\textit{numero\_randomico} \gets \text{random }\textit{numero}$
 			\If {$\textit{numero\_randomico} < \text{FATOR\_DE\_EXPLORACAO} $ }
 				\State \Return $\textit{acao\_randomica}$
@@ -342,4 +339,4 @@ Um desses métodos é chamado de exploração gulosa (\textit{greedy exploration
 	\end{algorithmic}
 \end{algorithm}
 
-Note que esse parâmetro $ \beta = \textit{FATOR\_DE\_EXPLORACAO} $ é muito importante e deve ser bem escolhido. Um valor mais baixo dele limita a exploração, enquanto um mais alto atrasa a aprendizagem e pode impedir a aprendizagem de uma política que execute uma sequência de ações mais complexa.
+Esse parâmetro $ \beta = \textit{FATOR\_DE\_EXPLORACAO} $ é muito importante e deve ser bem escolhido. Um valor mais baixo dele limita a exploração, enquanto um mais alto atrasa a aprendizagem e pode impedir a aprendizagem de uma política que execute uma sequência de ações mais complexa.
