@@ -28,6 +28,37 @@ BayesianQLearning::BayesianQLearning()
     new_q_value_ = 0;
     old_behavior_ = 0;
     behavior_ = 0;
+
+    behavioral_weights_[0][0] = 100.697;
+    behavioral_weights_[0][1] = 103.412;
+    behavioral_weights_[0][2] = 18.8963;
+    behavioral_weights_[0][3] = 52.0346;
+    behavioral_weights_[0][4] = -75.4693;
+    behavioral_weights_[0][5] = 5.35213;
+    behavioral_weights_[1][0] = 298.643;
+    behavioral_weights_[1][1] = 118.747;
+    behavioral_weights_[1][2] = 2.78798;
+    behavioral_weights_[1][3] = 126.191;
+    behavioral_weights_[1][4] = -182.662;
+    behavioral_weights_[1][5] = 48.2057;
+    behavioral_weights_[2][0] = 201.525;
+    behavioral_weights_[2][1] = 125.762;
+    behavioral_weights_[2][2] = 108.723;
+    behavioral_weights_[2][3] = 44.3171;
+    behavioral_weights_[2][4] = -52.7883;
+    behavioral_weights_[2][5] = 5.40286;
+    behavioral_weights_[3][0] = 98.26;
+    behavioral_weights_[3][1] = 96.3409;
+    behavioral_weights_[3][2] = 22.817;
+    behavioral_weights_[3][3] = 56.1262;
+    behavioral_weights_[3][4] = -90.5891;
+    behavioral_weights_[3][5] = 9.87186;
+    behavioral_weights_[4][0] = 75.2606;
+    behavioral_weights_[4][1] = 89.2352;
+    behavioral_weights_[4][2] = 10.4304;
+    behavioral_weights_[4][3] = 66.3378;
+    behavioral_weights_[4][4] = -184.263;
+    behavioral_weights_[4][5] = 18.5121;
 }
 
 void BayesianQLearning::saveTempFeatures(int behavior)

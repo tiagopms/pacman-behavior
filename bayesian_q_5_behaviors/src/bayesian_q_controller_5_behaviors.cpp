@@ -12,9 +12,9 @@
 
 #include <mcheck.h>
 
-int NUMBER_OF_GAMES_WITH_NO_GUI = 3000;
-int NUMBER_OF_GAMES = 4000;
-int NUMBER_OF_TRAININGS = 2700;
+int NUMBER_OF_GAMES_WITH_NO_GUI = 0;
+int NUMBER_OF_GAMES = 2000;
+int NUMBER_OF_TRAININGS = 0;
 bool is_training = true;
 
 bool endGame(pacman_msgs::EndGame::Request &req, pacman_msgs::EndGame::Response &res, 
@@ -77,6 +77,8 @@ bool getAction(pacman_msgs::PacmanGetAction::Request &req, pacman_msgs::PacmanGe
     int behavior;
 
     //ROS_INFO_STREAM("Sending action");
+
+    sleep(10);
 
     // predict next game state
     if (is_training) {
@@ -163,7 +165,7 @@ int main(int argc, char **argv)
     // spin to answer services
     ros::spin();
 
-    q_learning->logWeights();
+    //q_learning->logWeights();
 
     // shutdown ros node
     ros::shutdown();
