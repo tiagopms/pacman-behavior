@@ -142,13 +142,13 @@ Então, caso for utilizada como característica, por exemplo, $ f_i = $ ``probab
 Partindo dos modelos obtidos na seção \ref{section:FiltroBayesiano}, pode-se agora utilizar a seleção de comportamento, vista no tópico \ref{subsection:QLearningParcialmenteObservavel}, como uma nova medida de sensor, fazendo:
 
 \begin{equation}
-	Z' = \binom{Z}{Z_b} = \binom{Z}{B}.
+	Z^+ = \binom{Z}{Z_b} = \binom{Z}{B}.
 \end{equation}
 
 Sendo $ Z $ as medidas sensorias e $ B = Z_b $ o comportamento obtido utilizando a aprendizagem por reforço. É necessário expandir também o modelo dos estados para:
 
 \begin{equation}
-	S' = \binom{S}{S_b}
+	S^+ = \binom{S}{S_b}
 \end{equation}
 
 Sendo, novamente, $ S $ o modelo do estado atual usual e $ S_b $ uma variável de estado que representa o comportamento atual do agente.
@@ -166,7 +166,7 @@ O filtro bayesiano é, então, reescrito como:
         \right).
 \end{equation}
 
-Existem três etapas para atualizar o estado $ S'^t $ recursivamente. Para esse novo filtro elas são:
+Existem três etapas para atualizar o estado $ S^+ $ recursivamente. Para esse novo filtro elas são:
 
 \begin{itemize}
 	\item Predição:
@@ -340,7 +340,7 @@ Para a escolha de comportamento após terminado o treinamento, primeiro se calcu
 } $ a^t \in A^t $ de se encontrar em cada estado $ S^t $.
 
 \begin{equation} \label{equation:QLearningEscolhaComportamentoFinal}
-    	Q \left( a^t, B^t \right) = \omega^1 \cdot f^1 \left( a^t, B^t \right) + \omega^2 \cdot f^2 \left( a^t, B^t \right) + \cdots + \omega^n \cdot f^n \left( a^t, B^t \right)
+    	Q \left( a^t, B^t \right) = \omega_1 \cdot f_1 \left( a^t, B^t \right) + \omega_2 \cdot f_2 \left( a^t, B^t \right) + \cdots + \omega_n \cdot f_n \left( a^t, B^t \right)
 \end{equation}
 
 Depois, se escolhe um comportamento a partir desses valores calculados, sendo escolhido o que maximiza essa função.
@@ -413,7 +413,7 @@ A comunicação entre a plataforma em Python e o programa em C++ se dá a partir
 \begin{itemize}
 	\item Posição do agente (Pacman) --- $ \left( x, y \right) \in \mathbb{R}^2 $;
 	\item Distância para os fantasmas --- $ \left( d_x, d_y \right) = \left( \Delta x, \Delta y \right) \in \mathbb{R}^2 $;
-	\item Ação a ser executada --- $ u \in \left\{Norte, Sul, Leste, Oeste, Esperar \right\} $;
+	\item Ação a ser executada --- $ m \in \left\{Norte, Sul, Leste, Oeste, Esperar \right\} $;
 	\item Recompensa recebida do ambiente --- $ r \in \mathbb{R} $.
 \end{itemize}
 
@@ -442,7 +442,7 @@ Analogamente a distância percebida para os fantasmas é:
 	\left( d_x, d_y \right) = \left( \delta\left( d_x^*, \sigma_{dist\_fant} \right), \delta\left( d_y^*, \sigma_{dist\_fant} \right) \right).
 \end{equation}
 
-A atuação tem um conjunto de valores possível tal que $ u \in U = \{ Norte,\allowbreak Sul,\allowbreak Leste,\allowbreak Oeste,\allowbreak Parar \} $. Por ela possuir um valor discreto e não numérico, não se insere um erro gaussiano gaussiano nela. Para simular erros de atuação, quando uma ação é recebida pela plataforma de simulação ela é executada de acordo com a função prensente no algorítmo \ref{algorithm:ErroAtuacao}.
+A atuação tem um conjunto de valores possível tal que $ m \in M = \{ Norte,\allowbreak Sul,\allowbreak Leste,\allowbreak Oeste,\allowbreak Parar \} $. Por ela possuir um valor discreto e não numérico, não se insere um erro gaussiano gaussiano nela. Para simular erros de atuação, quando uma ação é recebida pela plataforma de simulação ela é executada de acordo com a função prensente no algorítmo \ref{algorithm:ErroAtuacao}.
 
 \begin{algorithm}[h]
 	\caption{Erro na Atuação} \label{algorithm:ErroAtuacao}

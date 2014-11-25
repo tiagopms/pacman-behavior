@@ -17,7 +17,7 @@ Em todas as áreas da robótica muitos esforços tem sido aplicados para se obte
 
 Robótica probabilística (\textit{probabilistic robotics}) é uma área da robótica que leva em conta a incerteza das percepções (sensores) e do controle (atuadores) de um robô. Baseada no campo de estatística, essa estratégia provê o robô com algoritmos mais robustos para lidar com situações do mundo real \cite{Thrun:2005:PR:1121596}. Esse nível de robustez é essencial quando se tem como plataforma um robô móvel, onde sensores e atuadores apresentam incertezas que, se não tratadas, levam a performances piores que as esperadas.
 
-Trazendo essa pergunta para o campo de robótica probabilística obtém-se uma equação que a resume $ P \left( M^t \mid z^{0: t} m^{0: t -1} \pi \right) $, ou seja, a probabilidade de se executar uma ação $ m \in M $ no tempo $ t $, sendo que foram observados $ z^{0:t} $ nos tempos de $ 0 $ a $ t $ e foram realizadas as ações $ m^{0:t-1} $ nos tempos $ 0 $ a $ t-1 $. $ \pi $ representa o conhecimento inerente que se tem do mundo.
+Trazendo essa pergunta para o campo de robótica probabilística obtém-se uma equação que a resume $ P \left( M^t \mid z^{0: t} m^{0: t -1} \pi_f \right) $, ou seja, a probabilidade de se executar uma ação $ m \in M $ no tempo $ t $, sendo que foram observados $ z^{0:t} $ nos tempos de $ 0 $ a $ t $ e foram realizadas as ações $ m^{0:t-1} $ nos tempos $ 0 $ a $ t-1 $. $ \pi_f $ representa o conhecimento inerente que se tem do mundo.
 
 Levando esse problema a um novo nível, pode-se perguntar como fazer um robô aprender dando-se recompensas a ele por certas ações e com isso aumentando sua eficiência com o passar do tempo.
 

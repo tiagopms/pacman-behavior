@@ -13,61 +13,73 @@
 
 \subsection*{Símbolos Latinos}
 
-\begin{tabular}{p{0.1\textwidth}p{0.63\textwidth}>{\PreserveBacklash\raggedleft}p{0.15\textwidth}}
-$v$  & Velocidade linear  & {[}m/s{]}\tabularnewline
+\begin{tabular}{p{0.15\textwidth}p{0.75\textwidth}}
+$m$  & Ação motora\tabularnewline
+$M$  & Conjunto das ações motoras\tabularnewline
+$z$  & Medida sensorial\tabularnewline
+$Z$  & Conjunto das medidas sensoriais\tabularnewline
+$s$  & Estado do sistema\tabularnewline
+$S$  & Conjunto dos estados do sistema\tabularnewline
+$t$  & Instante de tempo\tabularnewline
+$u$  & Ação genérica\tabularnewline
+$U$  & Conjunto das ações genéricas\tabularnewline
+$b$  & Comportamento\tabularnewline
+$B$  & Conjunto dos comportamentos\tabularnewline
+$a$  & Distribuição de probabilidade dos estados\tabularnewline
+$A$  & Conjunto das distribuições de probabilidade dos estados\tabularnewline
+$s_b$  & Variável de estado relativa ao comportamento\tabularnewline
+$S_b$  & Conjunto das variáveis de estado relativas ao comportamento\tabularnewline
+$x$  & Posição no eixo horizontal\tabularnewline
+$y$  & Posição no eixo vertical\tabularnewline
+$d_x$  & Distância no eixo horizontal\tabularnewline
+$d_y$  & Distância no eixo vertical\tabularnewline
+$n$  & Contador\tabularnewline
 \end{tabular}
 
 
 \subsection*{Símbolos Gregos}
 
-\begin{tabular}{p{0.1\textwidth}p{0.63\textwidth}>{\PreserveBacklash\raggedleft}p{0.15\textwidth}}
-$\omega$ & Velocidade angular & {[}rad/s{]}\tabularnewline
+\begin{tabular}{p{0.15\textwidth}p{0.75\textwidth}}
+$\pi_f$  & Conhecimento inerente que se tem do mundo\tabularnewline
+$\omega_i$  & Peso de uma característica $ i $\tabularnewline
+$\gamma$  & Fator de desconto\tabularnewline
+$\alpha$  & Fator de aprendizagem\tabularnewline
+$\beta$  & Fator de exploração\tabularnewline
+$\mu$  & Média\tabularnewline
+$\sigma$  & Desvio padrão\tabularnewline
+$\nu$  & Fator de acerto para atuação\tabularnewline
 \end{tabular}
 
 
-\subsection*{Grupos Adimensionais}
+\subsection*{Funções}
 
-\begin{tabular}{p{0.1\textwidth}p{0.8\textwidth}}
-$\dq q$,$\dq p$,$\transicao{\dq m}aba$ & Quatérnion dual\tabularnewline
-$\quat q$, $\quat o$, $\transicao{\quat r}aba$ & Quatérnion unitário\tabularnewline
-$\dualnum a$,$\dualnum b$ & Número dual\tabularnewline
-i, k & Contador\tabularnewline
-$\vect{\theta}$, $\vect c$ & Vetor\tabularnewline
-$\jacob$ & Jacobiana\tabularnewline
-$\frame{}$ & Quadro (Tradução livre da palavra \textit{frame})\tabularnewline
-$\orientation{}{}$ & Orientação\tabularnewline
-$\pose{}{}$ & Pose\tabularnewline
+\begin{tabular}{p{0.15\textwidth}p{0.75\textwidth}}
+$P$ & Probabilidade\tabularnewline
+$\pi$ & Política\tabularnewline
+$r$ & Recompensa\tabularnewline
+$V$ & Valor esperado do estado\tabularnewline
+$Q$ & Valor esperado do par estado-ação (ou estado-comportamento)\tabularnewline
+$f_i$ & Característica $ i $ do par estado-ação (ou estado-comportamento)\tabularnewline
+$mean$ & Média aritmética\tabularnewline
+$\delta$  & Gera número randômico com probabilidade baseada em gaussiana \tabularnewline
 \end{tabular}
 
 
 \subsection*{Subscritos}
 
-\begin{tabular}{p{0.1\textwidth}p{0.8\textwidth}}
-$ref$  & referência \tabularnewline
-$fer$  & ferramenta \tabularnewline
-$sis$  & sistema \tabularnewline
-$des$ & desejado\tabularnewline
+\begin{tabular}{p{0.15\textwidth}p{0.75\textwidth}}
+$\#(numero)$  & Índice \tabularnewline
+$\pi_{td}$  & Relativo à política fixa do algoritmo TD \tabularnewline
+$b$  & Relativo à comportamento \tabularnewline
 \end{tabular}
 
 
 \subsection*{Sobrescritos}
 
-\begin{tabular}{p{0.1\textwidth}p{0.8\textwidth}}
-$\cdot$  & Variação temporal \tabularnewline
-$-$  & Valor médio \tabularnewline
-\end{tabular}
-
-
-\subsection*{Siglas}
-
-\begin{tabular}{p{0.1\textwidth}p{0.8\textwidth}}
-PCI  & \textit{Peripheral Component Interconnect}\tabularnewline
-CPU & Unidade Central de Processamento - \textit{Central Processing Unit} \tabularnewline
-AO & Saída Analógica - \textit{Analog Out}\tabularnewline
-DO & Saída Digital - \textit{Digital Out}\tabularnewline
-CS & Seletor de \textit{Chip - Chip Select}\tabularnewline
-SC & Sem Conexão\tabularnewline
-P.I. & Placa de Interface\tabularnewline
-ICW & \textit{Initialization Command Words}\tabularnewline
-OCW & \textit{Operational Control Word}\tabularnewline
+\begin{tabular}{p{0.15\textwidth}p{0.75\textwidth}}
+$'$  & No instante seguinte de tempo ($ t+1 $) \tabularnewline
+$t$  & No instante de tempo $ t $ \tabularnewline
+$0:t$  & Valores para todos instantes de tempo entre $\left[0, t\right]$ \tabularnewline
+$*$  & Valor ótimo ou exato \tabularnewline
+$+$  & Variável com a definição expandida \tabularnewline
 \end{tabular}
