@@ -342,61 +342,62 @@ Novamente, para ter uma visualização melhor desses dados calcula-se um polinô
     \label{img:5ComportamentosMapaPequeno:ComportamentosEscolhidosPolinômio}
 \end{figure}
 
-Nesse experimento, o comportamento $ Comer $ novamente tem o maior número de execuções, sendo $ Fugir $ o único que continua sendo executado até o final. Isso pode ser justificado por um fato não esperado, observado no experimento. O algoritmo ``percebeu'' que muitas das vezes que o comportamento $ Fugir $ é executado, o agente foge para cima da Cápsula, não só evitando o fantasma, mas servindo de substituto ao comportamento $ Comer\_Capsula $. Por isso o peso $ \omega_3 $, da característica $ Prox. Capsula $, é máximo para esse comportamento. Além disso, o comportamento $ Comer $, além de ir atrás da comida, muitas vezes acaba indo em direção a um fantasma branco nesse mapa pequeno.
+Nesse experimento, o comportamento $ Comer $ novamente tem o maior número de execuções, sendo $ Fugir $ o único que continua sendo executado até o final. Isso é justificado por um fato não esperado, observado no experimento. O algoritmo ``percebeu'' que muitas vezes em que o comportamento $ Fugir $ é executado, o agente foge para cima da Cápsula, não só evitando o fantasma, mas servindo de substituto ao comportamento $ Comer\_Capsula $. Por isso o peso $ \omega_3 $, da característica $ Prox. Capsula $, é máximo para esse comportamento. Além disso, o comportamento $ Comer $, além de ir atrás da comida, muitas vezes acaba indo em direção a um fantasma branco nesse mapa pequeno.
 
-A pontuação para cada partida pode ser vista na imagem à seguir, \ref{img:5ComportamentosMapaPequeno:PontuacaoPorPartida}. Novamente aproximamos esses dados por um polinômio de terceiro grau, utilizando o método dos mínimos quadrado.
+A pontuação para cada partida pode ser vista na imagem \ref{img:5ComportamentosMapaPequeno:PontuacaoPorPartida}. Mais uma vez aproxima-se esses dados por um polinômio de quarto grau, utilizando o método dos mínimos quadrado.
 
-\begin{figure}[H]
+\begin{figure}[h]
     \centering
     \includegraphics[width=\linewidth]{images/5_behaviors_small_map/match_scores____pol}
     \caption{Pontuação por partida.}
     \label{img:5ComportamentosMapaPequeno:PontuacaoPorPartida}
 \end{figure}
 
-Exceto pelo inicio do experimento, aproximadamente as primeiras trezentas partidas, a pontuação aumenta durante todo o treinamento. A média de pontos feita, após a conclusão do treinamento, foi:
-$$ mean \left( score \right) = 143.93 $$
+Exceto pelo inicio do experimento, aproximadamente as primeiras trezentas partidas, a pontuação aumenta durante todo o treinamento. A média de pontos, após a conclusão do treinamento, é:
+$$ mean \left( score \right) = 143.93. $$
 
-Temos também como média de escolha por partida dos comportamentos:
-$$ mean \left( Ficar\_Parado \right) = 0.0 $$
-$$ mean \left( Comer \right) = 59.10 $$
-$$ mean \left( Fugir \right) = 8.35 $$
-$$ mean \left( Comer\_Capsula \right) = 0.0 $$
-$$ mean \left( \textit{Caçar} \right) = 0.0 $$
+Temos como média do número de escolhas dos comportamentos por partida:
+$$ mean \left( Ficar\_Parado \right) = 0.0; $$
+$$ mean \left( Comer \right) = 59.10; $$
+$$ mean \left( Fugir \right) = 8.35; $$
+$$ mean \left( Comer\_Capsula \right) = 0.0; $$
+$$ mean \left( \textit{Caçar} \right) = 0.0. $$
 
 
 \subsection{Discussão}
 
-O algoritmo, nesse experimento, após completo o treinamento, escolheu somente os comportamentos $ Comer $ e $ Fugir $, mesmo em posse dos outros. Isso pode ser explicado, em parte devido a particularidades encontradas no mapa, que não eram esperadas a princípio, e em parte pela natureza probabilística do sistema, o que dificulta ter certeza se os fantasmas estão brancos.
+O algoritmo, nesse experimento, após completo o treinamento, escolheu somente os comportamentos $ Comer $ e $ Fugir $, mesmo em posse dos outros. Isso é explicado, em parte, devido a particularidades encontradas no mapa, que não eram esperadas a princípio, e em parte pela natureza probabilística do sistema, o que diminui a certeza de os fantasmas estão brancos.
 
 
 \section{5 Comportamentos no mapa original (Teste 4)}
 
 Nesse experimento%
-\footnote{Os parâmetros e o setup desse experimento estão melhor descritos no tópico \ref{subsection:5ComportamentosMapaOriginal}.%
-}, como no anterior, utilizamos 5 comportamentos. 
+\footnote{Os parâmetros e o \textit{setup} desse experimento estão melhor descritos no tópico \ref{subsection:5ComportamentosMapaOriginal}.%
+}, como no anterior, foram utilizados 5 comportamentos. 
 $$ B = \{Ficar\_Parado, Comer, Fugir, \textit{Comer\_Cápsula}, \textit{Caçar} \} $$
-
-E utilizamos como vetor de características $ f $:
+e como vetor de características $ f $:
 \begin{equation}
 \renewcommand\arraystretch{1.5}
 	\begin{array}{r l}
 		Bias: & f_1 \left( a, u \right) = 1.0 \\
 		Prox. Comida: & f_2 \left( a, u \right) = \frac{\displaystyle 1}{\displaystyle ObterCaracteristicaDistanciaComida \left( a \right)} \\
-		Prob. e Prox. Capsula: & f_3 \left( a, u \right) = \frac{\displaystyle ObterCaracteristicaProbExistirCapsula \left( a \right)}{\displaystyle ObterCaracteristicaDistânciaCapsula \left( a \right)} \\
-		Prob. Fantasma Branco Existir: & f_4 \left( a, u \right) = ObterCaracteristicaProbExistirFantasmaBranco \left( a \right) \\
+		Prob. e Prox. Capsula: & f_3 \left( a, u \right) = \frac{\displaystyle ObterCaracteristicaProbExistirCapsula \left( a \right)}{\displaystyle ObterCaracteristicaDistanciaCapsula \left( a \right)} \\
+		Prob. Fantasma Branco Existir: & \\
+		f_4 \left( a, u \right) = & ObterCaracteristicaProbExistirFantasmaBranco \left( a \right) \\
 		Prob. Fantasma Por Perto: & f_5 \left( a, u \right) = ObterCaracteristicaProbFantasmas \left( a \right) \\
-		Prob. Fantasma Branco Por Perto: & f_6 \left( a, u \right) = ObterCaracteristicaProbFantasmasBrancos \left( a \right)
+		Prob. Fantasma Branco Por Perto: & \\
+		f_6 \left( a, u \right) = & ObterCaracteristicaProbFantasmasBrancos \left( a \right)
 	\end{array}
 \end{equation}
 
-Realizamos o treinamento ao longo de 700 partidas, sendo que a exploração gulosa (\textit{greedy exploration}) foi executada até a partida 500. Após terminado o treinamento utilizamos 300 partidas para avaliar e obter dados sobre o algoritmo treinado.
+O treinamento é realizado ao longo de 700 partidas, sendo que a exploração gulosa (\textit{greedy exploration}) é executada até a partida 500. Após terminado o treinamento 300 partidas foram utilizadas para avaliar o algoritmo treinado.
 
 
 \subsection{Resultados e Análise}
 
-Nas figuras à seguir, de \ref{img:5ComportamentosMapaOriginal:PesoBiasAndDistComida} a \ref{img:5ComportamentosMapaOriginal:PesoProbFantasmaBrancoExistirOuNormalPerto}, temos os gráficos de como os valores dos pesos $ \omega_i $ evoluem com o tempo, para cada um dos comportamentos.
+Nas figuras à seguir, de \ref{img:5ComportamentosMapaOriginal:PesoBiasAndDistComida} a \ref{img:5ComportamentosMapaOriginal:PesoProbFantasmaBrancoExistirOuNormalPerto}, os gráficos apresentam a evolução dos pesos $ \omega_i $ com o tempo, para cada um dos comportamentos.
 
-\begin{figure}[H]
+\begin{figure}[h]
 	\centering
 	\begin{subfigure}[t]{.5\textwidth}
 		\centering
@@ -414,7 +415,7 @@ Nas figuras à seguir, de \ref{img:5ComportamentosMapaOriginal:PesoBiasAndDistCo
 	\label{img:5ComportamentosMapaOriginal:PesoBiasAndDistComida}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[h]
 	\centering
 	\begin{subfigure}[t]{.5\textwidth}
 		\centering
@@ -432,7 +433,7 @@ Nas figuras à seguir, de \ref{img:5ComportamentosMapaOriginal:PesoBiasAndDistCo
 	\label{img:5ComportamentosMapaOriginal:PesoDistCapsulaOuProbCapsulaExistir}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[h]
 	\centering
 	\begin{subfigure}[t]{.5\textwidth}
 		\centering
@@ -450,22 +451,22 @@ Nas figuras à seguir, de \ref{img:5ComportamentosMapaOriginal:PesoBiasAndDistCo
 	\label{img:5ComportamentosMapaOriginal:PesoProbFantasmaBrancoExistirOuNormalPerto}
 \end{figure}
 
-Nesse experimento temos 6 pesos diferentes e, em posse deles, podemos ver que a \textit{Bias} alcança os maiores valores, superando em muito o valor absoluto da \textit{Prob. Fantasma Perto}. Isso acontece devido ao fato de esse mapa ser mais ``fácil'', o que faz com que todos os comportamentos tenham valor maior para essa característica, que indica quão bom um comportamento é, independente da situação atual, como foi explicado no tópico \ref{subsubsection:3ComportamentosVetorCaracterísticas}.
+Nesse experimento existem 6 pesos diferentes e, em posse deles, percebe-se que os pesos da \textit{Bias} alcança os maiores valores, superando o valor absoluto do peso de \textit{Prob.FantasmaPerto}. Isso se deve a esse mapa ser mais ``fácil'', o que faz com que todos os comportamentos tenham valor maior para essa característica, que indica quão bom um comportamento é, independente da situação atual, como foi explicado no tópico \ref{subsubsection:3ComportamentosVetorCaracterísticas}.
 
-Assim como no teste 3, também com 5 comportamentos, temos pesos diferentes do esperado para a característica $ \textit{Proximidade Cápsula} $, mas dessa vez o comportamento que tem maior valor para ela é $ Comer $. Isso ocorre pois, nesse mapa, $ Comer $, quando escolhido próximo a uma cápsula, quase sempre leva o agente a comê-la.
+Assim como no teste 3, também com 5 comportamentos, há pesos com valores diferentes do esperado para a característica $ \textit{Proximidade Cápsula} $, mas dessa vez o comportamento que tem maior valor para ela é $ Comer $. Isso ocorre pois, nesse mapa, $ Comer $, quando escolhido próximo a uma cápsula, geralmente leva o agente a comê-la.
 
-Vemos também que os pesos $ \omega_4 $ e $ \omega_6 $, \textit{Prob.ExistirFantasmaBranco} e \textit{Prob.FantasmaBracoPerto}, também tem maior valor para $ Comer $. O que reflete que $ Comer $ nesse mapa, sendo indiferente aos fantasmas, é preferível a procurar ativamente por ele.
+Vemos também que os pesos $ \omega_4 $ e $ \omega_6 $, \textit{Prob.ExistirFantasmaBranco} e \textit{Prob.FantasmaBracoPerto}, também tem maior valor para $ Comer $. O que reflete que $ Comer $ nesse mapa, sendo indiferente aos fantasmas, é preferível a procurar ativamente por eles.
 
-Como para os outros experimentos, plotando o número de vezes que cada comportamentos é escolhido por partida para esse experimento, eles formam a nuvem exposta na figura \ref{img:5ComportamentosMapaOriginal:ComportamentosEscolhidos}.
+Como para os outros experimentos, o número de vezes que cada comportamentos é escolhido por partida para esse experimento é apresentado na figura \ref{img:5ComportamentosMapaOriginal:ComportamentosEscolhidos}.
 
-\begin{figure}[H]
+\begin{figure}[h]
     \centering
     \includegraphics[width=\linewidth]{images/5_behaviors_original_map/chosen_behaviors}
     \caption{Escolha de comportamentos por partida.}
     \label{img:5ComportamentosMapaOriginal:ComportamentosEscolhidos}
 \end{figure}
 
-Novamente, para ter uma visualização melhor dos dados, achamos um polinômio que represente essa nuvem de pontos. Para um polinômio de quarto grau essa curva fica como a descrita na figura \ref{img:5ComportamentosMapaOriginal:ComportamentosEscolhidosPolinômio}.
+Novamente, para ter uma visualização melhor dos dados, calcula-se um polinômio que represente essa nuvem de pontos. Para um polinômio de quarto grau essa curva fica como a descrita na figura \ref{img:5ComportamentosMapaOriginal:ComportamentosEscolhidosPolinômio}.
 
 \begin{figure}[H]
     \centering
@@ -476,38 +477,37 @@ Novamente, para ter uma visualização melhor dos dados, achamos um polinômio q
 
 Como para os outros experimentos, o comportamento $ Comer $ foi o mais escolhido, seguido por $ Fugir $. Assim como para o outro experimento com 5 comportamentos, após completo o treinamento somente esses dois comportamentos são utilizados. Isso novamente se deve a uma característica do mapa, em geral quando o agente está a uma pequena distância de uma cápsula, o comportamento $ Comer $ o leva na mesma direção que o $ \textit{Comer\_Cápsula} $.
 
-A pontuação para cada partida pode ser vista na imagem à seguir, \ref{img:5ComportamentosMapaOriginal:PontuacaoPorPartida}. Novamente aproximamos esses dados por um polinômio de quarto grau.
+A pontuação para cada partida pode ser vista na imagem à seguir, \ref{img:5ComportamentosMapaOriginal:PontuacaoPorPartida}. Como anteriormente, aproxima-se esses dados por um polinômio de quarto grau.
 
-\begin{figure}[H]
+\begin{figure}[h]
     \centering
     \includegraphics[width=\linewidth]{images/5_behaviors_original_map/match_scores____pol}
     \caption{Pontuação por partida.}
     \label{img:5ComportamentosMapaOriginal:PontuacaoPorPartida}
 \end{figure}
 
-Essa curva mostra uma melhora na pontuação ao longo de todo o treinamento. A média de pontos feita, após a conclusão do treinamento:
+Essa curva mostra uma melhora na pontuação ao longo de todo o treinamento. A média de pontos, após a conclusão do treinamento, é:
 
-$$ mean \left( score \right) = 619.20 $$
+$$ mean \left( score \right) = 619.20, $$
+sendo a média de escolha dos comportamentos por partida:
 
-Sendo a média de escolha por partida dos comportamentos:
-
-$$ mean \left( Ficar\_Parado \right) = 0.0 $$
-$$ mean \left( Comer \right) = 181.04 $$
-$$ mean \left( Fugir \right) = 5.29 $$
-$$ mean \left( Comer\_Capsula \right) = 0.0 $$
-$$ mean \left( \textit{Caçar} \right) = 0.0 $$
+$$ mean \left( Ficar\_Parado \right) = 0.0; $$
+$$ mean \left( Comer \right) = 181.04; $$
+$$ mean \left( Fugir \right) = 5.29; $$
+$$ mean \left( Comer\_Capsula \right) = 0.0; $$
+$$ mean \left( \textit{Caçar} \right) = 0.0. $$
 
 
 \subsection{Discussão}
 
-Assim como para o teste anterior, o algoritmo escolheu somente os comportamentos $ Comer $ e $ Fugir $, após o treinamento estar completo. Isso pode ser explicado em parte devido a particularidades encontradas no mapa, que não eram esperadas a princípio, e em parte pela natureza probabilística do sistema, o que dificulta se ter uma certeza de os fantasmas estarem brancos.
+Assim como para o teste anterior, o algoritmo escolheu somente os comportamentos $ Comer $ e $ Fugir $, após o treinamento estar completo. Isso é explicado em parte devido a particularidades encontradas no mapa, que não eram esperadas a princípio, e em parte pela natureza probabilística do sistema, o que dificulta se ter uma certeza de os fantasmas estarem brancos.
 
-Pode-se observar também que existe uma dificuldade do algoritmo de sair de um máximo local para alcançar um máximo global. Pelo fato de ele inicialmente perceber que é ruim ter uma probabilidade alta de possuir fantasmas normais por perto, ele não consegue aprender a escolher o comportamento $ \textit{Caçar} $ como seria desejado, mesmo para casos com alta probabilidade de os fantasmas estarem brancos.
+Observa-se também que existe uma dificuldade do algoritmo de sair de um máximo local para alcançar um máximo global. Pelo fato de ele inicialmente perceber que é ruim ter uma probabilidade alta de possuir fantasmas normais por perto, ele não consegue aprender a escolher o comportamento $ \textit{Caçar} $ como seria desejado, mesmo para casos com alta probabilidade de os fantasmas estarem brancos.
 
 \section{Discussão Geral}
 
-O algoritmo, como esperado, teve comportamentos diferentes, para diferentes mapas, comportamentos e parâmetros.
+O algoritmo, como esperado, teve comportamentos diferentes para diferentes mapas, comportamentos e parâmetros.
 
-Algumas coisas inesperadas foram observadas, por exemplo, nos terceiro e quarto casos de teste, mesmo só executando, ao final, dois comportamentos, $ Comer $ e $ Fugir $, os mesmo executados pelos dois primeiros experimentos, ele conseguiu uma média de pontos bastante superior. Isso se deve ao caso de uma característica, que parecia ter pouca relevância para esses dois comportamentos, ser mais importante que o esperado. Isso reforça a informação dada na Fundamentação Teórica, no tópico \ref{subsection:GeneralizaçãoParesEstadoAção}, que falava ``devemos escolher esses valores/características com cuidado para obter uma boa representação do nosso par estado-ação [...] ou podemos ter estados-ações com valores [...] parecidos, e, consequentemente, valores de $ Q \left( S, U \right) $ também parecidos, mas que são muito diferentes.''
+Alguns fatos inesperados foram observados, por exemplo, nos terceiro e quarto casos de teste, mesmo só executando, ao final, dois comportamentos, $ Comer $ e $ Fugir $, os mesmo executados pelos dois primeiros experimentos, eles conseguiram uma média de pontos superior. Isso se deve a que uma característica, que parecia ter pouca relevância para esses dois comportamentos, é mais importante que o esperado. Isso reforça a informação dada na Fundamentação Teórica, no tópico \ref{subsection:GeneralizaçãoParesEstadoAção}, que afirma que devemos escolher essas características com cuidado, ou podemos ter dois estados-comportamentos com valores parecidos e, consequentemente, valores de $ Q \left( S, U \right) $ também parecidos, mas que são muito diferentes.
 
-O modelo obteve bons resultados, conseguindo fazer escolhas satisfatórias mesmo num sistema com alto erro de atuação e sensoriamento e sem ter nenhuma informação previa de como os comportamentos influenciariam seu desempenho ou atuação. Mesmo com algumas características inesperadas encontradas, o algoritmo se comportou como desejado. Nos experimentos com o mapa clássico, por exemplo, ele aprende e valoriza muito mais a ação de comer, enquanto nos mapas pequenos ele é muito mais cauteloso.
+O modelo obteve bons resultados, conseguindo fazer escolhas satisfatórias mesmo num sistema com alto erro de atuação e sensoriamento e sem ter nenhuma informação previa de como os comportamentos influenciariam seu desempenho ou atuação. Mesmo com algumas características inesperadas encontradas, o algoritmo se comportou como desejado. Nos experimentos com o mapa clássico, por exemplo, ele aprende e valoriza mais o comportamento de comer, enquanto nos mapas pequenos ele é mais cauteloso.
