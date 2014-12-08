@@ -79,6 +79,9 @@
 \usepackage{graphicx} % Allows including images
 \usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
 \usepackage[utf8]{inputenc}
+\usepackage[labelformat=empty]{caption}
+\usepackage{subcaption}
+\usepackage{multicol}
 
 %----------------------------------------------------------------------------------------
 %	TITLE PAGE
@@ -146,18 +149,13 @@ Nesse trabalho, tentaremos responder essa pergunta utilizando:\pause
 
 \begin{frame}
 %\frametitle{Koike}
-Koike
+Koike (2008) \cite{Koike:2008}
 \begin{itemize}
 	\item Seleção de comportamentos;
 	\item Redes bayesianas.
-\end{itemize}
-\end{frame}
+\end{itemize}\pause
 
-%------------------------------------------------
-
-\begin{frame}
-%\frametitle{Lidoris}
-Lidoris
+Lidoris (2011) \cite{lidoris2011state}
 \begin{itemize}
 	\item Seleção de comportamentos;
 	\item Redes bayesianas;
@@ -207,7 +205,7 @@ $$
 Dividido em três passos:
 \begin{itemize}
 	\item Predição: $$
-	\textcolor{red}{ P \left( S^t \mid z^{0: t-1} m^{0: t-1} \pi_f \right) } \propto \sum\limits_{S^{t-1}}
+	\textcolor{green}{ P \left( S^t \mid z^{0: t-1} m^{0: t-1} \pi_f \right) } \propto \sum\limits_{S^{t-1}}
         \left(
             \begin{array}{l}
                 P \left( S^t \mid S^{t-1} m^{t-1} \pi_f \right) \\
@@ -221,16 +219,16 @@ Dividido em três passos:
         \left(
             \begin{array}{l}
                 P \left( z^t \mid S^t \pi_f \right) \\
-                \times \textcolor{red}{ P \left( S^t \mid z^{0: t-1} m^{0: t-1} \pi_f \right) }
+                \times \textcolor{green}{ P \left( S^t \mid z^{0: t-1} m^{0: t-1} \pi_f \right) }
             \end{array}
         \right)
     $$\pause
 	\item Escolha de ação motora: $$
-	\textcolor{green}{ P \left( M^t \mid z^{0: t} m^{0: t-1} \pi_f \right) } \propto \sum\limits_{S^t}
+	\textcolor{brown}{ P \left( M^t \mid z^{0: t} m^{0: t-1} \pi_f \right) } \propto \sum\limits_{S^t}
         \left(
             \begin{array}{l}
                 P \left( M^t \mid S^t m^{t-1} \pi_f \right)\\
-                \times \textcolor{red}{ P \left( S^t \mid z^{0: t} m^{0: t-1} \pi_f \right) }
+                \times \textcolor{blue}{ P \left( S^t \mid z^{0: t} m^{0: t-1} \pi_f \right) }
             \end{array}
         \right)
     $$
@@ -609,6 +607,7 @@ Erros inseridos:\pause
 \subsection{3 Comportamentos no mapa pequeno (Teste 1)}
 
 \begin{frame}
+\begin{multicols}{2}
 Comportamentos:
 \begin{itemize}
 	\item Ficar Parado;
@@ -616,11 +615,62 @@ Comportamentos:
 	\item Fugir.
 \end{itemize}
 
+Características ($ f_i \left( a, B \right) $):
+\begin{itemize}
+	\item Bias;
+	\item Distância para Comida;
+	\item Probabilidade de Fantasma.
+\end{itemize}
+
+\end{multicols}
+
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.6\linewidth]{images/pacman_small_map}
     \caption{Mapa pequeno do jogo Pacman.}
     \label{img:PlataformaPacmanMapaPequeno}
+\end{figure}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+$$
+    \resizebox{.8\hsize}{!}{ $
+    		\textcolor{red}{ Q^t \left( a^t, B^t \right) } = \textcolor{violet}{ \omega_1 } \cdot f_1 \left( a^t, B^t \right) + \textcolor{violet}{ \omega_2 } \cdot f_2 \left( a^t, B^t \right) + \textcolor{violet}{ \omega_3 } \cdot f_3 \left( a^t, B^t \right)
+    $}
+$$\pause
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}[t]{.5\textwidth}
+		\centering
+		\includegraphics[width=.6\linewidth]{images/3_behaviors_small_map/weights____pol__Bias}
+		\caption{Bias ($ \omega_1 $)}
+		\label{img:3ComportamentosMapaPequeno:PesoBias}
+	\end{subfigure}%
+	\begin{subfigure}[t]{.5\textwidth}
+		\centering
+		\includegraphics[width=.6\linewidth]{images/3_behaviors_small_map/weights____pol__DistComida}
+		\caption{Distância para Comida ($ \omega_2 $)}
+		\label{img:3ComportamentosMapaPequeno:PesoDistComida}
+	\end{subfigure}
+	\begin{subfigure}[t]{\textwidth}
+		\centering
+		\includegraphics[width=.3\linewidth]{images/3_behaviors_small_map/weights____pol__ProbFantasma}
+		\caption{Probabilidade de Fantasma} ($ \omega_3 $)
+	\end{subfigure}
+	\label{img:3ComportamentosMapaPequeno:PesoBiasAndDistComida}
+\end{figure}
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{images/3_behaviors_small_map/chosen_behaviors}
+    \caption{Escolha dos comportamentos por partida.}
+    \label{img:3ComportamentosMapaPequeno:ComportamentosEscolhidos}
 \end{figure}
 \end{frame}
 
@@ -699,6 +749,7 @@ $$ \textit{média} \left( \textit{pontuação} \right) = 536.76 $$
 \subsection{5 Comportamentos no mapa pequeno (Teste 3)}
 
 \begin{frame}
+\begin{multicols}{2}
 Comportamentos:
 \begin{itemize}
 	\item Ficar Parado;
@@ -707,6 +758,19 @@ Comportamentos:
 	\item Comer Cápsula;
 	\item Caçar.
 \end{itemize}
+\vfill
+\columnbreak
+
+Características ($ f_i \left( a, B \right) $):
+\begin{itemize}
+	\item Bias;
+	\item Proximidade Comida;
+	\item Proximidade Cápsula;
+	\item Probabilidade de Fantasma;
+	\item Probabilidade de Fantasma Branco.
+\end{itemize}
+
+\end{multicols}
 
 \begin{figure}[h]
     \centering
@@ -789,11 +853,13 @@ $$ \textit{média} \left( \textit{pontuação} \right) = 619.20 $$
 %------------------------------------------------
 
 \begin{frame}
-\Huge{\centerline{Conclusões}}
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.7\linewidth]{images/pacman_conclusion}
-\end{figure}
+\centerline{\Huge{Conclusões}}
+\begin{itemize}
+	\item O algoritmo consegue escolher comportamentos de forma lógica;
+	\item Foi possível executar tarefas complexas utilizando modelos de seleção de ação simples;
+	\item O vetor de características dos pares $ \left( A, B \right) $ deve ser escolhido com cuidado;
+	\item O algorítmo possuí certa dificuldade de superar máximos locais.
+\end{itemize}
 \end{frame}
 
 %------------------------------------------------
@@ -804,7 +870,7 @@ $$ \textit{média} \left( \textit{pontuação} \right) = 619.20 $$
 \end{frame}
 
 \begin{frame}
-\Huge{\centerline{The End}}
+\Huge{\centerline{Obrigado}}
 \end{frame}
 
 
