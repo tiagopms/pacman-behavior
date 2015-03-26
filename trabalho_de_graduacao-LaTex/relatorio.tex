@@ -97,7 +97,7 @@ Título
 
 \titulolinhai{Aprendizagem por Reforço aplicada a Seleção de Comportamento}
 
-\titulolinhaii{em Robótica Móvel}
+\titulolinhaii{em Agentes Autônomos}
 
 \titulolinhaiii{}
 
@@ -121,7 +121,7 @@ determinado membro da banca.
 \end{comment}
 
 
-\membrodabancai{Prof. Carla Maria Chagas e Cavalcante Koike, CiC/UnB}
+\membrodabancai{Profa. Carla Maria Chagas e Cavalcante Koike, CiC/UnB}
 
 \membrodabancaifuncao{Orientadora}
 
@@ -176,7 +176,7 @@ Texto de dedicatória do primeiro autor.
 \end{comment}
 
 
-\dedicatoriaautori{À minha família (isso já te inclui há anos, amor!) e à minha família extendida.}
+\dedicatoriaautori{À minha família (isso já te inclui há anos, amor!) e à minha família estendida.}
 
 \begin{comment}
 Texto de dedicatória do segundo autor. Caso não tenha um segundo autor,
@@ -211,15 +211,15 @@ Texto de agradecimentos do primeiro autor.
 \end{comment}
 
 
-\agradecimentosautori{Finalmente, após (não tão) longos anos de graduaçào é chegada a hora de agradecer a todos aqueles que sempre me deram apoio, alegraram meus dias e me ajudaram a chegar aqui.
+\agradecimentosautori{Finalmente, após (não tão) longos anos de graduação é chegada a hora de agradecer a todos aqueles que sempre me deram apoio, alegraram meus dias e me ajudaram a chegar aqui.
 
 Nada mais justo do que começar com os três que se tornaram meus melhores amigos durante o curso e que, sem sua companhia e amizade (e cadernos), não estaria escrevendo esse trabalho tão cedo. O Bruno, que, em seis anos, não encontrei uma vez em que não estivesse sorrindo e bem humorado. A Marcela, ex-concorrente que virou coleguinha e que virou uma das minhas melhores amigas. A pessoa que faz mais falta por estar em outro país. E o Guiga que ouve eu reclamar de ``;'' há seis anos e ainda entra na brincadeira. Que consegue, nessa brincadeira, convencer pessoas passantes de que a discussão do século está acontecendo. E com quem trabalhei no LARA, na UnBall, LARA de novo, além de outros projetos e que, sem sua presença, esses trabalhos seriam muito mais longos e tediosos.
 
 Preciso agradecer também a todos os outros amigos que fiz na mecatrônica e em toda UnB. Todos os LARAboys e LARAgirls, que ficam 24h por dia no laboratório comigo, em especial a Pam, sempre lá e sempre simpática, o Levy, sempre fingindo estar no Facebook, mas secretamente trabalhando, e todos do AMORA, com quem almoço toda semana. O Tcholas, que é um dos caras mais inteligentes que eu conheço e me ensinou muito sobre muita coisa. Todos os forrozeiros, grupo mais simpático da UnB, em especial Aninha, André, De Hong e Levy, pessoas de quem eu gosto e que admiro muito, embora eu nunca responda no whatsapp. Um agradecimento também ao George, que me ensinou ainda mais que o Tcholas.
 
-Gostaria de fazer também um agradecimento a todos meus profeçores, em especial: Célius, Zaghetto, Lineu e Padilha e a minha orientadora, prof. Carla Koike, que me ensinou quase tudo que sei de robótica.
+Gostaria de fazer também um agradecimento a todos meus professores, em especial: Célius, Zaghetto, Lineu e Padilha e a minha orientadora, Prof. Carla Koike, que me ensinou quase tudo que sei de robótica.
 
-Agradeço, agora, todos meus amigos do Sigma, mas em especial a todo o grupo do pão de queijo. Acho que eu nem preciso dizer o quanto eu aprecio todos os momentos que passamos juntos em qualquer lugar (no outback). Maurício, Jessica, Filipe, Bernardo, Thiago e Ana Paula, eu amo vocês e não vou me estender nesse agradecimento porque não caberia aqui. Mari e Cainã, também amo muito vocês, como vocês sabem.
+Agradeço, agora, todos meus amigos do Sigma, mas em especial a todo o grupo do pão de queijo. Acho que eu nem preciso dizer o quanto eu aprecio todos os momentos que passamos juntos em qualquer lugar (no Outback). Maurício, Jessica, Filipe, Bernardo, Thiago e Ana Paula, eu amo vocês e não vou me estender nesse agradecimento porque não caberia aqui. Mari e Cainã, também amo muito vocês, como vocês sabem.
 
 Por último, mas não menos importante, agradeço toda minha família. Meus pais, que me dão todo apoio e suporte há mais de 23 anos, meus irmãos, que roubam meu lugar na hora do almoço, e meus primos, sem os quais não consigo imaginar um natal (mesmo o Gabriel, que foge de SP quando vou pra lá, e a Carol, que só vem pra Brasília quando não estou aqui). E novamente agradeço você, Ana Paula, que já é parte da minha família.
 
@@ -270,19 +270,19 @@ Este trabalho apresenta uma abordagem para uma escolha autônoma de ação, base
 \medskip{}
 
 
-Palavras Chave: Relatório de TG, Aprendizagem de Máquina, Aprendizagem por Reforço, Redes Bayesianas, Seleção de Comportamento, Q Learning, Robótica Móvel, Inteligência Artificial
+Palavras Chave: Aprendizagem de Máquina, Aprendizagem por Reforço, Redes Bayesianas, Seleção de Comportamento, Q-Learning, Robótica Móvel, Inteligência Artificial
 
 }\vspace*{2cm}
 
 
 \resumo{Abstract}{
 
-This work describes an approach for autonomous action selection, based in a previous behaviour selection, using Bayesian networks and reinforcement learning. An agent can, by receiving rewards from the system, learn a behaviour selection policy in a partially observable system, without any previous knowledge about the behaviours. The model is divided in two parts: during and post training. During the training there are five steps for a recursive state estimation and action selection: Prediction, Behaviour selection, Observation, Action selection and Learning. After the training is complete, in the post training part, the learning step is not applied any more.
+This work describes an approach for autonomous action selection, based in a previous behaviour selection, using Bayesian networks and reinforcement learning. An agent can, by receiving rewards from the system, learn a behaviour selection policy in a partially observable system, without any previous knowledge about the behaviours. The model is divided in two parts: during and post training. During the training there are five steps for a recursive state estimation and action selection: Prediction, Behaviour selection, Observation, Action selection and Learning. After the training is complete, in the post training part, the learning step is no longer applied.
 
 \medskip{}
 
 
-Keywords: Graduation Project, Machine Learning, Reinforcement Learning, Bayesian Networks, Behaviour Selection, Q Learning, Mobile Robotics, Artificial Intelligence
+Keywords: Machine Learning, Reinforcement Learning, Bayesian Networks, Behaviour Selection, Q-Learning, Mobile Robotics, Artificial Intelligence
 
 }
 
