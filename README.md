@@ -10,7 +10,15 @@ $ git clone https://github.com/tiagopms/pacman-behavior ./
 
 And then you will have a copy of this project.
 
-To run it, compile with ROS hidro: catkin_make and use:
+To run it, compile with ROS Indigo:
+
+```bash
+$ catkin_make pacman_msgs
+$ catkin_make pacman_interface
+$ catkin_make
+```
+
+And then use:
 
 ```bash
 $ roscore
