@@ -13,8 +13,8 @@ And then you will have a copy of this project.
 To run it, compile with ROS Indigo:
 
 ```bash
-$ catkin_make pacman_msgs
-$ catkin_make pacman_interface
+$ catkin_make --pkg pacman_msgs
+$ catkin_make --pkg pacman_interface
 $ catkin_make
 ```
 
